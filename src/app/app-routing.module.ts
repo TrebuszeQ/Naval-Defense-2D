@@ -1,7 +1,12 @@
-import { NgModule } from '@angular/core';
+import { Component, NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-const routes: Routes = [];
+// components
+import { LevelWrapperComponent } from './level-wrapper/level-wrapper.component';
+
+const routes: Routes = [
+ { path: 'game', component: LevelWrapperComponent },
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

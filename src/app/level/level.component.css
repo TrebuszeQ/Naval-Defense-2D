@@ -1,0 +1,45 @@
+#warship {
+  display: block;
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  background-color: rgb(101, 101, 101);
+  transition: all 0.5s ease-out;  
+}
+
+/*
+div {
+  box-sizing: border-box;
+}
+
+#waves {
+  z-index: 5;
+  display: grid;
+  position: relative;
+  align-self: flex-end;
+  margin: 0 0 52% 0;
+  padding: 0 2%;
+  width: 100%;
+  height: 5%;
+  background-color: rgb(74, 150, 174);
+}
+
+#water {
+  z-index: 5;
+  display: inline-flex;
+  flex-flow: row wrap;
+  position: absolute;
+  align-self: flex-end;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background-color: rgb(74, 150, 174);
+}
+
+.waterBlock {
+  z-index: inherit;
+  position:relative;
+  margin: 0;
+  padding: 0;
+} */
+
