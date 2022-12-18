@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+// services
+import { WaterService } from './water.service';
 
 @Component({
   selector: 'app-water',
@@ -10,24 +12,32 @@ export class WaterComponent implements OnInit {
   level = document.getElementById("level");
   stylesheet = document.styleSheets[0];
 
-  gridRows = 22;
-  gridColumns = 42;
+  gridRows = 0;
+  gridColumns = 0;
 
   blockAmount = this.gridRows * this.gridColumns;
-  constructor() { }
+  constructor(private waterService: WaterService) { }
 
   ngOnInit(): void {
+    // water service
+    // set water levels
+    this.waterService.getWaterLevels().subscribe(array => {
+      // here
+      this.gridRows = array[0];
+      this.gridColumns = array[1];
+    });
+    
+    // internal
     this.level = document.getElementById("level");
     
     this.stylesheet = document.styleSheets[0];
 
     this.fillWater();
   }
-  fillWater() {
-    
-
+  
+  fillWater() { 
     let columnCounter = 0;
-    let gridRow = this.gridRows;
+    let gridRow = 42;
 
     let waterBlockRule = 
     `
@@ -40,7 +50,7 @@ export class WaterComponent implements OnInit {
         box-sizing: border-box;
         width: 100%;
         height: 100%;
-        background-color: blue;
+        background-color: #58989b;
       }`;
 
 
@@ -55,7 +65,7 @@ export class WaterComponent implements OnInit {
 
       if(columnCounter == this.gridColumns) {
         columnCounter = 0;
-        gridRow += 1;
+        gridRow -= 1;
       }
       waterBlock.style.gridRow = `${gridRow}`;
       this.level!.appendChild(waterBlock);
