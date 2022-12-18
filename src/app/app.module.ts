@@ -7,13 +7,15 @@ import { AppComponent } from './app.component';
 import { LevelWrapperComponent } from './level-wrapper/level-wrapper.component';
 import { LevelComponent } from './level/level.component';
 import { CharacterComponent } from './character/character.component';
+import { WaterComponent } from './water/water.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LevelWrapperComponent,
     LevelComponent,
-    CharacterComponent
+    CharacterComponent,
+    WaterComponent
   ],
   imports: [
     BrowserModule,

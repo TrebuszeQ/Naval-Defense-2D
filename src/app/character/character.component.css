@@ -1,8 +1,8 @@
 #warship {
-    display: block;
-    position: absolute;
-    margin: 0;
-    padding: 0;
-    background-color: rgb(101, 101, 101);
-    transition: all 0.5s ease-out;  
+  z-index: 8;
+  display: block;
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  background-color: rgb(101, 101, 101);
 }
