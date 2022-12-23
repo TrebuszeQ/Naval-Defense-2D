@@ -15,16 +15,16 @@ export class WaterComponent implements OnInit {
   gridRows = 0;
   gridColumns = 0;
 
-  blockAmount = this.gridRows * this.gridColumns;
+  blockAmount = 0;
   constructor(private waterService: WaterService) { }
 
   ngOnInit(): void {
     // water service
     // set water levels
     this.waterService.getWaterLevels().subscribe(array => {
-      // here
       this.gridRows = array[0];
       this.gridColumns = array[1];
+      this.blockAmount = this.gridRows * this.gridColumns;
     });
     
     // internal
@@ -42,7 +42,7 @@ export class WaterComponent implements OnInit {
     let waterBlockRule = 
     `
        .waterBlock {
-        z-index: 8;
+        z-index: 7;
         display: inline-block;
         position:relative;
         margin: 0;
@@ -56,7 +56,6 @@ export class WaterComponent implements OnInit {
 
     // insert waterBlock class rule
     this.stylesheet.insertRule(waterBlockRule);
-
 
     for(let i = 0; i < this.blockAmount; i++, columnCounter++) {
       let waterBlock = document.createElement("div");

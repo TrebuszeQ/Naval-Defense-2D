@@ -8,7 +8,7 @@ import { Observable, observable, of } from 'rxjs';
 export class WaterService {
 
 
-  gridRows = 26;
+  gridRows = 30;
   gridColumns = 42;
 
   constructor() { }

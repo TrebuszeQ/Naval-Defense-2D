@@ -1,16 +1,18 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+// services
+import { WaterService } from '../water/water.service';
+import { TorpedoService } from './services/torpedo.service';
+import { WarshipPositionService } from './services/warship-position.service';
+import { WarshipTypeService } from './services/warship-type.service';
 
 
 @Component({
   selector: 'app-character',
   // templateUrl: './character.component.html',
-  template: '<div id="warship">  </div>',
+  template: '',
   styleUrls: ['./character.component.css']
 })
 export class CharacterComponent implements OnInit {
-
-  @Input() waterLevel = 0;
-  @Input() gridRow = 0;
 
   level = document.getElementById("level");
 
@@ -19,7 +21,10 @@ export class CharacterComponent implements OnInit {
   warship = document.getElementById("warship");
   
   warshipX: number = 0;
-  // warshipY: number = 0;
+
+  warshipType = "basic";
+  
+  torpedoCount: number = 0;
 
   keyframeRight = new KeyframeEffect(
     this.warship!,
@@ -34,7 +39,10 @@ export class CharacterComponent implements OnInit {
       fill: 'forwards',
     }
   )
-  constructor() { }
+
+  waterLevel = 0;
+
+  constructor(private waterService: WaterService, private warshipPositionService: WarshipPositionService, private warshipTypeService: WarshipTypeService, private torpedoService: TorpedoService) { }
 
   async ngOnInit(): Promise<string> {
     // stylesheet
@@ -42,63 +50,78 @@ export class CharacterComponent implements OnInit {
 
     this.level = document.getElementById("level");
 
-    // warship
-      await this.spawnWarship().then(() => {
-      this.warship = document.getElementById("warship");
-
-      // load default warship (wip)
-      this.default(this.warship);
-    });
+    this.warship = document.getElementById("warship");
+    await this.setWarshipType(this.warshipType);
+    await this.placeWarshipOnWater();
 
     // warship position
     this.warshipX = 0;
   
     // listening for keyboardEvent API
     document.addEventListener("keydown", (event) => {
-      this.moveCharacter(event.key);
+      // console.log(event.key);
+      this.warshipActions(event.key);
     });
     return Promise.resolve("resolved");
   }
   
-  default(ship: HTMLElement | null): void {
-    const maxHeight = window.screen.height;
+  // makes warship default size
+  async setWarshipType(name: string) {
     
-    ship!.style.width = `12.5%`;
-    ship!.style.height = `${maxHeight * 0.025}px`;
-  }
-
-  spawnWarship() {
-    const warship = document.createElement("div")
-    warship.id = "warship";
-    this.stylesheet.insertRule(`
-    #warship {
-      z-index: 8;
-      display: block;
-      position: absolute;
-      margin: 0;
-      padding: 0;
-      background-color: rgb(101, 101, 101);
+    const warshipTypeObserver = {
+      next: (rule: string) => this.stylesheet.insertRule(rule),
+      error: (error: Error) => "warshipTypeObserver encountered an error" + error,
+      // complete: () => console.log("warshipTypeObserver received complete"),
     }
-    `);
+    
+    switch(name) {
+      case "basic":
+        this.warshipTypeService.getBasic().subscribe(warshipTypeObserver).unsubscribe();
+        break;
+    }
 
-    this.appendWarship(warship);
     return Promise.resolve("resolved");
   }
 
-  appendWarship(warship: HTMLDivElement) {
-    this.level!.appendChild(warship);
-    return Promise.resolve("resolved")
-  }
-  async moveCharacter(key: string) {
+  async placeWarshipOnWater() {
+    const waterObserver = {
+      next: (array: number[]) => this.waterLevel = array[0],
+      error: (error: Error) => console.error('waterObserver faced an error: ' + error),
+      // complete: () => console.log('waterObserver received complete'),
+    };
+    this.waterService.getWaterLevels().subscribe(waterObserver).unsubscribe();
+
+
+    this.warship!.style.gridRow = `${42 - this.waterLevel}`;
     
-    if(key == "ArrowRight") {
-      this.warshipX == 700 ? this.warshipX == 700 : this.warshipX += 2.5;
-      await this.moveCharacterRightGrid();
-    } 
-    else if(key == "ArrowLeft") {
-      this.warshipX == 0 ? this.warshipX == 0 : this.warshipX -= 2.5;
-      await this.moveCharacterLeftGrid();
+    return Promise.resolve("resolved");
+  }
+
+  async warshipActions(key: string) {
+    const warshipPositionObserver = {
+      next: (warshipX: number) => {
+        this.warshipX = warshipX;
+      },
+      error: (error: Error) => console.error("warshipPositionObserver faced an error: " + error),
+      // complete: () => console.log("Observer received complete.")
+    };
+
+    switch(key) {
+      case "ArrowRight":
+        this.warshipPositionService.incrementRight().subscribe(warshipPositionObserver).unsubscribe();
+        await this.moveCharacterRightGrid();
+        break;
+      
+      case "ArrowLeft":
+        this.warshipPositionService.decrementLeft().subscribe(warshipPositionObserver).unsubscribe();
+        await this.moveCharacterRightGrid();
+        break;
+
+      case " ":
+        await this.dropTorpedo();
+        break;
     }
+
     return Promise.resolve("resolved");
   }
 
@@ -133,6 +156,23 @@ export class CharacterComponent implements OnInit {
       }
 
     )
+    return Promise.resolve("resolved");
+  }
+
+  async dropTorpedo() {
+    const torpedoCountObserver = {
+      next: (torpedoCount: number) => this.torpedoCount = torpedoCount,
+      error: (error: Error) => "torpedoCountObserver faced an error" + error,
+      // complete: () => "torpedoCountObserver received complete",
+    }
+
+    const torpedo = document.createElement("div");
+    this.torpedoService.getTorpedoCount().subscribe(torpedoCountObserver).unsubscribe();
+
+    torpedo.id = `torpedo${this.torpedoCount}`;
+    torpedo.className = "torpedo";
+    this.level!.appendChild(torpedo);
+
     return Promise.resolve("resolved");
   }
 }
