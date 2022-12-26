@@ -1,8 +1,8 @@
 export interface WarshipType {
     name: string,
-    width: string,
-    height: string,
-    backgroundImage?: ImageBitmap
+    width: number,
+    height: number,
+    backgroundImage?: string | HTMLImageElement | ImageBitmap
 }
 
 // #warship {
