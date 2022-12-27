@@ -11,7 +11,23 @@ export class TorpedoService {
   constructor() { }
   
   getTorpedoCount(): Observable <number> {
-    this.torpedoCount += 1;
+    // torpedoCount counter
+    // console.log(`Torpedo count on service: ${this.torpedoCount}`);
+
     return of (this.torpedoCount);
+  }
+
+  incrementTorpedoCount(): Promise<string> {
+    this.torpedoCount += 1;
+
+    return Promise.resolve("resolved");
+  }
+
+  decrementTorpedoCount(): Promise<string> {
+    this.torpedoCount -= 1;
+    // after decrement counter
+    // console.log(`After decrement ${this.torpedoCount}`);
+
+    return Promise.resolve("string");
   }
 }

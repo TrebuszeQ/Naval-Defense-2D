@@ -6,4 +6,5 @@ export interface TorpedoType {
     damage: number,
     area: number,
     speed: number,
+    limit: number,
 }

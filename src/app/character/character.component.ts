@@ -34,8 +34,6 @@ export class CharacterComponent implements OnInit {
 
   torpedoType: any;
 
-  torpedoCount: number = 0;
-
   waterLevel = 0;
 
   constructor(private waterService: WaterService, private warshipPositionService: WarshipPositionService, private warshipTypeService: WarshipTypeService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService) { }
@@ -215,24 +213,56 @@ export class CharacterComponent implements OnInit {
   }
 
   async dropTorpedo() {
+    
+    let torpedoCount = await this.checkTorpedoCount();
+    if(torpedoCount < this.torpedoType.limit) {
+      // increment torpedoService torpedoCount
+      this.torpedoService.incrementTorpedoCount();
+
+      let torpedo = await this.setTorpedoStartingPosition(torpedoCount);
+      let drop = await this.torpedoTrajectoryService.moveDown(this.level!, this.gridRow, this.warshipType, this.warshipX, torpedo, this.torpedoType);
+      drop;
+      // await this.removeTorpedo(torpedo);
+    }
+
+    return Promise.resolve("resolved");
+  }
+
+
+  async checkTorpedoCount() {
+    let torpedoCountLocal: number = 0;
     const torpedoCountObserver = {
-      next: (torpedoCount: number) => this.torpedoCount = torpedoCount,
+      next: (torpedoCount: number) => torpedoCountLocal = torpedoCount,
       error: (error: Error) => "torpedoCountObserver faced an error" + error,
       // complete: () => "torpedoCountObserver received complete",
     };
 
     this.torpedoService.getTorpedoCount().subscribe(torpedoCountObserver).unsubscribe();
 
+    return Promise.resolve(torpedoCountLocal);
+  }
+
+  async setTorpedoStartingPosition(torpedoCount: number) {
     const torpedo = document.createElement("div");
-    torpedo.id = `torpedo${this.torpedoType.name + this.torpedoCount}`;
+    torpedo.id = `torpedo${this.torpedoType.name + torpedoCount}`;
     torpedo.className = `torpedo ${this.torpedoType.name}`;
 
-    this.level!.appendChild(torpedo);
-
-    this.torpedoTrajectoryService.moveDown(this.level!, this.gridRow, this.warshipType, this.warshipX, torpedo, this.torpedoType);
-
-    // this.level!.removeChild(torpedo);
-
-    return Promise.resolve("resolved");
+    return Promise.resolve(torpedo);
   }
+
+  // async removeTorpedo(torpedo: HTMLDivElement) {
+  //   this.level!.removeChild(torpedo);
+
+  //   // decrement torpedoService torpedoCount
+  //   this.updateTorpedoCount();
+  //   return Promise.resolve("resolved");
+  // }
+
+  // async updateTorpedoCount() {
+  //   this.torpedoService.decrementTorpedoCount().then((message: string) => {
+  //     console.log(message);
+  //   });
+
+  //   return Promise.resolve("resolved");
+  // }
 }

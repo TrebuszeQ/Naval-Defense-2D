@@ -18,5 +18,6 @@ export const torpedoTypeArray: TorpedoType[] = [
         damage: 100,
         area: 10,
         speed: 500,
+        limit: 5,
     }
 ]
