@@ -10,11 +10,19 @@ import { TorpedoType } from '../interfaces/torpedo-type';
 })
 export class TorpedoTypeService {
 
+  torpedoName: string = '';
+
   constructor() { }
 
-  getTorpedoType(name: string): Observable<TorpedoType | undefined> {
+  getTorpedoType(): Observable<TorpedoType | undefined> {
     const array: TorpedoType[] = torpedoTypeArray;
-    const torpedoType = array.find(element => element.name = name);
+    const torpedoType = array.find(element => element.name = this.torpedoName);
     return of(torpedoType);
+  }
+
+  updateTorpedoName(name: string) {
+    this.torpedoName = name;
+
+    return Promise.resolve("resolved");
   }
 }

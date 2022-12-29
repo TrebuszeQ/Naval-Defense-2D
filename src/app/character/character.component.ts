@@ -34,6 +34,8 @@ export class CharacterComponent implements OnInit {
 
   torpedoType: any;
 
+  torpedoCount: number = 0;
+
   waterLevel = 0;
 
   constructor(private waterService: WaterService, private warshipPositionService: WarshipPositionService, private warshipTypeService: WarshipTypeService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService) { }
@@ -88,7 +90,7 @@ export class CharacterComponent implements OnInit {
       // complete: () => console.log("warshipTypeObserver received complete"),
     }
     
-    this.warshipTypeService.getWarshipType(name).subscribe(warshipTypeObserver).unsubscribe();
+    this.warshipTypeService.getWarshipType().subscribe(warshipTypeObserver).unsubscribe();
 
     return Promise.resolve("resolved");
   }
@@ -128,7 +130,7 @@ export class CharacterComponent implements OnInit {
         break;
 
       case " ":
-        await this.dropTorpedo();
+        await this.dropTorpedo2();
         break;
     }
 
@@ -185,12 +187,13 @@ export class CharacterComponent implements OnInit {
       // area: number
       // }
 
-    this.torpedoTypeService.getTorpedoType(name).subscribe(torpedoTypeObserver).unsubscribe()
+    this.torpedoTypeService.getTorpedoType().subscribe(torpedoTypeObserver).unsubscribe()
 
     const torpedoRule = `
     .torpedo {
       z-index: inherit;
       display: block;
+      visibility: hidden;
       position: absolute;
       margin: 0;
       padding: 0;
@@ -212,42 +215,62 @@ export class CharacterComponent implements OnInit {
     return Promise.resolve("resolved");
   }
 
-  async dropTorpedo() {
+  // async dropTorpedo() {
     
-    let torpedoCount = await this.checkTorpedoCount();
-    if(torpedoCount < this.torpedoType.limit) {
+  //   let torpedoCount = await this.checkTorpedoCount();
+  //   if(torpedoCount < this.torpedoType.limit) {
+  //     // increment torpedoService torpedoCount
+  //     this.torpedoService.incrementTorpedoCount();
+
+  //     let torpedo = await this.setTorpedoStartingPosition();
+  //     await this.torpedoTrajectoryService.dropTheTorpedo(this.level!, this.gridRow, this.warshipType, this.warshipX, torpedo, this.torpedoType);
+  //     // await this.removeTorpedo(torpedo);
+  //   }
+
+  //   return Promise.resolve("resolved");
+  // }
+
+  async dropTorpedo2() {
+    
+    await this.checkTorpedoCount();
+    if(this.torpedoCount < this.torpedoType.limit) {
       // increment torpedoService torpedoCount
       this.torpedoService.incrementTorpedoCount();
 
-      let torpedo = await this.setTorpedoStartingPosition(torpedoCount);
-      let drop = await this.torpedoTrajectoryService.moveDown(this.level!, this.gridRow, this.warshipType, this.warshipX, torpedo, this.torpedoType);
-      drop;
+      let torpedo = await this.setTorpedoStartingPosition();
+      await this.torpedoTrajectoryService.dropTheTorpedo(torpedo);
       // await this.removeTorpedo(torpedo);
     }
 
     return Promise.resolve("resolved");
   }
 
-
   async checkTorpedoCount() {
     let torpedoCountLocal: number = 0;
     const torpedoCountObserver = {
-      next: (torpedoCount: number) => torpedoCountLocal = torpedoCount,
+      next: (torpedoCount: number) => this.torpedoCount = torpedoCount,
       error: (error: Error) => "torpedoCountObserver faced an error" + error,
       // complete: () => "torpedoCountObserver received complete",
     };
 
     this.torpedoService.getTorpedoCount().subscribe(torpedoCountObserver).unsubscribe();
 
-    return Promise.resolve(torpedoCountLocal);
+    return Promise.resolve("resolved");
   }
 
-  async setTorpedoStartingPosition(torpedoCount: number) {
+  async setTorpedoStartingPosition() {
     const torpedo = document.createElement("div");
-    torpedo.id = `torpedo${this.torpedoType.name + torpedoCount}`;
+    torpedo.id = `torpedo${this.torpedoType.name + this.torpedoCount}`;
     torpedo.className = `torpedo ${this.torpedoType.name}`;
-
+    // console.log("set");
     return Promise.resolve(torpedo);
+  }
+
+  async appendLevelWithTorpedo(level: HTMLElement, torpedoId: HTMLDivElement, top: number) {
+    torpedoId!.style.top = `${top}%`;
+    level!.appendChild(torpedoId);
+    // console.log("appended");
+    return Promise.resolve("resolved");
   }
 
   // async removeTorpedo(torpedo: HTMLDivElement) {

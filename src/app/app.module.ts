@@ -8,6 +8,7 @@ import { LevelWrapperComponent } from './level-wrapper/level-wrapper.component';
 import { LevelComponent } from './level/level.component';
 import { CharacterComponent } from './character/character.component';
 import { WaterComponent } from './water/water.component';
+import { PregameComponent } from './pregame/pregame.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { WaterComponent } from './water/water.component';
     LevelWrapperComponent,
     LevelComponent,
     CharacterComponent,
-    WaterComponent
+    WaterComponent,
+    PregameComponent
   ],
   imports: [
     BrowserModule,

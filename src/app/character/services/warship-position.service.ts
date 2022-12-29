@@ -20,4 +20,8 @@ export class WarshipPositionService {
     this.warshipX == 0 ? this.warshipX == 0 : this.warshipX -= 2.5;
     return of(this.warshipX);
   }
+
+  getWarshipPosition(): Observable <number> {
+    return of(this.warshipX);
+  }
 }

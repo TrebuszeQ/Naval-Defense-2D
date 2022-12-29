@@ -14,14 +14,3 @@ app-character {
   margin: 0;
   padding: 0;
 }
-
-.torpedo {
-  z-index: inherit;
-  display: block;
-  position: absolute;
-  margin: 0;
-  padding: 0;
-  width: 5%;
-  height: 2%;
-  background-color: rgb(23, 54, 53);
-}
