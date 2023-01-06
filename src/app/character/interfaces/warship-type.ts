@@ -1,8 +1,12 @@
+import { TorpedoType } from "../interfaces/torpedo-type"
+
 export interface WarshipType {
     name: string,
     width: number,
     height: number,
-    backgroundImage?: string | HTMLImageElement | ImageBitmap
+    backgroundImagePath: string,
+    description: string,
+    availableTorpedes: TorpedoType[]
 }
 
 // #warship {

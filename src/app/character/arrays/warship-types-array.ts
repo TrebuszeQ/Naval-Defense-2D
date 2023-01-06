@@ -1,4 +1,5 @@
 import { WarshipType } from "../interfaces/warship-type";
+import { torpedoTypeArray } from "./torpedo-types";
 
 const maxHeight = window.screen.height;
 
@@ -7,9 +8,13 @@ export const warshipTypeArray: WarshipType[] = [
         name: "basic",
         width: 12.5,
         height: maxHeight * 0.025,
-        backgroundImage: undefined,
+        backgroundImagePath: "/assets/images/warships/HMS_Daring.jpg",
+        description: `Starting warship. ${torpedoTypeArray[0].name}`,
+        availableTorpedes: [torpedoTypeArray[0]],
     },
 ]
+
+// possibleTorpedes to be built
 
 // export interface WarshipType {
 //     name: string,
@@ -17,3 +22,4 @@ export const warshipTypeArray: WarshipType[] = [
 //     height: number,
 //     backgroudImage?: ImageBitmap
 // }
+

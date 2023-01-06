@@ -9,6 +9,8 @@ import { LevelComponent } from './level/level.component';
 import { CharacterComponent } from './character/character.component';
 import { WaterComponent } from './water/water.component';
 import { PregameComponent } from './pregame/pregame.component';
+import { WarshipCarouselComponent } from './warship-carousel/warship-carousel.component';
+import { DescriptionPipe } from './character/pipes/description.pipe';
 
 @NgModule({
   declarations: [
@@ -17,7 +19,9 @@ import { PregameComponent } from './pregame/pregame.component';
     LevelComponent,
     CharacterComponent,
     WaterComponent,
-    PregameComponent
+    PregameComponent,
+    WarshipCarouselComponent,
+    DescriptionPipe
   ],
   imports: [
     BrowserModule,

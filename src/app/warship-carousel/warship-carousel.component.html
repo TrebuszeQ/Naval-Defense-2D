@@ -1,0 +1,15 @@
+<ul id="warshipCarouselUl">
+    <li *ngFor="let item of warshipTypeArray">
+        <div class="warshipContainerDiv">
+            <h3>{{item.name | uppercase}}</h3>
+            <h5 [innerHTML]="item.description | description: item.availableTorpedes"> </h5>       
+            <img src="{{item.backgroundImagePath}}">
+        </div>
+    </li>
+</ul>
+
+<!-- name: "basic",
+width: 12.5,
+height: maxHeight * 0.025,
+backgroundImage: undefined,
+description: "Basic standard onstart warship.", -->

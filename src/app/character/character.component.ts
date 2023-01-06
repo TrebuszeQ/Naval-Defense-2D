@@ -80,7 +80,7 @@ export class CharacterComponent implements OnInit {
           padding: 0;
           width: ${warshipType!.width}%;
           height: ${warshipType!.height}px;
-          background-image: ${warshipType!.backgroundImage};
+          background-image: url(${warshipType!.backgroundImagePath});
           background-color: rgb(101, 101, 101);
         }`;
         this.stylesheet.insertRule(rule);

@@ -19,6 +19,10 @@ export class WarshipTypeService {
     return of(warshipType!);    
   }
 
+  getWarshipTypeArray(): Observable<WarshipType[]> {
+    return of(warshipTypeArray); 
+  }
+
   updateWarshipName(name: string) {
     this.warshipName = name;
     return Promise.resolve("resolved");
