@@ -1,13 +1,17 @@
+<button class="carouselArrows">
+    <fa-icon [icon]="faArrowLeft"></fa-icon>
+</button>
 <ul id="warshipCarouselUl">
-    <li *ngFor="let item of warshipTypeArray">
-        <div class="warshipContainerDiv">
-            <h3>{{item.name | uppercase}}</h3>
-            <h5 [innerHTML]="item.description | description: item.availableTorpedes"> </h5>       
-            <img src="{{item.backgroundImagePath}}">
-        </div>
+    <li *ngFor="let item of warshipTypeArray" class="warshipContainerLi">
+        <h3>{{item.name | uppercase}}</h3>
+        <h4 [innerHTML]="item.description | description: item.availableTorpedes"></h4>       
+        <img src="{{item.backgroundImagePath}}">
     </li>
 </ul>
-
+<button class="carouselArrows">
+    <fa-icon [icon]="faArrowRight"></fa-icon>
+</button>
+<i class="fa-solid fa-arrow-right"></i>
 <!-- name: "basic",
 width: 12.5,
 height: maxHeight * 0.025,

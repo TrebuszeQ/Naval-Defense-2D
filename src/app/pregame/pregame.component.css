@@ -2,7 +2,7 @@
     z-index: 9;
     display: grid;
     grid-template-columns: 20% 60% 20%;
-    grid-template-rows: 10% 40% 10% 40%;
+    grid-template-rows: 5% 45% 5% 45%;
     align-items: center;
     justify-items: center;
     align-content: center;
@@ -32,27 +32,30 @@ h2 {
     grid-row: 3;
 }
 
-#warshipCarousel {
+
+.selectionCarousel {
     z-index: 8;
     display: inline-flex;
     position: relative;
-    grid-column: 2/3;
-    background-color: aquamarine;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
     max-width: 100%;
     width: 100%;
-    max-height: 80%;
-    height: 80%;
+    max-height: 90%;
+    height: 90%;
+    background-color: aquamarine;
+}
+
+app-warship-carousel {
+    width: 100%;
+    padding: 0 2.5%;
+}
+
+#warshipCarouselWrapper {
+    grid-column: 2/3;
 }
 
 #levelsCarousel {
-    z-index: 8;
-    display: inline-flex;
-    position: relative;
-    grid-column: 2/3;
-    background-color: aquamarine;
-    max-width: 100%;
-    width: 100%;
-    max-height: 80%;
-    height: 80%;
     grid-column: 2/3;
 }

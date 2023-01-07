@@ -7,7 +7,7 @@ import { TorpedoType } from '../interfaces/torpedo-type';
 export class DescriptionPipe implements PipeTransform {
 
   transform(value: string, array: TorpedoType[]): unknown {
-    return value + `
+    return value + ` <br>
     Avalaible torpedes are: 
     <ul>
       ${this.createList(array)}

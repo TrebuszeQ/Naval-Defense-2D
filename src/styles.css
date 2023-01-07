@@ -2,3 +2,11 @@ body {
   margin: 0;
   padding: 0;
 }
+
+.carouselArrows {
+  z-index: inherit;
+  display: block;
+  position: absolute;
+  width: 3.5%;
+  height: 3vh;
+}

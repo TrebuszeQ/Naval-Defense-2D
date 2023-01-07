@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { WarshipType } from '../character/interfaces/warship-type';
 // services
 import { WarshipTypeService } from '../character/services/warship-type.service';
+// icons
+import { faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 
 @Component({
@@ -12,6 +14,8 @@ import { WarshipTypeService } from '../character/services/warship-type.service';
 })
 export class WarshipCarouselComponent implements OnInit {
 
+  faArrowRight = faArrowRight;
+  faArrowLeft = faArrowLeft;
   warshipTypeArray!: WarshipType[];
 
   constructor(private warshipTypeService: WarshipTypeService ) {}

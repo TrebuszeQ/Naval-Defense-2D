@@ -3,6 +3,8 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+//addons
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 // components
 import { LevelWrapperComponent } from './level-wrapper/level-wrapper.component';
 import { LevelComponent } from './level/level.component';
@@ -11,6 +13,7 @@ import { WaterComponent } from './water/water.component';
 import { PregameComponent } from './pregame/pregame.component';
 import { WarshipCarouselComponent } from './warship-carousel/warship-carousel.component';
 import { DescriptionPipe } from './character/pipes/description.pipe';
+
 
 @NgModule({
   declarations: [
@@ -25,7 +28,8 @@ import { DescriptionPipe } from './character/pipes/description.pipe';
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    FontAwesomeModule
   ],
   providers: [],
   bootstrap: [AppComponent]
