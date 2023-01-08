@@ -1,55 +1,100 @@
+/* 
+it is in styles.css v
+
+.carouselArrowsButton {
+  z-index: inherit;
+  display: block;
+  position: relative;
+  grid-row: 1/2;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+} */
+
+#leftWarshipCarouselButton {
+    grid-column: 1/2;
+}
+#rightWarshipCarouselButton {
+    grid-column: 3/4;
+}
+
+#fa-arrow-left {
+    height: 1.5%;
+}
+
+#fa-arrow-right {
+    height: 1.5%;
+}
+
 #warshipCarouselUl {
-    z-index: 8;
-    z-index: inherit;
-    display: flex;
+    z-index: 6;
+    display: inline-flex;
+    flex-flow: column wrap;
     overflow: hidden;
-    flex-flow: column nowrap;
-    align-content: center;
+    align-items: center;
     justify-content: center;
     position: relative;
+    grid-column: 2/3;
+    grid-row: 1/2;
     margin: 0;
     padding: 0;
-    max-width: 100%;
-    width: 100%;
+    max-width: 200%;
+    width: 200%;
     max-height: 100%;
     height: 100%;
     list-style-type: none;
 }
 
 .warshipContainerLi {
-    z-index: inherit;
     display: grid;
     overflow: inherit;
-    grid-template-columns: 27.5% 72.5%;
-    grid-template-rows: 15% 85%;
+    grid-template-columns: 25% 75%;
+    grid-template-rows: 15% 5% 80%;
     align-content: inherit;
     justify-content: inherit;
-    position: inherit;
+    position: relative;
     margin: inherit;
-    padding: 0;
-    max-width: inherit;
-    width: inherit;
+    padding: 0.5%;
+    max-width: 47.5%;
+    width: 47.5%;
     max-height: inherit;
     height: inherit;
+    background-color: black;
+    box-sizing: border-box;
+    border: 0.4vw solid rgb(150, 150, 150)
 }
 
 h3 {
-    grid-column: 1/3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1;
     grid-row: 1;
     padding: 0;
+    margin: 0;
+    height: 100%;
     text-align: center;
+    color: rgb(0, 209, 0);
+    box-sizing: border-box;
+    border: 0.1vw solid rgb(194, 77, 194);
+    
 }
 
 h4 {
+    grid-row: 3/4;
     margin: 0;
-    padding: 0;
+    padding: 2%;
+    color: rgb(0, 209, 0);
+    box-sizing: border-box;
+    border: 0.1vw solid rgb(194, 77, 194);
 }
 
 img {
-    grid-row: 2;
+    grid-row: 1/4;
     grid-column: 2/3;
     margin: 0;
-    padding: 0;
+    padding: 1%;
     object-fit: contain;
     width: 100%;
 }

@@ -1,5 +1,8 @@
-<button class="carouselArrows">
-    <fa-icon [icon]="faArrowLeft"></fa-icon>
+<button id="leftWarshipCarouselButton" class="carouselArrowsButton" (click)="moveWarshipCarouselLeft()">
+    <fa-icon class="carouselArrows" [icon]="faArrowLeft"></fa-icon>
+</button>
+<button id="rightWarshipCarouselButton" class="carouselArrowsButton" (click)="this.moveWarshipCarouselRight()">
+    <fa-icon class="carouselArrows" [icon]="faArrowRight"></fa-icon>
 </button>
 <ul id="warshipCarouselUl">
     <li *ngFor="let item of warshipTypeArray" class="warshipContainerLi">
@@ -8,10 +11,6 @@
         <img src="{{item.backgroundImagePath}}">
     </li>
 </ul>
-<button class="carouselArrows">
-    <fa-icon [icon]="faArrowRight"></fa-icon>
-</button>
-<i class="fa-solid fa-arrow-right"></i>
 <!-- name: "basic",
 width: 12.5,
 height: maxHeight * 0.025,
