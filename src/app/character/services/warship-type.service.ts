@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-// arrays
-import { warshipTypeArray } from '../arrays/warship-types-array';
+
 // interface
 import { WarshipType } from '../interfaces/warship-type';
 
@@ -10,21 +9,17 @@ import { WarshipType } from '../interfaces/warship-type';
 })
 export class WarshipTypeService {
 
-  warshipName: string = '';
+  warshipSelected!: WarshipType;
   constructor() { }
 
-  getWarshipType(): Observable<WarshipType> {
-    const warshipType = warshipTypeArray.find(warshipType => { return this.warshipName = warshipType.name });
-
-    return of(warshipType!);    
+  getSelectedWarshipType(): Observable<WarshipType> {
+    return of(this.warshipSelected);    
   }
 
-  getWarshipTypeArray(): Observable<WarshipType[]> {
-    return of(warshipTypeArray); 
-  }
 
-  updateWarshipName(name: string) {
-    this.warshipName = name;
-    return Promise.resolve("resolved");
+
+  async setSelectedWarship(warship: WarshipType): Promise<string> {
+    this.warshipSelected = warship;
+    return Promise.resolve("resolved");   
   }
 }

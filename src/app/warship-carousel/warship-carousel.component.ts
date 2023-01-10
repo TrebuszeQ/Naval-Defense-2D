@@ -3,8 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { WarshipType } from '../character/interfaces/warship-type';
 // services
 import { WarshipTypeService } from '../character/services/warship-type.service';
+import { WarshipTypeArrayService } from '../character/services/warship-type-array.service';
+import { WarshipCarouselService } from './Services/warship-carousel.service';
 // icons
 import { faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+// arrays
+import { warshipTypeArray } from '../character/arrays/warship-types-array';
 
 
 @Component({
@@ -18,22 +22,21 @@ export class WarshipCarouselComponent implements OnInit {
   faArrowLeft = faArrowLeft;
   warshipTypeArray!: WarshipType[];
   warshipCarouselPosition = 0;
-  moveAmount = 50;
-  constructor(private warshipTypeService: WarshipTypeService ) {}
+  warshipCarouselMax = 0;
+  moveAmount = 100;
+  carouselAimedWarship: WarshipType = warshipTypeArray[0];
+  constructor(private warshipTypeService: WarshipTypeService, private warshipTypeArrayService: WarshipTypeArrayService, private warshipCarouselService: WarshipCarouselService) {}
 
   async ngOnInit(): Promise<string> {
+    await this.setWarshipCarouselMax();
     await this.getWarshipTypeArray();
     await this.changeArrowsSize();
 
+    console.log(this.warshipCarouselMax);
     return Promise.resolve("resolved");
   }
 
   async getWarshipTypeArray(): Promise<string> {
-    // getWarshipType(): Observable<WarshipType> {
-    //   const warshipType = warshipTypeArray.find(warshipType => { return this.warshipName = warshipType.name });
-  
-    //   return of(warshipType!);    
-    // }
     const getWarshipTypeArrayObserver = {
       next: (array: WarshipType[]) => {
         this.warshipTypeArray = array;
@@ -46,7 +49,7 @@ export class WarshipCarouselComponent implements OnInit {
       // }
     }
 
-    this.warshipTypeService.getWarshipTypeArray().subscribe(getWarshipTypeArrayObserver).unsubscribe();
+    this.warshipTypeArrayService.getWarshipTypeArray().subscribe(getWarshipTypeArrayObserver).unsubscribe();
     return Promise.resolve("resolved");
   }
 
@@ -68,12 +71,60 @@ export class WarshipCarouselComponent implements OnInit {
     return Promise.resolve("resolved");
   }
 
-  async moveWarshipCarouselRight() {
+  async setWarshipCarouselMax(): Promise<string> {
+    const setWarshipCarouselMaxObserver = {
+      next: (max: number) => {
+        this.warshipCarouselMax = -max;
+      },
+      error: (error: Error) => {
+        console.error(`setWarshipCarouselMaxObserver on warship-carousel.component faced an error: ${error}.`)
+      },
+      // complete: () => {
+      //   console.log("setWarshipCarouselMaxObserver on warship-carousel.component received complete.");
+      // }
+    };
+
+    this.warshipCarouselService.getWarshipCarouselMax().subscribe(setWarshipCarouselMaxObserver).unsubscribe();
+    return Promise.resolve("resolved");
+  }
+
+  async setWarshipCarouselPositionLeft(): Promise<string> {
+
+    if (this.warshipCarouselPosition == 0) {
+      this.warshipCarouselPosition = this.warshipCarouselMax;
+    }
+    else if(this.warshipCarouselPosition != this.warshipCarouselMax && this.warshipCarouselPosition != 0) {
+      this.warshipCarouselPosition += this.moveAmount;
+    }
+    else if(this.warshipCarouselPosition == this.warshipCarouselMax) {
+      this.warshipCarouselPosition = 0;
+    };
+
+    return Promise.resolve("resolved");
+  }
+
+  async setWarshipCarouselPositionRight(): Promise<string> {
+
+    if (this.warshipCarouselPosition == 0) {
+      this.warshipCarouselPosition -= this.moveAmount;
+    }
+    else if(this.warshipCarouselPosition != this.warshipCarouselMax && this.warshipCarouselPosition != 0) {
+      this.warshipCarouselPosition -= this.moveAmount;
+    }
+    else if(this.warshipCarouselPosition == this.warshipCarouselMax) {
+      this.warshipCarouselPosition = 0;
+    };
+
+    return Promise.resolve("resolved");
+  }
+
+  async moveWarshipCarouselRight(): Promise<string> {
     const carouselUl = document.getElementById("warshipCarouselUl");
 
-    this.warshipCarouselPosition == -50 ? this.warshipCarouselPosition += this.moveAmount : this.warshipCarouselPosition -= this.moveAmount;
-    
-    // console.log(this.moveAmount);
+    await this.setWarshipCarouselPositionRight();
+    await this.aimedWarship();
+
+    console.log(this.warshipCarouselPosition);
 
     carouselUl!.animate(
     [
@@ -86,14 +137,17 @@ export class WarshipCarouselComponent implements OnInit {
       fill: "forwards",
       duration: 200,
     });
+
+    return Promise.resolve("resolved");
   }
 
-  async moveWarshipCarouselLeft() {
+  async moveWarshipCarouselLeft(): Promise<string> {
     const carouselUl = document.getElementById("warshipCarouselUl");
 
-    this.warshipCarouselPosition == 0 ? this.warshipCarouselPosition -= this.moveAmount : this.warshipCarouselPosition += this.moveAmount;
+    await this.setWarshipCarouselPositionLeft();
+    await this.aimedWarship();
 
-    // console.log(this.moveAmount);
+    console.log(this.warshipCarouselPosition);
 
     carouselUl!.animate(
       [
@@ -107,5 +161,23 @@ export class WarshipCarouselComponent implements OnInit {
         duration: 200,
       }
     )
+
+    return Promise.resolve("resolved");
+  }
+
+  async aimedWarship(): Promise<string> {
+    switch(this.warshipCarouselPosition) {
+      case 0:
+        this.carouselAimedWarship = warshipTypeArray[0]
+      break;
+    }
+
+    return Promise.resolve("resolved");
+  }
+  
+  async selectWarship(): Promise<string> {
+    this.warshipTypeService.setSelectedWarship(this.carouselAimedWarship)
+
+    return Promise.resolve("resolved");
   }
 }

@@ -1,12 +1,13 @@
-import { Injectable } from '@angular/core';
-import { WaterService } from 'src/app/water/water.service';
+import { Injectable, OnInit } from '@angular/core';
+
 // interfaces
 import { TorpedoType } from '../interfaces/torpedo-type';
 import { WarshipType } from '../interfaces/warship-type';
+
+// services
 import { TorpedoService } from './torpedo.service';
 import { WarshipPositionService } from './warship-position.service';
-
-import { OnInit } from '@angular/core';
+import { WaterService } from 'src/app/level/water/Services/water.service';
 import { WarshipTypeService } from './warship-type.service';
 import { TorpedoTypeService } from './torpedo-type.service';
 
@@ -29,7 +30,10 @@ export class TorpedoTrajectoryService implements OnInit{
 
   level = document.getElementById("level");
 
-  constructor(private waterService: WaterService, private warshipTypeService: WarshipTypeService, private torpedoTypeService: TorpedoTypeService,  private warshipPositionService: WarshipPositionService, private torpedoService: TorpedoService) { }
+  constructor(private waterService: WaterService, private warshipTypeService: WarshipTypeService, private torpedoTypeService: TorpedoTypeService,  private warshipPositionService: WarshipPositionService, private torpedoService: TorpedoService) {
+    this.level = document.getElementById("level");
+    this.ngOnInit();
+   }
 
   async ngOnInit() {
     this.level = document.getElementById("level");
@@ -64,7 +68,7 @@ export class TorpedoTrajectoryService implements OnInit{
       }
     }
 
-    this.warshipTypeService.getWarshipType().subscribe(warshipTypeObserver).unsubscribe();
+    this.warshipTypeService.getSelectedWarshipType().subscribe(warshipTypeObserver).unsubscribe();
   }
 
   async getTorpedoType() {

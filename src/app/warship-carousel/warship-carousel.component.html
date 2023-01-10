@@ -1,16 +1,21 @@
-<button id="leftWarshipCarouselButton" class="carouselArrowsButton" (click)="moveWarshipCarouselLeft()">
+<button type="button" id="leftWarshipCarouselButton" class="carouselArrowButton carouselButton" (click)="moveWarshipCarouselLeft()">
     <fa-icon class="carouselArrows" [icon]="faArrowLeft"></fa-icon>
 </button>
-<button id="rightWarshipCarouselButton" class="carouselArrowsButton" (click)="this.moveWarshipCarouselRight()">
+<button type="button" id="rightWarshipCarouselButton" class="carouselArrowButton carouselButton" (click)="this.moveWarshipCarouselRight()">
     <fa-icon class="carouselArrows" [icon]="faArrowRight"></fa-icon>
 </button>
 <ul id="warshipCarouselUl">
-    <li *ngFor="let item of warshipTypeArray" class="warshipContainerLi">
+    <li *ngFor="let item of warshipTypeArray" class="warshipContainerLi warshipContainerLiLength">
         <h3>{{item.name | uppercase}}</h3>
         <h4 [innerHTML]="item.description | description: item.availableTorpedes"></h4>       
-        <img src="{{item.backgroundImagePath}}">
+        <div class="warshipImageWrapper">
+            <img src="{{item.backgroundImagePath}}">
+        </div>
     </li>
 </ul>
+<button type="button" id="warshipCarouselSelectButton" class="carouselSelectButton carouselButton" (click)="selectWarship()">
+    <h3>SELECT</h3>
+</button>
 <!-- name: "basic",
 width: 12.5,
 height: maxHeight * 0.025,

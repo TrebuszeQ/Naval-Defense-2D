@@ -3,7 +3,9 @@ import { Levels } from "../interfaces/levels";
 
 export const levelArray: Levels[] = [
     {
-        name: "noname",
+        name: "basic",
+        difficulty: 1,
+        description: "",
         componentName: "LevelComponent",
     },
 ]

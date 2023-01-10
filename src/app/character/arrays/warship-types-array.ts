@@ -13,7 +13,15 @@ export const warshipTypeArray: WarshipType[] = [
         availableTorpedes: [torpedoTypeArray[0]],
     },
     {
-        name: "copy",
+        name: "warship2",
+        width: 12.5,
+        height: maxHeight * 0.025,
+        backgroundImagePath: "/assets/images/warships/HMS_Daring.jpg",
+        description: `<center>Description</center> <br> Starting warship.`,
+        availableTorpedes: [torpedoTypeArray[0]],
+    },
+    {
+        name: "warship3",
         width: 12.5,
         height: maxHeight * 0.025,
         backgroundImagePath: "/assets/images/warships/HMS_Daring.jpg",
@@ -22,6 +30,12 @@ export const warshipTypeArray: WarshipType[] = [
     }
 ]
 
+
+export function findWarship(name: string): WarshipType | undefined{
+    return warshipTypeArray.find((warship) => {
+        return warship.name == name.toLowerCase();
+    });
+}
 // possibleTorpedes to be built
 
 // export interface WarshipType {

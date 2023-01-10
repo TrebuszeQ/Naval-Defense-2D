@@ -9,10 +9,11 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { LevelWrapperComponent } from './level-wrapper/level-wrapper.component';
 import { LevelComponent } from './level/level.component';
 import { CharacterComponent } from './character/character.component';
-import { WaterComponent } from './water/water.component';
+import { WaterComponent } from './level/water/water.component';
 import { PregameComponent } from './pregame/pregame.component';
 import { WarshipCarouselComponent } from './warship-carousel/warship-carousel.component';
 import { DescriptionPipe } from './character/pipes/description.pipe';
+import { LevelCarouselComponent } from './level-carousel/level-carousel.component';
 
 
 @NgModule({
@@ -24,7 +25,8 @@ import { DescriptionPipe } from './character/pipes/description.pipe';
     WaterComponent,
     PregameComponent,
     WarshipCarouselComponent,
-    DescriptionPipe
+    DescriptionPipe,
+    LevelCarouselComponent
   ],
   imports: [
     BrowserModule,

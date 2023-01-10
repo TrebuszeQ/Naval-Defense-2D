@@ -10,7 +10,7 @@
     position: relative;
     margin: 0;
     padding: 0;
-    background-color: #292983;
+    background-color: #717179;
     max-width: 100%;
     width: 100%;
     max-height: 100%;
@@ -21,7 +21,7 @@
     display: block;
     position: relative;
     grid-row: 1/5;
-    background-color: #e3f0f9;
+    background-color: #202224;
     max-width: 100%;
     width: 100%;
     max-height: 100%;
@@ -31,12 +31,12 @@
 
 #leftColumnPregameMenu {
     grid-column: 1/2;
-    border-right: 0.25vw solid gold;
+    border-right: 0.25vw solid #2f3133;
 }
 
 #rightColumnPregameMenu {
     grid-column: 3/4;
-    border-left: 0.25vw solid gold;
+    border-left: 0.25vw solid #2f3133;
 }
 
 h2 {
@@ -62,7 +62,7 @@ app-warship-carousel {
     z-index: 8;
     display: grid;
     grid-template-columns: 10% 80% 10%;
-    grid-template-rows: 100%; 
+    grid-template-rows: 90% 10%; 
     position: relative;
     grid-column: 2/3;
     overflow: hidden;
@@ -75,7 +75,7 @@ app-warship-carousel {
     background-color: rgb(131, 131, 131);
     box-sizing: border-box;
     border: 0.3vw solid rgb(173, 173, 173);
-    outline: 0.5vw solid rgb(85, 85, 85);
+    outline: 0.5vw solid #717179;
 }
 
 #warshipCarouselWrapper {

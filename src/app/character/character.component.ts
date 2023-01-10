@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 // services
-import { WaterService } from '../water/water.service';
+import { WaterService } from '../level/water/Services/water.service';
 import { TorpedoTypeService } from './services/torpedo-type.service';
 import { TorpedoService } from './services/torpedo.service';
 import { WarshipPositionService } from './services/warship-position.service';
@@ -48,7 +48,7 @@ export class CharacterComponent implements OnInit {
 
     this.warship = document.getElementById("warship");
     // temporarily hardocded warshiptype string
-    await this.setWarshipType("basic");
+    await this.setWarshipType();
     await this.placeWarshipOnWater();
 
     // hardcoded string is a placeholder
@@ -67,7 +67,7 @@ export class CharacterComponent implements OnInit {
   }
   
   // makes warship default size
-  async setWarshipType(name: string) {
+  async setWarshipType() {
     
     const warshipTypeObserver = {
       next: (warshipType: WarshipType) => { 
@@ -90,7 +90,7 @@ export class CharacterComponent implements OnInit {
       // complete: () => console.log("warshipTypeObserver received complete"),
     }
     
-    this.warshipTypeService.getWarshipType().subscribe(warshipTypeObserver).unsubscribe();
+    this.warshipTypeService.getSelectedWarshipType().subscribe(warshipTypeObserver).unsubscribe();
 
     return Promise.resolve("resolved");
   }

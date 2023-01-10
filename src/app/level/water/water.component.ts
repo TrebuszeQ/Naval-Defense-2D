@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 // services
-import { WaterService } from './water.service';
+import { WaterService } from './Services/water.service';
 
 @Component({
   selector: 'app-water',
