@@ -5,4 +5,5 @@ export interface Levels {
     difficulty: number,
     description: string,
     componentName: string,
+    backgroundImagePath: string,
 }

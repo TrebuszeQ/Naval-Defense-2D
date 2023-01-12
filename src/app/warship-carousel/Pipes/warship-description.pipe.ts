@@ -1,10 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { TorpedoType } from '../interfaces/torpedo-type';
+import { TorpedoType } from 'src/app/character/interfaces/torpedo-type';
 
 @Pipe({
-  name: 'description'
+  name: 'warshipDescriptionPipe'
 })
-export class DescriptionPipe implements PipeTransform {
+export class WarshipDescriptionPipe implements PipeTransform {
 
   transform(value: string, array: TorpedoType[]): unknown {
     return value + ` <br>

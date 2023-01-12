@@ -2,7 +2,7 @@ export interface TorpedoType {
     name: string,
     width: number,
     height: number,
-    backgroundImage?: string | HTMLImageElement | ImageBitmap
+    backgroundImagePath: string,
     damage: number,
     area: number,
     speed: number,

@@ -7,7 +7,7 @@ import { WarshipType } from '../interfaces/warship-type';
 // services
 import { TorpedoService } from './torpedo.service';
 import { WarshipPositionService } from './warship-position.service';
-import { WaterService } from 'src/app/level/water/Services/water.service';
+import { WaterService } from 'src/app/level-wrapper/levels/water/Services/water.service';
 import { WarshipTypeService } from './warship-type.service';
 import { TorpedoTypeService } from './torpedo-type.service';
 

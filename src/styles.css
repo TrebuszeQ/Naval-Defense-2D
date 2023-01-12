@@ -2,33 +2,3 @@ body {
   margin: 0;
   padding: 0;
 }
-
-.carouselButton {
-  z-index: inherit;
-  display: block;
-  position: relative;
-  align-self: center;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgb(211, 211, 211);;
-  box-sizing: border-box;
-  border: 0.3vw solid rgb(236, 234, 234);
-}
-
-.carouselArrowButton {
-  grid-row: 1/3;
-
-
-}
-
-.carouselButton:hover {
-  background-color: rgb(110, 110, 110);
-  border: 0.3vw solid rgb(155, 155, 155);
-  color: white;
-}
-
-.carouselSelectButton {
-  box-sizing: border-box;
-}

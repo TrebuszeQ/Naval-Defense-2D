@@ -17,7 +17,7 @@ export const warshipTypeArray: WarshipType[] = [
         width: 12.5,
         height: maxHeight * 0.025,
         backgroundImagePath: "/assets/images/warships/HMS_Daring.jpg",
-        description: `<center>Description</center> <br> Starting warship.`,
+        description: `<center>Description</center> <br> warship2.`,
         availableTorpedes: [torpedoTypeArray[0]],
     },
     {
@@ -25,7 +25,7 @@ export const warshipTypeArray: WarshipType[] = [
         width: 12.5,
         height: maxHeight * 0.025,
         backgroundImagePath: "/assets/images/warships/HMS_Daring.jpg",
-        description: `<center>Description</center> <br> Starting warship.`,
+        description: `<center>Description</center> <br> warship3.`,
         availableTorpedes: [torpedoTypeArray[0]],
     }
 ]

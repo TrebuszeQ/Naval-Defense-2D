@@ -14,7 +14,7 @@ export const torpedoTypeArray: TorpedoType[] = [
         name: "basic",
         width: 2,
         height: 0.5,
-        backgroundImage: undefined,
+        backgroundImagePath: '',
         damage: 100,
         area: 10,
         speed: 500,

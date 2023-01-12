@@ -1,0 +1,130 @@
+#fa-arrow-left {
+    height: 1.5%;
+}
+  
+#fa-arrow-right {
+    height: 1.5%;
+}
+
+.carouselButton {
+    z-index: inherit;
+    display: block;
+    position: relative;
+    align-self: center;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(211, 211, 211);;
+    box-sizing: border-box;
+    border: 0.3vw solid rgb(236, 234, 234);
+}
+
+.carouselArrowButton {
+    grid-row: 1/3;
+}
+
+.carouselButton:hover {
+    background-color: rgb(110, 110, 110);
+    border: 0.3vw solid rgb(155, 155, 155);
+    color: white;
+}
+
+.carouselSelectButton {
+    box-sizing: border-box;
+}
+
+
+#leftLevelCarouselButton {
+    grid-column: 1/2;
+}
+#rightLevelCarouselButton {
+    grid-column: 3/4;
+}
+
+#levelCarouselUl {
+    z-index: 6;
+    display: inline-flex;
+    flex-flow: column wrap;
+    overflow: visible;
+    position: relative;
+    grid-column: 2/3;
+    grid-row: 1/2;
+    margin: 0;
+    padding: 0;
+    max-height: 100%;
+    height: 100%;
+    list-style-type: none;
+}
+
+.levelContainerLi {
+    display: grid;
+    overflow: inherit;
+    grid-template-columns: 25% 75%;
+    grid-template-rows: 15% 5% 80%;
+    align-content: inherit;
+    justify-content: inherit;
+    position: relative;
+    margin: inherit;
+    padding: 0.5%;
+    max-width: 100%;
+    width: 100%;
+    max-height: inherit;
+    height: inherit;
+    background-color: black;
+    box-sizing: border-box;
+    border: 0.4vw solid rgb(150, 150, 150)
+}
+
+h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.levelContainerLi > h3 {
+    grid-column: 1;
+    grid-row: 1;
+    color: rgb(0, 209, 0);
+    border: 0.1vw solid rgb(194, 77, 194);
+}
+
+.levelContainerLi > h4 {
+    grid-row: 3/4;
+    margin: 0;
+    padding: 2%;
+    color: rgb(0, 209, 0);
+    box-sizing: border-box;
+    border: 0.1vw solid rgb(194, 77, 194);
+}
+
+.levelImageWrapper {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    grid-column: 2/3;
+    grid-row: 1/4;
+    box-sizing: border-box;
+    border: 0.1vw solid rgb(194, 77, 194);
+    border-left: none;
+}
+
+img {
+    display: block;
+    position: relative;
+    margin: 0;
+    padding: 1%;
+    object-fit: contain;
+    width: 100%;
+}

@@ -23,16 +23,16 @@ export class WarshipCarouselComponent implements OnInit {
   warshipTypeArray!: WarshipType[];
   warshipCarouselPosition = 0;
   warshipCarouselMax = 0;
-  moveAmount = 100;
+  moveAmount = 0;
   carouselAimedWarship: WarshipType = warshipTypeArray[0];
   constructor(private warshipTypeService: WarshipTypeService, private warshipTypeArrayService: WarshipTypeArrayService, private warshipCarouselService: WarshipCarouselService) {}
 
   async ngOnInit(): Promise<string> {
-    await this.setWarshipCarouselMax();
     await this.getWarshipTypeArray();
     await this.changeArrowsSize();
+    await this.setWarshipCarouselMax();
+    await this.setMoveAmount();
 
-    console.log(this.warshipCarouselMax);
     return Promise.resolve("resolved");
   }
 
@@ -74,7 +74,7 @@ export class WarshipCarouselComponent implements OnInit {
   async setWarshipCarouselMax(): Promise<string> {
     const setWarshipCarouselMaxObserver = {
       next: (max: number) => {
-        this.warshipCarouselMax = -max;
+        this.warshipCarouselMax = 0 ? this.warshipCarouselMax = 0 : this.warshipCarouselMax = -max;
       },
       error: (error: Error) => {
         console.error(`setWarshipCarouselMaxObserver on warship-carousel.component faced an error: ${error}.`)
@@ -90,7 +90,7 @@ export class WarshipCarouselComponent implements OnInit {
 
   async setWarshipCarouselPositionLeft(): Promise<string> {
 
-    if (this.warshipCarouselPosition == 0) {
+    if (this.warshipCarouselPosition == (0 || -0)) {
       this.warshipCarouselPosition = this.warshipCarouselMax;
     }
     else if(this.warshipCarouselPosition != this.warshipCarouselMax && this.warshipCarouselPosition != 0) {
@@ -105,7 +105,7 @@ export class WarshipCarouselComponent implements OnInit {
 
   async setWarshipCarouselPositionRight(): Promise<string> {
 
-    if (this.warshipCarouselPosition == 0) {
+    if (this.warshipCarouselPosition == (0 || -0)) {
       this.warshipCarouselPosition -= this.moveAmount;
     }
     else if(this.warshipCarouselPosition != this.warshipCarouselMax && this.warshipCarouselPosition != 0) {
@@ -124,7 +124,7 @@ export class WarshipCarouselComponent implements OnInit {
     await this.setWarshipCarouselPositionRight();
     await this.aimedWarship();
 
-    console.log(this.warshipCarouselPosition);
+    // console.log(this.warshipCarouselPosition);
 
     carouselUl!.animate(
     [
@@ -147,7 +147,7 @@ export class WarshipCarouselComponent implements OnInit {
     await this.setWarshipCarouselPositionLeft();
     await this.aimedWarship();
 
-    console.log(this.warshipCarouselPosition);
+    // console.log(this.warshipCarouselPosition);
 
     carouselUl!.animate(
       [
@@ -167,8 +167,16 @@ export class WarshipCarouselComponent implements OnInit {
 
   async aimedWarship(): Promise<string> {
     switch(this.warshipCarouselPosition) {
-      case 0:
-        this.carouselAimedWarship = warshipTypeArray[0]
+      case (0 || -0):
+        this.carouselAimedWarship = warshipTypeArray[0];
+      break;
+      
+      case -100: 
+        this.carouselAimedWarship = warshipTypeArray[1];
+      break;
+
+      case -200: 
+        this.carouselAimedWarship = warshipTypeArray[2];
       break;
     }
 
@@ -177,6 +185,17 @@ export class WarshipCarouselComponent implements OnInit {
   
   async selectWarship(): Promise<string> {
     this.warshipTypeService.setSelectedWarship(this.carouselAimedWarship)
+
+    return Promise.resolve("resolved");
+  }
+
+  async setMoveAmount(): Promise<string> {
+    if(this.warshipTypeArray.length == (0 || -0 || 1)) {
+      this.moveAmount = 0;
+    }
+    else {
+      this.moveAmount = 100;
+    }
 
     return Promise.resolve("resolved");
   }

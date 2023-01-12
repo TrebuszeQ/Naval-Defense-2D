@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 // services
-import { WaterService } from '../level/water/Services/water.service';
+import { WaterService } from '../level-wrapper/levels/water/Services/water.service';
 import { TorpedoTypeService } from './services/torpedo-type.service';
 import { TorpedoService } from './services/torpedo.service';
 import { WarshipPositionService } from './services/warship-position.service';

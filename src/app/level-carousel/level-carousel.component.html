@@ -1,1 +1,18 @@
-<p>level-carousel works!</p>
+<button type="button" id="leftLevelCarouselButton" class="carouselArrowButton carouselButton" (click)="this.moveLevelCarouselLeft()">
+    <fa-icon class="carouselArrows" [icon]="faArrowLeft"></fa-icon>
+</button>
+<button type="button" id="rightLevelCarouselButton" class="carouselArrowButton carouselButton" (click)="this.moveLevelCarouselRight()">
+    <fa-icon class="carouselArrows" [icon]="faArrowRight"></fa-icon>
+</button>
+<ul id="levelCarouselUl">
+    <li *ngFor="let item of levelArray" class="levelContainerLi levelContainerLiLength">
+        <h3>{{item.name | uppercase}}</h3>
+        <h4 [innerHTML]="item.description"></h4>       
+        <div class="levelImageWrapper">
+            <img src="{{item.backgroundImagePath}}">
+        </div>
+    </li>
+</ul>
+<button type="button" id="levelCarouselSelectButton" class="carouselSelectButton carouselButton" (click)="this.selectLevel()">
+    <h3>SELECT</h3>
+</button>

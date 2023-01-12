@@ -2,11 +2,11 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'app-level',
-  templateUrl: './level.component.html',
-  styleUrls: ['./level.component.css'],
+  templateUrl: './first-level.component.html',
+  styleUrls: ['./first-level.component.css'],
   encapsulation: ViewEncapsulation.Emulated,
 })
-export class LevelComponent implements OnInit {
+export class FirstLevelComponent implements OnInit {
 
   maxWidth = window.screen.width;
 
