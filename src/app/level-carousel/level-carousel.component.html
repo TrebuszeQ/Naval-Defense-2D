@@ -1,7 +1,7 @@
-<button type="button" id="leftLevelCarouselButton" class="carouselArrowButton carouselButton" (click)="this.moveLevelCarouselLeft()">
+<button type="button" id="leftLevelCarouselButton" class="carouselArrowButton carouselButton notBlack" (click)="this.moveLevelCarouselLeft()" [disabled]="this.levelArray.length == 1">
     <fa-icon class="carouselArrows" [icon]="faArrowLeft"></fa-icon>
 </button>
-<button type="button" id="rightLevelCarouselButton" class="carouselArrowButton carouselButton" (click)="this.moveLevelCarouselRight()">
+<button type="button" id="rightLevelCarouselButton" class="carouselArrowButton carouselButton notBlack" (click)="this.moveLevelCarouselRight()" [disabled]="this.levelArray.length == 1">
     <fa-icon class="carouselArrows" [icon]="faArrowRight"></fa-icon>
 </button>
 <ul id="levelCarouselUl">
@@ -13,6 +13,6 @@
         </div>
     </li>
 </ul>
-<button type="button" id="levelCarouselSelectButton" class="carouselSelectButton carouselButton" (click)="this.selectLevel()">
+<button type="button" id="levelCarouselSelectButton" class="carouselSelectButton carouselButton notBlack" (click)="this.selectLevel()">
     <h3>SELECT</h3>
 </button>

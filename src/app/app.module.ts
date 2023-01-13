@@ -12,8 +12,9 @@ import { CharacterComponent } from './character/character.component';
 import { WaterComponent } from './level-wrapper/levels/water/water.component';
 import { PregameComponent } from './pregame/pregame.component';
 import { WarshipCarouselComponent } from './warship-carousel/warship-carousel.component';
-import { WarshipDescriptionPipe } from './warship-carousel/Pipes/warship-description.pipe';
 import { LevelCarouselComponent } from './level-carousel/level-carousel.component';
+// pipes
+import { WarshipDescriptionPipe } from './character/pipes/warship-description.pipe';
 import { LevelDescriptionPipe } from './level-carousel/Pipes/level-description.pipe';
 
 @NgModule({

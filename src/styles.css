@@ -2,3 +2,14 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* not black */
+.notBlack {
+  color: #292931;
+}
+
+.navy {
+  background-color: rgb(36, 105, 166);
+  border: 0.15vw solid rgb(242, 175, 88);
+  color: #ececec;
+}

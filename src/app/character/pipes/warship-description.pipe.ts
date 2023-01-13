@@ -8,7 +8,7 @@ export class WarshipDescriptionPipe implements PipeTransform {
 
   transform(value: string, array: TorpedoType[]): unknown {
     return value + ` <br>
-    Avalaible torpedes are: 
+    avalaible torpedes are: 
     <ul>
       ${this.createList(array)}
     <ul>`; 

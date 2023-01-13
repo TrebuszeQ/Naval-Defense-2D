@@ -7,6 +7,7 @@ import { LevelArrayService } from '../level-wrapper/levels/Services/level-array.
 import { LevelCarouselService } from './Services/level-carousel.service';
 // icons
 import { faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { PregameConsoleService } from '../pregame/services/pregame-console.service';
 
 
 @Component({
@@ -26,10 +27,11 @@ export class LevelCarouselComponent implements OnInit {
   moveAmount = 0;
   carouselAimedLevel!: Levels;
 
-  constructor(private levelService: LevelService, private levelArrayService: LevelArrayService, private levelCarouselService: LevelCarouselService) {}
+  constructor(private levelService: LevelService, private levelArrayService: LevelArrayService, private levelCarouselService: LevelCarouselService, private pregameConsoleService: PregameConsoleService ) {}
   
   async ngOnInit(): Promise<string> {
     await this.getLevelsArray();
+    await this.aimedLevel();
     await this.changeArrowsSize();
     await this.getLevelCarouselMax();
     await this.setMoveAmount();
@@ -132,6 +134,7 @@ export class LevelCarouselComponent implements OnInit {
   
   async selectLevel(): Promise<string> {
     this.levelService.setSelectedLevel(this.carouselAimedLevel);
+    await this.sendMessageToPregameConsole(this.carouselAimedLevel.name);
 
     return Promise.resolve("resolved");
   }
@@ -190,6 +193,12 @@ export class LevelCarouselComponent implements OnInit {
     else if(this.levelArray.length) {
       this.moveAmount = 100;
     }
+
+    return Promise.resolve("resolved");
+  }
+
+  async sendMessageToPregameConsole(message: string): Promise<string> {
+    this.pregameConsoleService.updateConsoleMessage(message);
 
     return Promise.resolve("resolved");
   }

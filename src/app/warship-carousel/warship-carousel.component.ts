@@ -5,10 +5,12 @@ import { WarshipType } from '../character/interfaces/warship-type';
 import { WarshipTypeService } from '../character/services/warship-type.service';
 import { WarshipTypeArrayService } from '../character/services/warship-type-array.service';
 import { WarshipCarouselService } from './Services/warship-carousel.service';
+import { PregameConsoleService } from '../pregame/services/pregame-console.service';
 // icons
 import { faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 // arrays
 import { warshipTypeArray } from '../character/arrays/warship-types-array';
+
 
 
 @Component({
@@ -25,7 +27,7 @@ export class WarshipCarouselComponent implements OnInit {
   warshipCarouselMax = 0;
   moveAmount = 0;
   carouselAimedWarship: WarshipType = warshipTypeArray[0];
-  constructor(private warshipTypeService: WarshipTypeService, private warshipTypeArrayService: WarshipTypeArrayService, private warshipCarouselService: WarshipCarouselService) {}
+  constructor(private warshipTypeService: WarshipTypeService, private warshipTypeArrayService: WarshipTypeArrayService, private warshipCarouselService: WarshipCarouselService, private pregameConsoleService: PregameConsoleService) {}
 
   async ngOnInit(): Promise<string> {
     await this.getWarshipTypeArray();
@@ -184,7 +186,8 @@ export class WarshipCarouselComponent implements OnInit {
   }
   
   async selectWarship(): Promise<string> {
-    this.warshipTypeService.setSelectedWarship(this.carouselAimedWarship)
+    this.warshipTypeService.setSelectedWarship(this.carouselAimedWarship);
+    await this.sendMessageToPregameConsole(this.carouselAimedWarship.name);
 
     return Promise.resolve("resolved");
   }
@@ -196,6 +199,12 @@ export class WarshipCarouselComponent implements OnInit {
     else {
       this.moveAmount = 100;
     }
+
+    return Promise.resolve("resolved");
+  }
+
+  async sendMessageToPregameConsole(message: string): Promise<string> {
+    this.pregameConsoleService.updateConsoleMessage(message);
 
     return Promise.resolve("resolved");
   }

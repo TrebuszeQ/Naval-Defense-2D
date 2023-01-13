@@ -1,27 +1,9 @@
-#pregameMenu {
-    z-index: 9;
-    display: grid;
-    grid-template-columns: 7.5% 85% 7.5%;
-    grid-template-rows: 5% 45% 5% 45%;
+.wrapper {
     align-items: center;
     justify-items: center;
     align-content: center;
     justify-content: center;
     position: relative;
-    margin: 0;
-    padding: 0;
-    background-color: #717179;
-    max-width: 100%;
-    width: 100%;
-    max-height: 100%;
-    height: 100vh;
-}
-
-.columnPregameMenu {
-    display: block;
-    position: relative;
-    grid-row: 1/5;
-    background-color: #202224;
     max-width: 100%;
     width: 100%;
     max-height: 100%;
@@ -29,33 +11,90 @@
     box-sizing: border-box;
 }
 
-#leftColumnPregameMenu {
-    grid-column: 1/2;
-    border-right: 0.25vw solid #2f3133;
+#pregameMenu {
+    z-index: 9;
+    display: grid;
+    grid-template-columns: 85% 15%;
+    grid-template-rows: 5% 45% 5% 45%;
+    margin: 0;
+    padding: 0;
+    background-color: #3b4e73;
 }
 
-#rightColumnPregameMenu {
-    grid-column: 3/4;
-    border-left: 0.25vw solid #2f3133;
+.columnPregameMenu {
+    z-index: inherit;
+    display: flex;
+    flex-flow: column nowrap;
+    margin: 0;
+    padding: 2%;
+    background-color: black;
 }
 
 h2 {
     position: relative;
     grid-column: 2/3;
     margin: 0;
-    width: 60%;
-    color: #e3f0f9;
     text-align: center;
+}
+
+.centeredHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    max-width: 100%;
+    width: 100%;
+    max-height: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+#pregameConsole {
+    overflow: scroll;
+    max-width: 100%;
+    width: 100%;
+    max-height: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+    border: 0.1vw solid rgb(194, 77, 194);
+}
+
+#pregameConsole > h3 {
+    padding: 0;
+    margin: 5% 0;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#pregameConsole > h3, h4 {
+    color: rgb(0, 209, 0);
+    font-family: 'Lucida Console';
+}
+
+#pregameConsole > h4 {
+    margin: 0;
+    padding: 2%;
+}
+
+#rightColumnPregameMenu {
+    grid-column: 2/4;
+    grid-row: 2/5;
+    border-left: 0.25vw solid #2f3133;
 }
 
 #chooseWarship {
     grid-row: 1;
-    grid-column: 2;
+    grid-column: 1;
+}
+
+#outputConsole {
+    grid-row: 1;
+    grid-column: 2/4;
 }
 
 #chooseLevel {
     grid-row: 3;
-    grid-column: 2;
+    grid-column: 1;
 }
 
 .carousel {
@@ -64,7 +103,7 @@ h2 {
     grid-template-columns: 10% 80% 10%;
     grid-template-rows: 90% 10%; 
     position: relative;
-    grid-column: 2/3;
+    grid-column: 1/2;
     overflow: hidden;
     margin: 0 5%;
     padding: 0;
@@ -75,53 +114,16 @@ h2 {
     background-color: rgb(131, 131, 131);
     box-sizing: border-box;
     border: 0.3vw solid rgb(173, 173, 173);
-    outline: 0.5vw solid #717179;
+    outline: 0.3vw solid #8a8a8a;
 } 
 
 #warshipCarouselWrapper {
-    grid-column: 2/3;
+    grid-column: 1/2;
+    grid-row: 2/3;
 }
 
 #levelsCarousel {
-    grid-column: 2/3;
+    grid-column: 1/2;
+    grid-row: 4/5;
 }
 
-/* children */
-
-#fa-arrow-left {
-    height: 1.5%;
-}
-
-#fa-arrow-right {
-    height: 1.5%;
-}
-
-.carouselButton {
-    z-index: inherit;
-    display: block;
-    position: relative;
-    align-self: center;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgb(211, 211, 211);;
-    box-sizing: border-box;
-    border: 0.3vw solid rgb(236, 234, 234);
-  }
-  
-  .carouselArrowButton {
-    grid-row: 1/3;
-  
-  
-  }
-  
-  .carouselButton:hover {
-    background-color: rgb(110, 110, 110);
-    border: 0.3vw solid rgb(155, 155, 155);
-    color: white;
-  }
-  
-  .carouselSelectButton {
-    box-sizing: border-box;
-  }

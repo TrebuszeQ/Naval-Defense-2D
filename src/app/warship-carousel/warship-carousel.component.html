@@ -1,7 +1,7 @@
-<button type="button" id="leftWarshipCarouselButton" class="carouselArrowButton carouselButton" (click)="this.moveWarshipCarouselLeft()">
+<button type="button" id="leftWarshipCarouselButton" class="carouselArrowButton carouselButton notBlack" (click)="this.moveWarshipCarouselLeft()" [disabled]="this.warshipTypeArray.length == 1">
     <fa-icon class="carouselArrows" [icon]="faArrowLeft"></fa-icon>
 </button>
-<button type="button" id="rightWarshipCarouselButton" class="carouselArrowButton carouselButton" (click)="this.moveWarshipCarouselRight()">
+<button type="button" id="rightWarshipCarouselButton" class="carouselArrowButton carouselButton notBlack" (click)="this.moveWarshipCarouselRight()" [disabled]="this.warshipTypeArray.length == 1">
     <fa-icon class="carouselArrows" [icon]="faArrowRight"></fa-icon>
 </button>
 <ul id="warshipCarouselUl">
@@ -13,6 +13,6 @@
         </div>
     </li>
 </ul>
-<button type="button" id="warshipCarouselSelectButton" class="carouselSelectButton carouselButton" (click)="this.selectWarship()">
+<button type="button" id="warshipCarouselSelectButton" class="carouselSelectButton carouselButton notBlack" (click)="this.selectWarship()">
     <h3>SELECT</h3>
 </button>
