@@ -7,7 +7,7 @@
 <ul id="warshipCarouselUl">
     <li *ngFor="let item of warshipTypeArray" class="warshipContainerLi warshipContainerLiLength">
         <h3>{{item.name | uppercase}}</h3>
-        <h4 [innerHTML]="item.description | warshipDescriptionPipe: item.availableTorpedes"></h4>       
+        <h4 [innerHTML]="item.description"></h4>       
         <div class="warshipImageWrapper">
             <img src="{{item.backgroundImagePath}}">
         </div>

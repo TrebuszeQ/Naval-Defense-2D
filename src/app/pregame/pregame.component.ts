@@ -12,6 +12,9 @@ export class PregameComponent implements OnInit {
   
   resolutionInfo: string = "resolved";
   pregameConsoleMessage: string = "";
+  warshipSelected: boolean = false;
+  levelSelected: boolean = false;
+  startGamePossible: boolean = false;
 
   constructor(private pregameConsoleService: PregameConsoleService) {}
 
@@ -67,7 +70,10 @@ export class PregameComponent implements OnInit {
   async addWarshipCarouselSelectButtonSelectionListener(): Promise<string> {
     const warshipCarouselSelectButton = document.getElementById("warshipCarouselSelectButton");
 
-    warshipCarouselSelectButton!.onclick = () => this.getConsoleMessage();
+    warshipCarouselSelectButton!.onclick = () => { 
+      this.warshipSelected == false ? this.warshipSelected = true : this.warshipSelected;
+      this.getConsoleMessage()
+    };
   
     return Promise.resolve(this.resolutionInfo);
   }
@@ -75,8 +81,23 @@ export class PregameComponent implements OnInit {
   async addLevelCarouselSelectButtonSelectionListener(): Promise<string> {
     const levelCarouselSelectButton = document.getElementById("levelCarouselSelectButton");
     
-    levelCarouselSelectButton!.onclick = () => this.getConsoleMessage();
+    levelCarouselSelectButton!.onclick = () => { 
+      this.levelSelected == false ? this.levelSelected = true : this.levelSelected;
+      this.getConsoleMessage();
+    }
     return Promise.resolve(this.resolutionInfo);
+  }
+
+  allowGameStart(): boolean {
+    if((this.warshipSelected && this.levelSelected) == false) {
+      return true;
+    }    
+    else {
+      return false;
+    }
+  }
+
+  async startGame() {
   }
 }
 

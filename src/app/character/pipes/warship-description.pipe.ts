@@ -6,11 +6,11 @@ import { TorpedoType } from 'src/app/character/interfaces/torpedo-type';
 })
 export class WarshipDescriptionPipe implements PipeTransform {
 
-  transform(value: string, array: TorpedoType[]): unknown {
+  transform(value: string, array: TorpedoType[] | null): unknown {
     return value + ` <br>
-    avalaible torpedes are: 
+    avalaible torpedos are: 
     <ul>
-      ${this.createList(array)}
+      ${this.checkIfNull(array)}
     <ul>`; 
   }
   
@@ -20,6 +20,15 @@ export class WarshipDescriptionPipe implements PipeTransform {
       availableTorpedos += '\n' + '<li>' + `${element.name}` + '</li>';
     }
     return availableTorpedos;
+  }
+
+  async checkIfNull(array: TorpedoType[] | null) {
+    if(array == null) {
+      return "none";
+    }
+    else {
+      return this.createList(array)
+    } 
   }
 }
 

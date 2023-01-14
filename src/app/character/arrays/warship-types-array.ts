@@ -1,32 +1,60 @@
+// interfaces
 import { WarshipType } from "../interfaces/warship-type";
+import { WeaponType } from "src/app/weapon/Interfaces/weapon-type";
+// arrays
 import { torpedoTypeArray } from "./torpedo-types";
+import { weaponArray } from "src/app/weapon/Arrays/weapon-array";
 
 const maxHeight = window.screen.height;
 
 export const warshipTypeArray: WarshipType[] = [
     {
-        name: "basic",
-        width: 12.5,
+        name: "River-class offshore patrol vessel",
+        width: 7.95,
         height: maxHeight * 0.025,
         backgroundImagePath: "/assets/images/warships/HMS_Daring.jpg",
-        description: `<center>DESCRIPTION</center> <br> starting warship.`,
-        availableTorpedes: [torpedoTypeArray[0]],
+        description: 
+            `<center>DESCRIPTION</center>
+            width: ${this.width}
+            `,
+        avalaibleWeapons: [weaponArray[0], weaponArray[1]],
+        availableTorpedes: null,
+        torpedeAmount: 0,
+        maxSpeed: 0.77,
+        repairmentTime: null,
+        skills: undefined,
+        armor: 1,
+        crew: 20,
     },
     {
         name: "warship2",
-        width: 12.5,
+        width: 7.95,
         height: maxHeight * 0.025,
         backgroundImagePath: "/assets/images/warships/HMS_Daring.jpg",
-        description: `<center>DESCRIPTION</center> <br> warship2.`,
-        availableTorpedes: [torpedoTypeArray[0]],
+        description: `<center>DESCRIPTION</center> <br> starting warship.`,
+        avalaibleWeapons: [weaponArray[0], weaponArray[1]],
+        availableTorpedes: null,
+        torpedeAmount: 0,
+        maxSpeed: 0.77,
+        repairmentTime: null,
+        skills: undefined,
+        armor: 1,
+        crew: 20,
     },
     {
         name: "warship3",
-        width: 12.5,
+        width: 7.95,
         height: maxHeight * 0.025,
         backgroundImagePath: "/assets/images/warships/HMS_Daring.jpg",
-        description: `<center>DESCRIPTION</center> <br> warship3.`,
-        availableTorpedes: [torpedoTypeArray[0]],
+        description: `<center>DESCRIPTION</center> <br> starting warship.`,
+        avalaibleWeapons: [weaponArray[0], weaponArray[1]],
+        availableTorpedes: null,
+        torpedeAmount: 0,
+        maxSpeed: 0.77,
+        repairmentTime: null,
+        skills: undefined,
+        armor: 1,
+        crew: 20,
     }
 ]
 
@@ -42,6 +70,15 @@ export function findWarship(name: string): WarshipType | undefined{
 //     name: string,
 //     width: number,
 //     height: number,
-//     backgroudImage?: ImageBitmap
+//     backgroundImagePath: string,
+//     description: string,
+//     availableTorpedes: TorpedoType[],
+//     torpedeAmount: number,
+//     maxSpeed: number,
+//     reloadingTime: number,
+//     repairmentTIme: number,
+//     skills?: undefined,
+//     armor: number,
+//     crew: number,
 // }
 

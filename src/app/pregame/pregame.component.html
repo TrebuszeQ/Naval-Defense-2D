@@ -6,9 +6,13 @@
     <h2 id="chooseLevel" class="centeredHeader navy">CHOOSE LEVEL</h2>
         <app-level-carousel class="carousel"> 
         </app-level-carousel>
-    <div id="rightColumnPregameMenu" class="columnPregameMenu wrapper">
+    <div id="rightColumnPregameMenu" class="wrapper">
         <div id="pregameConsole">
             <h3 class="pregameConsoleH3 pregameConsoleH">OUTPUT</h3>
         </div>
+        <button type="button" id="startGameButton" class="wrapper notBlack" [disabled]="(this.allowGameStart() == true)" routerLink="/game" routerLinkActive="active">
+            <h3>START</h3>
+        </button>
+
     </div>
 </div>

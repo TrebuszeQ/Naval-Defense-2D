@@ -15,20 +15,26 @@
     padding: 0;
     width: 100%;
     height: 100%;
-    background-color: rgb(211, 211, 211);
+    background-color: #999da6;
     box-sizing: border-box;
-    border: 0.3vw solid rgb(236, 234, 234);
-    color: #292931;
+    border: 0.2vw solid rgb(211, 214, 217);
+    border-radius: 1%;
 }
 
 .carouselArrowButton {
     grid-row: 1/3;
 }
 
-.carouselButton:hover, .carouselButton:disabled {
+.carouselButton:hover {
     background-color: rgb(110, 110, 110);
-    border: 0.3vw solid rgb(155, 155, 155);
+    border: 0.2vw solid rgb(155, 155, 155);
     color: #cacaca;
+}
+
+.carouselButton:disabled {
+    background-color: rgb(173, 173, 173);
+    border: 0.2vw solid rgb(155, 155, 155);
+    color: rgb(182, 182, 182);
 }
 
 .carouselSelectButton {
