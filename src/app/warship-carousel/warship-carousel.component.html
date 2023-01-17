@@ -6,8 +6,40 @@
 </button>
 <ul id="warshipCarouselUl">
     <li *ngFor="let item of warshipTypeArray" class="warshipContainerLi warshipContainerLiLength">
-        <h3>{{item.name | uppercase}}</h3>
-        <h4 [innerHTML]="item.description"></h4>       
+        <h3 class="warshipName">{{item.name | uppercase}}</h3>
+        
+        <div id="warshipHardDetails" class="warshipDetails">
+            <h4>Length:</h4> 
+            <p>{{item.width}}m</p>
+            <h4>Height:</h4> 
+            <p>{{item.height}}m</p>
+            <h4>Max speed:</h4> 
+            <p>{{item.maxSpeed}}</p>
+            <h4>Repairment time</h4> 
+            <p *ngIf="item.repairmentTime != null">{{item.repairmentTime}}</p>
+            <p *ngIf="item.repairmentTime == null">none</p>
+            <h4>Armor:</h4> <p>{{item.armor}}</p>
+            <h4>Crew:</h4> <p>{{item.crew}}</p>
+        </div>
+        <div id="warshipDynamicDetails" class="warshipDetails">
+            
+            <h4>Avalaible weapons:</h4>
+            <h4 *ngIf="item.avalaibleWeapons == null">none</h4>
+            <ul id="weaponsUl" *ngIf="item.avalaibleWeapons != null">
+                <li *ngFor="let weapon of item.avalaibleWeapons" class="weaponLi"><p>{{weapon.weaponName}}</p></li>
+            </ul>
+            <h4>Avalaible torpedes: </h4>
+            <p *ngIf="item.availableTorpedes == null">none</p>
+            <ul id="torpedesUl" *ngIf="item.availableTorpedes != null">
+                <li *ngFor="let torpede of item.availableTorpedes" class="torpedeLi"><p>{{torpede.name}}</p></li>
+            </ul>
+
+            <h4>Skills:</h4>
+            <ul *ngIf="item.skills != null" id="skillsUl">
+                <li *ngFor="let skill of item.skills" class="skillsLi">{{skill.skillName}}</li>
+            </ul>
+            <p *ngIf="item.skills == null">none</p>
+        </div>     
         <div class="warshipImageWrapper">
             <img src="{{item.backgroundImagePath}}">
         </div>
@@ -16,3 +48,29 @@
 <button type="button" id="warshipCarouselSelectButton" class="carouselSelectButton carouselButton notBlack" (click)="this.selectWarship()">
     <h3>SELECT</h3>
 </button>
+
+
+<!-- export interface WarshipType {
+    name: string,
+    width: number,
+    height: number,
+    backgroundImagePath: string,
+    description: string,
+    avalaibleWeapons: WeaponType[] | null,
+    availableTorpedes: TorpedoType[] | null,
+    torpedeAmount: number,
+    maxSpeed: number,
+    repairmentTime: number | null,
+    skills?: undefined,
+    armor: number,
+    crew: number,
+} -->
+
+<!-- weaponName: string,
+firingRate: number,
+reloadingRate: number,
+barrelLife: number,
+range: number[],
+attackVector: AttackVector[],
+damage: number[],
+armorPenetration: number, -->

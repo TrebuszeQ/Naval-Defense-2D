@@ -1,21 +1,21 @@
 // interfaces
 import { TorpedoType } from "../interfaces/torpedo-type"
 import { WeaponType } from "src/app/weapon/Interfaces/weapon-type"
+import { Skills } from "./skills"
 // components
-import { WarshipDescriptionComponent } from "../warship-description/warship-description.component"
 
 export interface WarshipType {
     name: string,
     width: number,
     height: number,
     backgroundImagePath: string,
-    description: WarshipDescriptionComponent,
+    description: string,
     avalaibleWeapons: WeaponType[] | null,
     availableTorpedes: TorpedoType[] | null,
     torpedeAmount: number,
     maxSpeed: number,
     repairmentTime: number | null,
-    skills?: undefined,
+    skills: null | Skills[],
     armor: number,
     crew: number,
 }
