@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-// types
+// interfaces
 import { WarshipType } from '../character/interfaces/warship-type';
+import { WeaponType } from '../weapon/Interfaces/weapon-type';
+import { Skills } from '../character/interfaces/skills';
+import { TorpedoType } from '../torpedo/Interfaces/torpedo-type';
 // services
 import { WarshipTypeService } from '../character/services/warship-type.service';
 import { WarshipTypeArrayService } from '../character/services/warship-type-array.service';
@@ -10,6 +13,9 @@ import { PregameConsoleService } from '../pregame/services/pregame-console.servi
 import { faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 // arrays
 import { warshipTypeArray } from '../character/arrays/warship-types-array';
+// types
+import { AttackVector } from '../weapon/Types/attack-vector';
+
 
 
 
@@ -20,6 +26,7 @@ import { warshipTypeArray } from '../character/arrays/warship-types-array';
 })
 export class WarshipCarouselComponent implements OnInit {
 
+  resolutionMessage: string = "resolved";
   faArrowRight = faArrowRight;
   faArrowLeft = faArrowLeft;
   warshipTypeArray!: WarshipType[];
@@ -35,7 +42,7 @@ export class WarshipCarouselComponent implements OnInit {
     await this.setWarshipCarouselMax();
     await this.setMoveAmount();
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async getWarshipTypeArray(): Promise<string> {
@@ -52,7 +59,7 @@ export class WarshipCarouselComponent implements OnInit {
     }
 
     this.warshipTypeArrayService.getWarshipTypeArray().subscribe(getWarshipTypeArrayObserver).unsubscribe();
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async changeArrowsSize(): Promise<string> {
@@ -70,7 +77,7 @@ export class WarshipCarouselComponent implements OnInit {
     arrowLeft2!.style.height = percentage;
     arrowRight2!.style.height = percentage;
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async setWarshipCarouselMax(): Promise<string> {
@@ -87,7 +94,7 @@ export class WarshipCarouselComponent implements OnInit {
     };
 
     this.warshipCarouselService.getWarshipCarouselMax().subscribe(setWarshipCarouselMaxObserver).unsubscribe();
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async setWarshipCarouselPositionLeft(): Promise<string> {
@@ -102,7 +109,7 @@ export class WarshipCarouselComponent implements OnInit {
       this.warshipCarouselPosition = 0;
     };
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async setWarshipCarouselPositionRight(): Promise<string> {
@@ -117,7 +124,7 @@ export class WarshipCarouselComponent implements OnInit {
       this.warshipCarouselPosition = 0;
     };
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async moveWarshipCarouselRight(): Promise<string> {
@@ -140,7 +147,7 @@ export class WarshipCarouselComponent implements OnInit {
       duration: 200,
     });
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async moveWarshipCarouselLeft(): Promise<string> {
@@ -164,7 +171,7 @@ export class WarshipCarouselComponent implements OnInit {
       }
     )
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async aimedWarship(): Promise<string> {
@@ -182,14 +189,14 @@ export class WarshipCarouselComponent implements OnInit {
       break;
     }
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
   
   async selectWarship(): Promise<string> {
     this.warshipTypeService.setSelectedWarship(this.carouselAimedWarship);
     await this.sendMessageToPregameConsole(this.carouselAimedWarship.name);
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async setMoveAmount(): Promise<string> {
@@ -200,12 +207,105 @@ export class WarshipCarouselComponent implements OnInit {
       this.moveAmount = 100;
     }
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async sendMessageToPregameConsole(message: string): Promise<string> {
     this.pregameConsoleService.updateConsoleMessage(message);
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async displayWeaponExtendedDetails(weapon: WeaponType, elementName: string, quantity: number) {
+    const warshipDetailsExtended = document.getElementById(`warshipDetailsExtended${elementName}`);
+
+        // weaponName: string,
+    // caliber: string,
+    // firingRate: number,
+    // reloadingRate: number,
+    // muzzleVelo: number,
+    // ammoCapacity: number,
+    // range: number[],
+    // barrelLife: number,
+    // attackVector: AttackVector[],
+    // damage: number[],
+    // armorPenetration: number,
+    // train: number | null,
+
+    const content: string = 
+    `
+    <h4>Caliber:</h4>
+    <p>${weapon.caliber}</p>
+    <h4>Ammo capacity:</h4>
+    <p>${weapon.ammoCapacity}</p>
+    <h4>Train degrees:</h4>
+    <p>${weapon.train}</p>
+    <h4>Firing rate:</h4>
+    <p>${weapon.firingRate}</p>
+    <h4>Barell life:</h4>
+    <p>${weapon.barrelLife}</p>
+    <h4>Armor penetration:</h4>
+    <p>${weapon.armorPenetration}</p>
+    <h4>Quantity:</h4>
+    <p>${quantity}</p>
+    <h4>Range</h4>
+    <ul class="warshipWeaponRangeUl">
+      <li>surface: ${await this.displayWeaponRange(weapon.range[0])},</li>
+      <li>air: ${await this.displayWeaponRange(weapon.range[1])},</li>
+      <li>underwater: ${await this.displayWeaponRange(weapon.range[2])},</li>   
+    </ul>
+    `
+
+    warshipDetailsExtended!.innerHTML = content;
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async displayWeaponRange(range: number): Promise<string> {
+    if(range == 0) {
+      return "none";
+    } 
+    else {
+      return `${range} m`
+    }
+  }
+
+  async displayTorpedoExtendedDetails(torpedo: TorpedoType, elementName: string, quantity: number) {
+    const warshipDetailsExtended = document.getElementById(`warshipDetailsExtended${elementName}`);
+
+    // torpedoName: string,
+    // length: number,
+    // height: number,
+    // backgroundImagePath: string | null,
+    // damage: number,
+    // area: number,
+    // speed: number,
+    // limit: number,
+    // loadingTime: number,
+    // range: number,
+    // navigated: boolean,
+
+    const content: string = 
+    `
+    <h4>Length:</h4>
+    <p>${torpedo.length}</p>
+    <h4>Range</h4>
+    <p>${torpedo.range}</p>
+    <h4>Speed</h4>
+    <p>${torpedo.speed}</p>
+    <h4>Area</h4>
+    <p>${torpedo.area}</p>
+    <h4>Limit</h4>
+    <p>${torpedo.limit}</p>
+    <h4>Loading Time</h4>
+    <p>${torpedo.loadingTime}</p>
+    <h4>Quantity:</h4>
+    <p>${quantity}</p>
+    <h4>Navigated:</h4>
+    <p>${torpedo.navigated}</p>
+    `
+    warshipDetailsExtended!.innerHTML = content;
+
+    return Promise.resolve(this.resolutionMessage);
   }
 }

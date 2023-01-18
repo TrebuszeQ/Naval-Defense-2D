@@ -96,7 +96,7 @@
     box-sizing: border-box;
 }
 
-.warshipDetails {
+.warshipDetailsWrapper {
     display: flex;
     overflow: hidden;
     position: relative;
@@ -127,6 +127,11 @@ p {
     text-indent: 2.5%;
 }
 
+.extendableP:hover {
+    background-color: rgb(0, 209, 0);
+    color: black; 
+}
+
 .warshipContainerLi > h3, #warshipDetails {
     font-family: 'Lucida Console';
     color: rgb(0, 209, 0);
@@ -135,13 +140,10 @@ p {
 }
 
 .warshipImageWrapper {
-    display: flex;
     flex-flow: column nowrap;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 0;
-    margin: 0;
     height: 100%;
     width: 100%;
     grid-column: 2/3;
@@ -156,7 +158,12 @@ img {
     position: relative;
     align-self: flex-end;
     margin: 0;
-    padding: 1%;
     object-fit: contain;
     width: 100%;
+}
+
+.warshipDetailsExtended {
+    flex-flow: column wrap;
+    border-bottom: 0.1vw solid rgb(194, 77, 194);
+    border-right: 0.1vw solid rgb(194, 77, 194);
 }

@@ -1,14 +1,14 @@
 import { Injectable, OnInit } from '@angular/core';
 
 // interfaces
-import { TorpedoType } from '../interfaces/torpedo-type';
-import { WarshipType } from '../interfaces/warship-type';
+import { TorpedoType } from '../../torpedo/Interfaces/torpedo-type';
+import { WarshipType } from 'src/app/character/interfaces/warship-type';
 
 // services
 import { TorpedoService } from './torpedo.service';
-import { WarshipPositionService } from './warship-position.service';
+import { WarshipPositionService } from 'src/app/character/services/warship-position.service';
 import { WaterService } from 'src/app/level-wrapper/levels/water/Services/water.service';
-import { WarshipTypeService } from './warship-type.service';
+import { WarshipTypeService } from 'src/app/character/services/warship-type.service';
 import { TorpedoTypeService } from './torpedo-type.service';
 
 @Injectable({

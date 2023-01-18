@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 
 @Component({
@@ -8,7 +8,7 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class LevelWrapperComponent implements OnInit {
 
-  warship = document.getElementById('app-character');
+  warshipElement = document.getElementById('app-character');
   warshipX: number = 0;
   controller = new AbortController();
   signal = this.controller.signal;

@@ -5,43 +5,45 @@
     <fa-icon class="carouselArrows" [icon]="faArrowRight"></fa-icon>
 </button>
 <ul id="warshipCarouselUl">
-    <li *ngFor="let item of warshipTypeArray" class="warshipContainerLi warshipContainerLiLength">
-        <h3 class="warshipName">{{item.name | uppercase}}</h3>
+    <li *ngFor="let warship of warshipTypeArray; index as i" class="warshipContainerLi warshipContainerLiLength">
+        <h3 class="warshipName">{{warship.name | uppercase}}</h3>
         
-        <div id="warshipHardDetails" class="warshipDetails">
+        <div id="warshipHardDetails" class="warshipDetailsWrapper">
             <h4>Length:</h4> 
-            <p>{{item.width}}m</p>
+            <p>{{warship.width}}m</p>
             <h4>Height:</h4> 
-            <p>{{item.height}}m</p>
+            <p>{{warship.height}}m</p>
             <h4>Max speed:</h4> 
-            <p>{{item.maxSpeed}}</p>
+            <p>{{warship.maxSpeed}}</p>
             <h4>Repairment time</h4> 
-            <p *ngIf="item.repairmentTime != null">{{item.repairmentTime}}</p>
-            <p *ngIf="item.repairmentTime == null">none</p>
-            <h4>Armor:</h4> <p>{{item.armor}}</p>
-            <h4>Crew:</h4> <p>{{item.crew}}</p>
+            <p *ngIf="warship.repairmentTime != null">{{warship.repairmentTime}}</p>
+            <p *ngIf="warship.repairmentTime == null">none</p>
+            <h4>Armor:</h4> <p>{{warship.armor}}</p>
+            <h4>Crew:</h4> <p>{{warship.crew}}</p>
         </div>
-        <div id="warshipDynamicDetails" class="warshipDetails">
+        <div id="warshipDynamicDetails" class="warshipDetailsWrapper">
             
             <h4>Avalaible weapons:</h4>
-            <h4 *ngIf="item.avalaibleWeapons == null">none</h4>
-            <ul id="weaponsUl" *ngIf="item.avalaibleWeapons != null">
-                <li *ngFor="let weapon of item.avalaibleWeapons" class="weaponLi"><p>{{weapon.weaponName}}</p></li>
+            <h4 *ngIf="warship.availableWeapons == null">none</h4>
+            <ul class="warshipWeaponsUl" *ngIf="warship.availableWeapons != null">
+                <li *ngFor="let weapon of warship.availableWeapons.weapon; index as j" class="warshipWeaponLi"><p class="extendableP" (mouseenter)="this.displayWeaponExtendedDetails(weapon, warship.name, warship.availableWeapons.quantity[j])">{{weapon.weaponName}}</p></li>
             </ul>
             <h4>Avalaible torpedes: </h4>
-            <p *ngIf="item.availableTorpedes == null">none</p>
-            <ul id="torpedesUl" *ngIf="item.availableTorpedes != null">
-                <li *ngFor="let torpede of item.availableTorpedes" class="torpedeLi"><p>{{torpede.name}}</p></li>
+            <p *ngIf="warship.availableTorpedos == null">none</p>
+            <ul class="warshipTorpedosUl" *ngIf="warship.availableTorpedos != null">
+                <li *ngFor="let torpedo of warship.availableTorpedos.torpedo; index as k" id="" class="warshipTorpedoLi"><p class="extendableP" (mouseenter)="this.displayTorpedoExtendedDetails(torpedo, warship.name, warship.availableTorpedos.quantity[k])">{{torpedo.torpedoName}}</p></li>
             </ul>
 
             <h4>Skills:</h4>
-            <ul *ngIf="item.skills != null" id="skillsUl">
-                <li *ngFor="let skill of item.skills" class="skillsLi">{{skill.skillName}}</li>
+            <ul *ngIf="warship.skills != null" class="warshipSkillsUl">
+                <li *ngFor="let skill of warship.skills" class="warshipSkillsLi"><p class="extendableP">{{skill.skillName}}</p></li>
             </ul>
-            <p *ngIf="item.skills == null">none</p>
+            <p *ngIf="warship.skills == null">none</p>
         </div>     
-        <div class="warshipImageWrapper">
-            <img src="{{item.backgroundImagePath}}">
+        <div class="warshipImageWrapper warshipDetailsWrapper">
+            <img src="{{warship.backgroundImagePath}}">
+        </div>
+        <div id="warshipDetailsExtended{{warship.name}}" class="warshipDetailsWrapper warshipDetailsExtended">
         </div>
     </li>
 </ul>

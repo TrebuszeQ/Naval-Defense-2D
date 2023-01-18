@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 // services
 import { WaterService } from '../level-wrapper/levels/water/Services/water.service';
-import { TorpedoTypeService } from './services/torpedo-type.service';
-import { TorpedoService } from './services/torpedo.service';
+import { TorpedoTypeService } from '../torpedo/Services/torpedo-type.service';
+import { TorpedoService } from '../torpedo/Services/torpedo.service';
 import { WarshipPositionService } from './services/warship-position.service';
 import { WarshipTypeService } from './services/warship-type.service';
-import { TorpedoTrajectoryService } from './services/torpedo-trajectory.service';
+import { TorpedoTrajectoryService } from '../torpedo/Services/torpedo-trajectory.service';
 // interfaces
-import { TorpedoType } from './interfaces/torpedo-type';
+import { TorpedoType } from '../torpedo/Interfaces/torpedo-type';
 import { WarshipType } from './interfaces/warship-type';
 
 

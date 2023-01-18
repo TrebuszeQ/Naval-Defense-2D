@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 // arrays
-import { torpedoTypeArray } from '../arrays/torpedo-types';
+import { torpedoTypeArray } from '../../torpedo/Arrays/torpedo-types';
 // torpedoType
-import { TorpedoType } from '../interfaces/torpedo-type';
+import { TorpedoType } from '../../torpedo/Interfaces/torpedo-type';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +16,7 @@ export class TorpedoTypeService {
 
   getTorpedoType(): Observable<TorpedoType | undefined> {
     const array: TorpedoType[] = torpedoTypeArray;
-    const torpedoType = array.find(element => element.name = this.torpedoName);
+    const torpedoType = array.find(element => element.torpedoName = this.torpedoName);
     return of(torpedoType);
   }
 

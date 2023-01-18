@@ -10,7 +10,7 @@ import { PregameConsoleService } from './services/pregame-console.service';
 })
 export class PregameComponent implements OnInit {
   
-  resolutionInfo: string = "resolved";
+  resolutionMessage: string = "resolved";
   pregameConsoleMessage: string = "";
   warshipSelected: boolean = false;
   levelSelected: boolean = false;
@@ -46,7 +46,7 @@ export class PregameComponent implements OnInit {
       await this.updateConsoleContent();
     }
 
-    return Promise.resolve(this.resolutionInfo);
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async createConsoleMessage(): Promise<HTMLHeadingElement> {
@@ -63,7 +63,7 @@ export class PregameComponent implements OnInit {
 
     consoleElement!.appendChild(consoleElementMessage);
 
-    return Promise.resolve(this.resolutionInfo);
+    return Promise.resolve(this.resolutionMessage);
   }
 
 
@@ -75,7 +75,7 @@ export class PregameComponent implements OnInit {
       this.getConsoleMessage()
     };
   
-    return Promise.resolve(this.resolutionInfo);
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async addLevelCarouselSelectButtonSelectionListener(): Promise<string> {
@@ -85,7 +85,7 @@ export class PregameComponent implements OnInit {
       this.levelSelected == false ? this.levelSelected = true : this.levelSelected;
       this.getConsoleMessage();
     }
-    return Promise.resolve(this.resolutionInfo);
+    return Promise.resolve(this.resolutionMessage);
   }
 
   allowGameStart(): boolean {
@@ -97,7 +97,37 @@ export class PregameComponent implements OnInit {
     }
   }
 
-  async startGame() {
+  async hideCarousel(carousel: "level" | "warship"): Promise<string> {    
+    const chooseWarshipButton = document.getElementById("chooseWarshipButton");
+    const chooseLevelButton = document.getElementById("chooseLevelButton");
+
+    const levelCarousel = document.getElementById("levelCarousel");
+    const warshipCarousel = document.getElementById("warshipCarousel");
+
+    switch(carousel) {
+      case "level":
+        chooseWarshipButton!.className = "headerButton headerButtonMain navy";
+        chooseLevelButton!.className = "headerButton headerButtonMinimized navy";
+        levelCarousel!.className = "carouselHidden";
+        warshipCarousel!.className = "carousel2";
+        break;
+      case "warship":
+        chooseLevelButton!.className = "headerButton headerButtonMain navy";
+        chooseWarshipButton!.className = "headerButton headerButtonMinimized navy";
+        warshipCarousel!.className = "carouselHidden";
+        levelCarousel!.className = "carousel2";
+        break;
+    }
+    
+    return Promise.resolve(this.resolutionMessage);
+  }
+  
+  async resetConsole(): Promise<string> {
+    const consoleElement = document.getElementById("pregameConsole");
+
+    consoleElement!.innerHTML = `<h3 class="pregameConsoleH3 pregameConsoleH">OUTPUT</h3>`
+
+    return Promise.resolve(this.resolutionMessage);
   }
 }
 

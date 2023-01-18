@@ -1,1 +1,1 @@
-export type AttackVector = "air" | "surface" | "underwater";
+export type AttackVector =  "surface" | "air" | "underwater";
