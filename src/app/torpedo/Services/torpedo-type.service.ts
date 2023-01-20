@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { Observable, of } from 'rxjs';
 // arrays
 import { torpedoTypeArray } from '../../torpedo/Arrays/torpedo-types';
@@ -11,10 +11,17 @@ import { TorpedoType } from '../../torpedo/Interfaces/torpedo-type';
 export class TorpedoTypeService {
 
   torpedoName: string = '';
+  currentTorpedo: TorpedoType | null = null;
 
-  constructor() { }
+  constructor() {this.ngOnInit}
 
-  getTorpedoType(): Observable<TorpedoType | undefined> {
+  async ngOnInit(): Promise<string> {
+    
+
+    return Promise.resolve("resolved");
+  }
+
+  getTorpedoTypeLegacy(): Observable<TorpedoType | undefined> {
     const array: TorpedoType[] = torpedoTypeArray;
     const torpedoType = array.find(element => element.torpedoName = this.torpedoName);
     return of(torpedoType);
@@ -25,4 +32,15 @@ export class TorpedoTypeService {
 
     return Promise.resolve("resolved");
   }
+
+  getTorpedoType(): Observable<TorpedoType | null> {
+    
+    return of(this.currentTorpedo);
+  }
+
+  async setTorpedoType(torpedo: TorpedoType): Promise<string> {
+    this.currentTorpedo = torpedo;
+
+    return Promise.resolve("resolved");
+  } 
 }

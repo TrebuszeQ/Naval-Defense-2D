@@ -6,7 +6,7 @@ import { Skills } from "./skills"
 
 export interface WarshipType {
     name: string,
-    width: number,
+    length: number,
     height: number,
     backgroundImagePath: string,
     description: string,

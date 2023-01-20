@@ -47,12 +47,12 @@ export class CharacterComponent implements OnInit {
     this.level = document.getElementById("level");
 
     this.warship = document.getElementById("warship");
-    // temporarily hardocded warshiptype string
+
     await this.setWarshipType();
     await this.placeWarshipOnWater();
 
-    // hardcoded string is a placeholder
-    await this.setTorpedoType("basic"); 
+    // // hardcoded string is a placeholder
+    // await this.setTorpedoType(); 
 
     // warship position
     this.warshipX = 0;
@@ -78,7 +78,7 @@ export class CharacterComponent implements OnInit {
           position: absolute;
           margin: 0;
           padding: 0;
-          width: ${warshipType!.width}%;
+          width: ${warshipType!.length}px;
           height: ${warshipType!.height}px;
           background-image: url(${warshipType!.backgroundImagePath});
           background-color: rgb(101, 101, 101);
@@ -172,22 +172,8 @@ export class CharacterComponent implements OnInit {
   }
 
   async setTorpedoType(name: string) {
-    const torpedoTypeObserver = {
-      next: (torpedoType: TorpedoType | undefined) => this.torpedoType = torpedoType,
-      error: (error: Error) => "torpedoTypeObserver faced an error" + error,
-      // complete: () => "torpedoTypeObserver receiver complete"
-    }
 
-      // export interface TorpedoType {
-      // name: string,
-      // width: string,
-      // height: string,
-      // backgroundImage?: string | HTMLImageElement,
-      // damage: number,
-      // area: number
-      // }
-
-    this.torpedoTypeService.getTorpedoType().subscribe(torpedoTypeObserver).unsubscribe()
+    
 
     const torpedoRule = `
     .torpedo {

@@ -22,7 +22,7 @@ export class TorpedoTrajectoryService implements OnInit{
 
   warshipType!: WarshipType;
 
-  torpedoType!: TorpedoType | undefined;
+  torpedoType!: TorpedoType | null;
 
   warshipX: number = 0;
 
@@ -73,8 +73,10 @@ export class TorpedoTrajectoryService implements OnInit{
 
   async getTorpedoType() {
     const torpedoTypeObserver = {
-      next: (torpedoType: TorpedoType | undefined) => {
-        this.torpedoType = torpedoType;
+      next: (torpedoType: TorpedoType | null) => {
+        if(this.torpedoType != null) {
+          this.torpedoType = torpedoType;
+        }
       },
       error: (error: Error) => {
         console.error(`torpedoTypeObserver from torpedo-trajectory service faced an error: ${error}.`);

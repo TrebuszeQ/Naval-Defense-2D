@@ -6,4 +6,7 @@ export interface Levels {
     description: string,
     componentName: string,
     backgroundImagePath: string,
+    startingDate: Date,
+    resources: number,
+    infrastructureEndurance: number,
 }

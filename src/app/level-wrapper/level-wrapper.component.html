@@ -1,36 +1,80 @@
 <div id="level-wrapper">
   <nav id="leftUi" class="ui">
-
+    <h5 class="sideUiH">WEAPON</h5>
+    <p *ngIf="this.warship.availableWeapons?.weapon == null">not available</p>
+    <ul *ngIf="this.warship.availableWeapons?.weapon != null" id="leftUiWeaponsUl" class="leftUiUl">
+      <li *ngFor="let weapon of this.warship.availableWeapons!.weapon" class="leftUiWeaponLi selectable" (click)="this.selectWeapon(weapon)">
+        <h5 class="sideUiH">{{weapon.weaponName}}</h5>
+      </li>
+    </ul>
+    <h5 *ngIf="this.currentWeapon != null" class="sideUiH">WEAPON DETAILS</h5>
+    <div *ngIf="this.currentWeapon != null" id="weaponDetailsWrapper" class="detailsWrapper">
+      <p>{{currentWeapon.caliber}}</p>
+      <p>{{currentWeapon.attackVector}}</p>
+      <p>{{currentWeapon.reloadingRate}}</p>
+      <p>{{currentWeapon.armorPenetration}}</p>
+      <p>{{currentWeapon.range}}</p>
+      <p>{{currentWeapon.muzzleVelo}}</p>
+      <p>{{currentWeapon.damage}}</p>
+      <p>{{currentWeapon.train}}</p>
+      <p>{{this.currentWeaponAmmo}}/{{currentWeapon.ammoCapacity}}</p>
+    </div>
+    
+    <h5 class="sideUiH">TORPEDO</h5>
+    <p *ngIf="this.warship.availableTorpedos?.torpedo == null">not available</p>
+    <ul *ngIf="this.warship.availableTorpedos?.torpedo != null" id="leftUiTorpedoUL" class="leftUiUl">
+      <li *ngFor="let torpedo of this.warship.availableTorpedos!.torpedo" class="leftUiTorpedoLi selectable" (click)="this.selectTorpedo(torpedo)">
+        <h5 class="sideUiH">{{torpedo.torpedoName}}</h5>
+      </li>
+    </ul>
+    <h5 *ngIf="this.currentTorpedo != null" class="sideUiH">TORPEDO DETAILS</h5>
+    <div *ngIf="this.currentTorpedo != null" id="torpedoDetailsWrapper" class="detailsWrapper">
+      <p>{{currentTorpedo.length}}</p>
+      <p>{{currentTorpedo.limit}}</p>
+      <p>{{currentTorpedo.loadingTime}}</p>
+      <p>{{currentTorpedo.range}}</p>
+      <p>{{currentTorpedo.area}}</p>
+      <p>{{currentTorpedo.speed}}</p>
+      <p>{{currentTorpedo.damage}}</p>
+      <p>{{currentTorpedo.navigated}}</p>
+    </div>
   </nav>
+
   <nav id="topUi" class="ui">
-    <h5 class="topUiH">WARSHIP</h5>
-    <h5 class="topUiH">CREW</h5>
     <h5 class="topUiH">INFRASTRUCTURE</h5>
-    <h5 class="topUiH">SPEED</h5>
-    <h5 class="topUiH">TIME</h5>
     <h5 class="topUiH">RESOURCES</h5>
+    <h5 class="topUiH">WIP</h5>
+    <h5 class="topUiH">WIP</h5>
+    <h5 class="topUiH">WIP</h5>
+    <h5 class="topUiH">WIP</h5>
     <button id="menuButton" class="topUiButton topUiH"><h4>MENU</h4></button>
+    <div id="infrastructureBar" class="bar">{{this.level.infrastructureEndurance}}</div>
+    <div id="resourcesBar" class="bar">{{this.level.resources}}</div>
     <div id="enduranceBar" class="bar"></div>
     <div id="crewBar" class="bar"></div>
-    <div id="infrastructureBar" class="bar"></div>
     <div id="speedBar" class="bar"></div>
     <div id="timeBar" class="bar"></div>
-    <div id="resourcesBar" class="bar"></div>
+    
   </nav>
   <app-level id="level">
   </app-level>
+
   <nav id="rightUi" class="ui">
-    <h5>OWN POSITION</h5>
-    <p id="ownPositionP">placeholder</p>
-    <h5>TIME</h5>
-    <p id="timeP">placeholder</p>
-    <h5>SPEED</h5>
-    <p id="speedP">placeholder</p>
-    <h5>WARSHIP ENDURANCE</h5>
-    <p id="warshipEnduranceP"></p>
-    <h5>ARMOR</h5>
-    <p id="armorP">placeholder</p>
-    <h5>CREW</h5>
-    <p id="crew">placeholder</p>
+    <h5 class="sideUiH">OWN POSITION</h5>
+    <p id="ownPositionP">x:{{this.warshipX}}</p>
+    <h5 class="sideUiH">LENGTH</h5>
+    <p id="warshipLength">{{this.warship.length}} m</p>
+    <h5 class="sideUiH">TIME</h5>
+    <p id="timeP">{{this.level.startingDate}}</p>
+    <h5 class="sideUiH">SPEED</h5>
+    <p id="speedP">{{this.warship.maxSpeed}} knots</p>
+    <h5 class="sideUiH">WARSHIP ENDURANCE</h5>
+    <p id="warshipEnduranceP">{{this.warship.warshipEndurance}}</p>
+    <h5 class="sideUiH">ARMOR</h5>
+    <p id="armorP">{{this.warship.armor}}</p>
+    <h5 class="sideUiH">CREW</h5>
+    <p id="crew">{{this.warship.crew}} ppl</p>
+    
+
   </nav>
 </div>

@@ -10,7 +10,7 @@ const maxHeight = window.screen.height;
 export const warshipTypeArray: WarshipType[] = [
     {
         name: "Offshore Patrol Vessel",
-        width: 79.5,
+        length: 79.5,
         height: maxHeight * 0.025,
         backgroundImagePath: "/assets/images/warships/HMS_Daring.jpg",
         description: "",
@@ -30,7 +30,7 @@ export const warshipTypeArray: WarshipType[] = [
     },
     {
         name: "Fast Patrol Boat",
-        width: 1.59,
+        length: 1.59,
         height: maxHeight * 0.025,
         backgroundImagePath: "/assets/images/warships/HMS_Daring.jpg",
         description: "",
@@ -50,7 +50,7 @@ export const warshipTypeArray: WarshipType[] = [
     },
     {
         name: "Mine Counter Measure Vessel",
-        width: 60,
+        length: 60,
         height: maxHeight * 0.025,
         backgroundImagePath: "/assets/images/warships/HMS_Daring.jpg",
         description: "",
