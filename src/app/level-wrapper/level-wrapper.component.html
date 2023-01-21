@@ -1,41 +1,58 @@
 <div id="level-wrapper">
   <nav id="leftUi" class="ui">
-    <h5 class="sideUiH">WEAPON</h5>
+    <h5 class="sideUiH border">WEAPON</h5>
     <p *ngIf="this.warship.availableWeapons?.weapon == null">not available</p>
     <ul *ngIf="this.warship.availableWeapons?.weapon != null" id="leftUiWeaponsUl" class="leftUiUl">
       <li *ngFor="let weapon of this.warship.availableWeapons!.weapon" class="leftUiWeaponLi selectable" (click)="this.selectWeapon(weapon)">
-        <h5 class="sideUiH">{{weapon.weaponName}}</h5>
+        <h6 class="sideUiH">{{weapon.weaponName}}</h6>
       </li>
     </ul>
-    <h5 *ngIf="this.currentWeapon != null" class="sideUiH">WEAPON DETAILS</h5>
+    <h5 *ngIf="this.currentWeapon != null" class="sideUiH border" (click)="this.showWeaponDetails()">WEAPON DETAILS</h5>
     <div *ngIf="this.currentWeapon != null" id="weaponDetailsWrapper" class="detailsWrapper">
+      <h6 class="sideUiH">CALIBER</h6>
       <p>{{currentWeapon.caliber}}</p>
+      <h6 class="sideUiH">VECTOR</h6>
       <p>{{currentWeapon.attackVector}}</p>
+      <h6 class="sideUiH">RELOADING RATE</h6>
       <p>{{currentWeapon.reloadingRate}}</p>
+      <h6 class="sideUiH">PENETRATION</h6>
       <p>{{currentWeapon.armorPenetration}}</p>
+      <h6 class="sideUiH">RANGE</h6>
       <p>{{currentWeapon.range}}</p>
+      <h6 class="sideUiH">MUZZLE VELOCITY</h6>
       <p>{{currentWeapon.muzzleVelo}}</p>
+      <h6 class="sideUiH">DAMAGE</h6>
       <p>{{currentWeapon.damage}}</p>
+      <h6 class="sideUiH">TRAIN</h6>
       <p>{{currentWeapon.train}}</p>
+      <h6 class="sideUiH">AMMO</h6>
       <p>{{this.currentWeaponAmmo}}/{{currentWeapon.ammoCapacity}}</p>
     </div>
     
-    <h5 class="sideUiH">TORPEDO</h5>
+    <h5 class="sideUiH border">TORPEDO</h5>
     <p *ngIf="this.warship.availableTorpedos?.torpedo == null">not available</p>
     <ul *ngIf="this.warship.availableTorpedos?.torpedo != null" id="leftUiTorpedoUL" class="leftUiUl">
       <li *ngFor="let torpedo of this.warship.availableTorpedos!.torpedo" class="leftUiTorpedoLi selectable" (click)="this.selectTorpedo(torpedo)">
-        <h5 class="sideUiH">{{torpedo.torpedoName}}</h5>
+        <h6 class="sideUiH">{{torpedo.torpedoName}}</h6>
       </li>
     </ul>
-    <h5 *ngIf="this.currentTorpedo != null" class="sideUiH">TORPEDO DETAILS</h5>
+    <h5 *ngIf="this.currentTorpedo != null" class="sideUiH border" (click)="this.showTorpedoDetails()">TORPEDO DETAILS</h5>
     <div *ngIf="this.currentTorpedo != null" id="torpedoDetailsWrapper" class="detailsWrapper">
+      <h6 class="sideUiH">LENGTH</h6>
       <p>{{currentTorpedo.length}}</p>
+      <h6 class="sideUiH">LIMIT</h6>
       <p>{{currentTorpedo.limit}}</p>
+      <h6 class="sideUiH">LOADING TIME</h6>
       <p>{{currentTorpedo.loadingTime}}</p>
+      <h6 class="sideUiH">RANGE</h6>
       <p>{{currentTorpedo.range}}</p>
+      <h6 class="sideUiH">AREA</h6>
       <p>{{currentTorpedo.area}}</p>
+      <h6 class="sideUiH">SPEED</h6>
       <p>{{currentTorpedo.speed}}</p>
+      <h6 class="sideUiH">DAMAGE</h6>
       <p>{{currentTorpedo.damage}}</p>
+      <h6 class="sideUiH">NAVIGATED</h6>
       <p>{{currentTorpedo.navigated}}</p>
     </div>
   </nav>
@@ -61,11 +78,14 @@
 
   <nav id="rightUi" class="ui">
     <h5 class="sideUiH">OWN POSITION</h5>
-    <p id="ownPositionP">x:{{this.warshipX}}</p>
+    <p id="ownPositionP">x:{{this.warshipX.toFixed(2)}}</p>
     <h5 class="sideUiH">LENGTH</h5>
     <p id="warshipLength">{{this.warship.length}} m</p>
     <h5 class="sideUiH">TIME</h5>
-    <p id="timeP">{{this.level.startingDate}}</p>
+    <p *ngIf="this.time != null">{{this.time.toLocaleDateString()}}</p>
+    <p *ngIf="this.time != null" id="timeP">{{this.time.toLocaleTimeString()}}</p>
+    <p *ngIf="this.time == null">{{this.level.startingDate.toLocaleDateString()}}</p>
+    <p *ngIf="this.time == null" id="timeP">{{this.level.startingDate.toLocaleTimeString()}}</p>
     <h5 class="sideUiH">SPEED</h5>
     <p id="speedP">{{this.warship.maxSpeed}} knots</p>
     <h5 class="sideUiH">WARSHIP ENDURANCE</h5>

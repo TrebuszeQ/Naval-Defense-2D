@@ -18,6 +18,7 @@ export class WarshipTypeService {
 
   async setSelectedWarship(warship: WarshipType): Promise<string> {
     this.warshipSelected = warship;
+    
     return Promise.resolve("resolved");   
   }
 }

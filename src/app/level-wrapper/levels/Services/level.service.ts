@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 // rxjs
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 //  interfaces 
 import { Levels } from '../interfaces/levels';
 
@@ -11,11 +11,13 @@ import { Levels } from '../interfaces/levels';
 export class LevelService {
 
   levelSelected!: Levels;
+  levelSubject = new Subject<Levels>();
 
   constructor() {}
   
   async setSelectedLevel(level: Levels): Promise<string> {
     this.levelSelected = level;
+    this.levelSubject.next(level);
 
     return Promise.resolve("resolved");
   }

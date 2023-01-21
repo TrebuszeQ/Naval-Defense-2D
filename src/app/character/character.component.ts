@@ -141,7 +141,7 @@ export class CharacterComponent implements OnInit {
     this.warship!.animate(
       [
         { 
-          transform: `translateX(${this.warshipX}%)`,
+          transform: `translateX(${this.warshipX}px)`,
           easing: "linear",
         }
       ], 
@@ -158,7 +158,7 @@ export class CharacterComponent implements OnInit {
     this.warship!.animate(
       [
         { 
-          transform: `translateX(${this.warshipX}%)`,
+          transform: `translateX(${this.warshipX}px)`,
           easing: "linear",
         }
       ], 
@@ -172,8 +172,6 @@ export class CharacterComponent implements OnInit {
   }
 
   async setTorpedoType(name: string) {
-
-    
 
     const torpedoRule = `
     .torpedo {

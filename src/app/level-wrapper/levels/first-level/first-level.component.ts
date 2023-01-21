@@ -15,7 +15,6 @@ export class FirstLevelComponent implements OnInit {
   constructor() { }
 
   async ngOnInit(): Promise<string> {
-
     return Promise.resolve("resolved");
   }
 }

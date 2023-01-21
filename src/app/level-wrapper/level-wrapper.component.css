@@ -17,6 +17,12 @@
   color: black;
 }
 
+.hidden {
+  display: none !important;
+}
+
+
+
 .ui {
   z-index: 9;
   position: relative;
@@ -29,6 +35,10 @@
   color: rgb(0, 209, 0);
   box-sizing: border-box;
   border: 0.2vw solid gray;
+}
+
+.border {
+  border: 0.1vw solid rgb(194, 77, 194);
 }
 
 #leftUi {
@@ -61,8 +71,11 @@
   width: 100%;
   max-height: 100%;
   box-sizing: border-box;
-  border: 0.1vw solid rgb(194, 77, 194);
   text-align: center;
+}
+
+h6.sideUiH {
+  padding: 3%;
 }
 
 .detailsWrapper {
@@ -139,9 +152,9 @@ p {
   max-width: 100%;
   width: 100%;
   max-height: 100%;
-  height: 100%;
   margin: 0;
   padding: 0;
+  font-size: 80%;
 }
 
 app-level {

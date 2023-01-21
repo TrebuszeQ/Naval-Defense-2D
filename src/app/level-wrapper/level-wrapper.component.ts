@@ -13,6 +13,7 @@ import { TorpedoTypeService } from '../torpedo/Services/torpedo-type.service';
 import { WeaponService } from '../weapon/Services/weapon.service';
 // arrays
 import { warshipTypeArray } from '../character/arrays/warship-types-array';
+import { LevelTimingService } from './levels/Services/level-timing.service';
 
 
 
@@ -33,8 +34,10 @@ export class LevelWrapperComponent implements OnInit {
   currentWeapon: WeaponType | null = null;
   currentWeaponAmmo: number | null = null;
   currentBarrelLife: number | null = null;
+  weaponDetailsHidden: boolean = false;
 
   currentTorpedo: TorpedoType | null = null;
+  torpedoDetailsHidden: boolean = false;
 
   warshipX: number = 0;
   
@@ -49,25 +52,31 @@ export class LevelWrapperComponent implements OnInit {
   repairmentTime: number | null = null;
 
 
-  time!: Date;
+  time: Date | null = null;
 
   warshipElement = document.getElementById('app-character');
 
   controller = new AbortController();
   signal = this.controller.signal;
   // warshipY: number = 0;
-  constructor(private warshipTypeService: WarshipTypeService, private levelService: LevelService, private warshipPositionService: WarshipPositionService, private torpedoTypeService: TorpedoTypeService, private weaponService: WeaponService) { }
+  constructor(private warshipTypeService: WarshipTypeService, private levelService: LevelService, private warshipPositionService: WarshipPositionService, private torpedoTypeService: TorpedoTypeService, private weaponService: WeaponService, private levelTimingService: LevelTimingService) { }
 
   async ngOnInit(): Promise<string> {
     await this.getLevel();
+    await this.setLevelTimingTime();
+    await this.getLevelTimingTimeSubject();
     await this.getWarship();
-    await this.getWarshipPosition();
-    
+    await this.setWarshipSpeed();
+    // await this.getWarshipPosition();
+    await this.getWarshipPositionSubject();
+    await this.getLevelWidth();
+
+
     await this.setCurrentWeapon();
     await this.setCurrentTorpedo();
     await this.setWeaponAmmo();
     await this.setBarrelLife();
-  
+
     return Promise.resolve(this.resolutionMessage);
   }
 
@@ -87,7 +96,7 @@ export class LevelWrapperComponent implements OnInit {
     this.levelService.getSelectedLevel().subscribe(getLevelObserver).unsubscribe();
     return Promise.resolve(this.resolutionMessage);
   }
-
+  
   async getWarship(): Promise<string> {
     const getWarshipObserver = {
       next: (warship: WarshipType) => {
@@ -105,23 +114,33 @@ export class LevelWrapperComponent implements OnInit {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async getWarshipPosition(): Promise<string> {
-    const getWarshipPositionObserver = {
+  // async getWarshipPosition(): Promise<string> {
+  //   const getWarshipPositionObserver = {
+  //     next: (warshipX: number) => {
+  //       this.warshipX = warshipX;
+  //     },
+  //     error: (error: Error) => {
+  //       console.error(`getWarshipPositionObserver on level-wrapper.component faced an issue: ${error}.`);
+  //     },
+  //     // complete: () => {
+  //     //   console.log("getWarshipPositionObserver on level-wrapper.component completed.");
+  //     // }
+  //   }
+
+  //   this.warshipPositionService.getWarshipPosition().subscribe(getWarshipPositionObserver);
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
+
+  async getWarshipPositionSubject(): Promise <string>{
+    this.warshipPositionService.warshipXSubject.subscribe({
       next: (warshipX: number) => {
         this.warshipX = warshipX;
-      },
-      error: (error: Error) => {
-        console.error(`getWarshipPositionObserver on level-wrapper.component faced an issue: ${error}.`);
-      },
-      // complete: () => {
-      //   console.log("getWarshipPositionObserver on level-wrapper.component completed.");
-      // }
-    }
-
-    this.warshipPositionService.getWarshipPosition().subscribe(getWarshipPositionObserver).unsubscribe();
+      }
+    });
+    
     return Promise.resolve(this.resolutionMessage);
   }
-
+  
   async setCurrentWeapon(): Promise<string> {
     if(this.warship.availableWeapons?.weapon != null) {
       this.currentWeapon = this.warship.availableWeapons.weapon[0];
@@ -134,6 +153,7 @@ export class LevelWrapperComponent implements OnInit {
 
     // push to service
     this.weaponService.setCurrentWeapon(weapon);
+    this.setWeaponAmmo();
 
     return Promise.resolve(this.resolutionMessage);
   }
@@ -167,6 +187,72 @@ export class LevelWrapperComponent implements OnInit {
     if(this.currentWeapon != null) {
       this.currentBarrelLife = this.currentWeapon.barrelLife;
     }
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async showWeaponDetails(): Promise<string> {
+    const weaponDetailsElement = document.getElementById("weaponDetailsWrapper");
+
+    if(this.weaponDetailsHidden == false) {
+      weaponDetailsElement!.className = "detailsWrapper hidden";
+      this.weaponDetailsHidden = true;
+    } else {
+      weaponDetailsElement!.className = "detailsWrapper";
+      this.weaponDetailsHidden = false;
+    }
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async showTorpedoDetails(): Promise<string> {
+    const torpedoDetailsElement = document.getElementById("torpedoDetailsWrapper");
+
+    if(this.torpedoDetailsHidden == false) {
+      torpedoDetailsElement!.className = "detailsWrapper hidden";
+      this.torpedoDetailsHidden = true;
+    }
+    else {
+      torpedoDetailsElement!.className = "detailsWrapper";
+      this.torpedoDetailsHidden = false;
+    }
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async getLevelWidth(): Promise <string> {
+    
+    const levelElement = document.getElementById("level");
+    const levelElementWidth = getComputedStyle(levelElement!).width;
+
+    this.warshipPositionService.setMaxPosition(parseFloat(levelElementWidth) - this.warship.length);
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async updateWarshipMaximumMovement(): Promise <string> {
+    const levelElementWidth = document.getElementById("level")!.style.getPropertyValue("width");
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async setLevelTimingTime(): Promise<string> {
+    this.time = this.level.startingDate;
+    this.levelTimingService.setLevelTime(this.level.startingDate);
+    
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async getLevelTimingTimeSubject(): Promise<string> {
+    this.levelTimingService.timeSubject.subscribe({
+      next: (date: Date) => {
+        this.time = date;
+      }
+    })
+    
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async setWarshipSpeed(): Promise<string> {
+    this.warshipPositionService.setWarshipSpeed(this.warship.maxSpeed);
 
     return Promise.resolve(this.resolutionMessage);
   }
