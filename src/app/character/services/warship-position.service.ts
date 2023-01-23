@@ -35,7 +35,7 @@ export class WarshipPositionService {
   }
 
   async setWarshipSpeed(speed: number): Promise <string> {
-    this.speedFactor = (speed * 0.27777777777806 / 10);
+    this.speedFactor = (speed * 0.27777777777806 / 31);
 
     return Promise.resolve("resolved");
   }

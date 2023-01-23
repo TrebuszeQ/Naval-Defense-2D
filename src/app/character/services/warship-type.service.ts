@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject} from 'rxjs';
 
 // interface
 import { WarshipType } from '../interfaces/warship-type';
@@ -10,6 +10,7 @@ import { WarshipType } from '../interfaces/warship-type';
 export class WarshipTypeService {
 
   warshipSelected!: WarshipType;
+  warshipTypeSubject: Subject<WarshipType> = new Subject<WarshipType>();
   constructor() { }
 
   getSelectedWarshipType(): Observable<WarshipType> {
@@ -18,6 +19,7 @@ export class WarshipTypeService {
 
   async setSelectedWarship(warship: WarshipType): Promise<string> {
     this.warshipSelected = warship;
+    this.warshipTypeSubject.next(warship);
     
     return Promise.resolve("resolved");   
   }

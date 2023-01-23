@@ -11,9 +11,10 @@ import { LevelService } from './levels/Services/level.service';
 import { WarshipPositionService } from '../character/services/warship-position.service';
 import { TorpedoTypeService } from '../torpedo/Services/torpedo-type.service';
 import { WeaponService } from '../weapon/Services/weapon.service';
+import { LevelTimingService } from './levels/Services/level-timing.service';
 // arrays
 import { warshipTypeArray } from '../character/arrays/warship-types-array';
-import { LevelTimingService } from './levels/Services/level-timing.service';
+
 
 
 
@@ -63,6 +64,7 @@ export class LevelWrapperComponent implements OnInit {
 
   async ngOnInit(): Promise<string> {
     await this.getLevel();
+    
     await this.setLevelTimingTime();
     await this.getLevelTimingTimeSubject();
     await this.getWarship();
@@ -256,4 +258,5 @@ export class LevelWrapperComponent implements OnInit {
 
     return Promise.resolve(this.resolutionMessage);
   }
+
 }

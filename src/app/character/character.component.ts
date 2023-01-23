@@ -9,17 +9,19 @@ import { TorpedoTrajectoryService } from '../torpedo/Services/torpedo-trajectory
 // interfaces
 import { TorpedoType } from '../torpedo/Interfaces/torpedo-type';
 import { WarshipType } from './interfaces/warship-type';
-
+// components
+import { TorpedoComponent } from '../torpedo/torpedo.component';
+import { WeaponComponent } from '../weapon/weapon.component';
 
 
 @Component({
   selector: 'app-character',
-  // templateUrl: './character.component.html',
-  template: '',
+  templateUrl: './character.component.html',
   styleUrls: ['./character.component.css']
 })
 export class CharacterComponent implements OnInit {
 
+  resolutionMessage: string = "resolved";
   level = document.getElementById("level");
 
   stylesheet = document.styleSheets[0];
@@ -30,7 +32,7 @@ export class CharacterComponent implements OnInit {
 
   warshipX: number = 0;
 
-  warshipType!: WarshipType;
+  warshipType: WarshipType | null = null;
 
   torpedoType: any;
 
@@ -48,7 +50,7 @@ export class CharacterComponent implements OnInit {
 
     this.warship = document.getElementById("warship");
 
-    await this.setWarshipType();
+    await this.getWarshipType();
     await this.placeWarshipOnWater();
 
     // // hardcoded string is a placeholder
@@ -63,11 +65,10 @@ export class CharacterComponent implements OnInit {
       this.warshipActions(event.key);
     });
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
   
-  // makes warship default size
-  async setWarshipType() {
+  async getWarshipType() {
     
     const warshipTypeObserver = {
       next: (warshipType: WarshipType) => { 
@@ -92,7 +93,7 @@ export class CharacterComponent implements OnInit {
     
     this.warshipTypeService.getSelectedWarshipType().subscribe(warshipTypeObserver).unsubscribe();
 
-    return Promise.resolve("resolved");
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async placeWarshipOnWater() {

@@ -1,2 +1,4 @@
 <app-character id="warship"></app-character>
-<app-water></app-water>
+<app-water id="water"></app-water>
+<app-weapon id="weapon" *ngIf="this.warshipType?.availableWeapons?.weapon != null"></app-weapon>
+<app-torpedo id="torpedo" *ngIf="this.warshipType?.availableTorpedos?.torpedo != null"></app-torpedo>
