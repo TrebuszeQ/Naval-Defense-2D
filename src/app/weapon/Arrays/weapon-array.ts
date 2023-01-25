@@ -28,7 +28,7 @@ export const weaponArray: WeaponType[] = [
         barrelLife: 4000,
         attackVector: ["surface", "air"],
         damage: [1, 3],
-        armorPenetration: 1,
+        armorPenetration: 1.05,
         train: 360    
     },
     {
@@ -42,7 +42,7 @@ export const weaponArray: WeaponType[] = [
         barrelLife: 15000,
         attackVector: ["surface", "air"],
         damage: [1, 3],
-        armorPenetration: 0.5,
+        armorPenetration: 0.86,
         train: 185, 
     },
     {
@@ -56,7 +56,7 @@ export const weaponArray: WeaponType[] = [
         barrelLife: 5000,
         attackVector: ["surface", "air"],
         damage: [1, 3],
-        armorPenetration: 0.5,
+        armorPenetration: 0.853,
         train: 185, 
     }
 ]

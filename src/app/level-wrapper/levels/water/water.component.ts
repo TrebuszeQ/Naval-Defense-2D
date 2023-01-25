@@ -42,7 +42,7 @@ export class WaterComponent implements OnInit {
     let waterBlockRule = 
     `
        .waterBlock {
-        z-index: 7;
+        z-index: 6;
         display: inline-block;
         position:relative;
         margin: 0;

@@ -4,3 +4,13 @@
     position: absolute;
     float: left;
 }
+
+#datacenter {
+    z-index: 7;
+    display: block;
+    position: absolute;
+    width: 80px;
+    height: 80vh;
+    top: 20%;
+    background-color: gray;
+}

@@ -6,12 +6,16 @@ import { TorpedoService } from '../torpedo/Services/torpedo.service';
 import { WarshipPositionService } from './services/warship-position.service';
 import { WarshipTypeService } from './services/warship-type.service';
 import { TorpedoTrajectoryService } from '../torpedo/Services/torpedo-trajectory.service';
+import { LevelService } from '../level-wrapper/levels/Services/level.service';
 // interfaces
 import { TorpedoType } from '../torpedo/Interfaces/torpedo-type';
 import { WarshipType } from './interfaces/warship-type';
+import { Levels } from '../level-wrapper/levels/interfaces/levels';
 // components
 import { TorpedoComponent } from '../torpedo/torpedo.component';
 import { WeaponComponent } from '../weapon/weapon.component';
+
+
 
 
 @Component({
@@ -22,12 +26,12 @@ import { WeaponComponent } from '../weapon/weapon.component';
 export class CharacterComponent implements OnInit {
 
   resolutionMessage: string = "resolved";
-  level = document.getElementById("level");
-
+  levelElement = document.getElementById("level");
   stylesheet = document.styleSheets[0];
-
   warship = document.getElementById("warship");
   
+  level: Levels | null = null;
+
   gridRow: number = 0;
 
   warshipX: number = 0;
@@ -40,24 +44,21 @@ export class CharacterComponent implements OnInit {
 
   waterLevel = 0;
 
-  constructor(private waterService: WaterService, private warshipPositionService: WarshipPositionService, private warshipTypeService: WarshipTypeService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService) { }
+  constructor(private waterService: WaterService, private levelService: LevelService, private warshipPositionService: WarshipPositionService, private warshipTypeService: WarshipTypeService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService) { }
 
   async ngOnInit(): Promise<string> {
     // stylesheet
     this.stylesheet = document.styleSheets[0];
-
-    this.level = document.getElementById("level");
-
+    this.levelElement = document.getElementById("level");
     this.warship = document.getElementById("warship");
-
+    
+    await this.getLevel();
+    await this.setWarshipX();
     await this.getWarshipType();
     await this.placeWarshipOnWater();
 
     // // hardcoded string is a placeholder
     // await this.setTorpedoType(); 
-
-    // warship position
-    this.warshipX = 0;
   
     // listening for keyboardEvent API
     document.addEventListener("keydown", (event) => {
@@ -68,6 +69,34 @@ export class CharacterComponent implements OnInit {
     return Promise.resolve(this.resolutionMessage);
   }
   
+  async getLevel(): Promise<string> {
+    const getLevelObserver = {
+      next: (level: Levels) => {
+        this.level = level;
+      },
+      error: (error: Error) => {
+        console.error(`getLevelObserver on character.component faced an issue: ${error}.`);
+      }
+      // complete: () => {
+      //   console.log("getLevelObserver on character.component completed.");
+      // }
+    }
+
+    this.levelService.getSelectedLevel().subscribe(getLevelObserver).unsubscribe();
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async setWarshipX(): Promise<string> {
+    const levelElement = document.getElementById("level");
+    const levelWidth = getComputedStyle(levelElement!).width;
+
+    this.warshipX = (this.level!.startingPosition * Number.parseFloat(levelWidth)) / 100;
+    this.warshipPositionService.warshipX = this.warshipX;
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
   async getWarshipType() {
     
     const warshipTypeObserver = {
@@ -79,6 +108,7 @@ export class CharacterComponent implements OnInit {
           position: absolute;
           margin: 0;
           padding: 0;
+          transform: translateX(${this.warshipX}px);
           width: ${warshipType!.length}px;
           height: ${warshipType!.height}px;
           background-image: url(${warshipType!.backgroundImagePath});
@@ -131,7 +161,7 @@ export class CharacterComponent implements OnInit {
         break;
 
       case " ":
-        await this.dropTorpedo2();
+        // await this.dropTorpedo2();
         break;
     }
 

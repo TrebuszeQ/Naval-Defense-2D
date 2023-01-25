@@ -1,4 +1,5 @@
-<app-character id="warship"></app-character>
+<app-character id="warship" class="hooverableObject"></app-character>
+<div id="datacenter" class="hooverableObject"></div>
 <app-water id="water"></app-water>
 <app-weapon id="weapon" *ngIf="this.warshipType?.availableWeapons?.weapon != null"></app-weapon>
-<app-torpedo id="torpedo" *ngIf="this.warshipType?.availableTorpedos?.torpedo != null"></app-torpedo>
+<app-torpedo id="torpedo" class="hooverableObject" *ngIf="this.warshipType?.availableTorpedos?.torpedo != null"></app-torpedo>
