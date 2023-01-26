@@ -12,8 +12,10 @@ import { WarshipPositionService } from '../character/services/warship-position.s
 import { TorpedoTypeService } from '../torpedo/Services/torpedo-type.service';
 import { WeaponService } from '../weapon/Services/weapon.service';
 import { LevelTimingService } from './levels/Services/level-timing.service';
+import { EnemyCounterService } from '../enemy-wrapper/Services/enemy-counter.service';
 // arrays
 import { warshipTypeArray } from '../character/arrays/warship-types-array';
+
 
 
 
@@ -27,7 +29,7 @@ import { warshipTypeArray } from '../character/arrays/warship-types-array';
 export class LevelWrapperComponent implements OnInit {
 
   resolutionMessage: string = "resolved";
-
+  time: Date | null = null;
   level!: Levels;
 
   warship: WarshipType = warshipTypeArray[0];
@@ -52,15 +54,14 @@ export class LevelWrapperComponent implements OnInit {
   
   repairmentTime: number | null = null;
 
-
-  time: Date | null = null;
+  allEnemyCounter: number = 0;
 
   warshipElement = document.getElementById('app-character');
 
   controller = new AbortController();
   signal = this.controller.signal;
   // warshipY: number = 0;
-  constructor(private warshipTypeService: WarshipTypeService, private levelService: LevelService, private warshipPositionService: WarshipPositionService, private torpedoTypeService: TorpedoTypeService, private weaponService: WeaponService, private levelTimingService: LevelTimingService) { }
+  constructor(private warshipTypeService: WarshipTypeService, private levelService: LevelService, private warshipPositionService: WarshipPositionService, private torpedoTypeService: TorpedoTypeService, private weaponService: WeaponService, private levelTimingService: LevelTimingService, private enemyCounterService: EnemyCounterService) { }
 
   async ngOnInit(): Promise<string> {
     await this.getLevel();
@@ -259,4 +260,13 @@ export class LevelWrapperComponent implements OnInit {
     return Promise.resolve(this.resolutionMessage);
   }
 
+  async getAllEnemyCounter(): Promise<string> {
+    this.enemyCounterService.enemySubjectsCounterArray[0].subjectQuantity.subscribe({
+      next: (enemyCounter: number) => {
+        this.allEnemyCounter = enemyCounter;
+      }
+    });
+
+    return Promise.resolve(this.resolutionMessage);
+  }
 }

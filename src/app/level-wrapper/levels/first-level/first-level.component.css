@@ -14,3 +14,14 @@
     top: 20%;
     background-color: gray;
 }
+
+app-water {
+    z-index: 6;
+    display: inherit;
+    grid-template-columns: inherit;
+    grid-template-rows: inherit;
+    position: inherit;
+    grid-row: 1;
+    width: inherit;
+    height: inherit;
+}

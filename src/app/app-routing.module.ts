@@ -8,7 +8,7 @@ import { PregameComponent } from './pregame/pregame.component';
 import { WarshipCarouselComponent } from './warship-carousel/warship-carousel.component';
 
 const routes: Routes = [
- { path: 'game', component: LevelWrapperComponent },
+ { path: "game", component: LevelWrapperComponent },
  { path: "pregame", component: PregameComponent },
  { path: "warships", component: WarshipCarouselComponent },
  { path: "levels", component: FirstLevelComponent }

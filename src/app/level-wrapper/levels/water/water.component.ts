@@ -9,7 +9,6 @@ import { WaterService } from './Services/water.service';
 })
 export class WaterComponent implements OnInit {
 
-  level = document.getElementById("level");
   stylesheet = document.styleSheets[0];
 
   gridRows = 0;
@@ -27,15 +26,13 @@ export class WaterComponent implements OnInit {
       this.blockAmount = this.gridRows * this.gridColumns;
     });
     
-    // internal
-    this.level = document.getElementById("level");
-    
     this.stylesheet = document.styleSheets[0];
 
     this.fillWater();
   }
   
   fillWater() { 
+    const water = document.getElementById("water");
     let columnCounter = 0;
     let gridRow = 42;
 
@@ -67,7 +64,7 @@ export class WaterComponent implements OnInit {
         gridRow -= 1;
       }
       waterBlock.style.gridRow = `${gridRow}`;
-      this.level!.appendChild(waterBlock);
+      water!.appendChild(waterBlock);
     }
     return;
   }

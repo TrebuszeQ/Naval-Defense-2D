@@ -21,8 +21,6 @@
   display: none !important;
 }
 
-
-
 .ui {
   z-index: 9;
   position: relative;
@@ -170,4 +168,6 @@ app-level {
   max-height: 100%;
   height: 95vh;
   background-color: rgb(230, 243, 247);
+  margin: 0;
+  padding: 0;
 }

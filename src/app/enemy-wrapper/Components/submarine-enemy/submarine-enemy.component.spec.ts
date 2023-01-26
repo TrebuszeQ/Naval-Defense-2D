@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EnemyWrapperComponent } from './enemy-wrapper.component';
+import { SubmarineEnemyComponent } from './submarine-enemy.component';
 
-describe('EnemyWrapperComponent', () => {
-  let component: EnemyWrapperComponent;
-  let fixture: ComponentFixture<EnemyWrapperComponent>;
+describe('SubmarineEnemyComponent', () => {
+  let component: SubmarineEnemyComponent;
+  let fixture: ComponentFixture<SubmarineEnemyComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EnemyWrapperComponent ]
+      declarations: [ SubmarineEnemyComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(EnemyWrapperComponent);
+    fixture = TestBed.createComponent(SubmarineEnemyComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

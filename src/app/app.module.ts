@@ -18,8 +18,9 @@ import { WarshipDescriptionComponent } from './character/warship-description/war
 import { LevelDescriptionPipe } from './level-carousel/Pipes/level-description.pipe';
 import { TorpedoComponent } from './torpedo/torpedo.component';
 import { WeaponComponent } from './weapon/weapon.component';
-import { SubmarineEnemyComponent } from './enemy-wrapper/submarine-enemy/submarine-enemy.component';
-import { EnemyWrapperComponent } from './enemy-wrapper/enemy.component';
+import { SubmarineEnemyComponent } from './enemy-wrapper/Components/submarine-enemy/submarine-enemy.component';
+import { EnemyWrapperComponent } from './enemy-wrapper/enemy-wrapper.component';
+import { EnemyComponent } from './enemy-wrapper/Components/enemy/enemy.component';
 
 @NgModule({
   declarations: [
@@ -37,6 +38,7 @@ import { EnemyWrapperComponent } from './enemy-wrapper/enemy.component';
     WarshipDescriptionComponent,
     SubmarineEnemyComponent,
     EnemyWrapperComponent,
+    EnemyComponent,
   ],
   imports: [
     BrowserModule,
