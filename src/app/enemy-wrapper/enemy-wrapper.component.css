@@ -1,0 +1,9 @@
+.enemy {
+    z-index: 8;
+    display: block;
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    object-fit: fill;
+    background-color: grey;
+}

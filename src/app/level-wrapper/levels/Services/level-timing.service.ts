@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 // rxjs
 import { Subject } from 'rxjs';
 // interfaces
-import { Levels } from '../interfaces/levels';
+import { Level } from '../interfaces/level';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +11,7 @@ export class LevelTimingService {
 
   time!: Date;
   timeSubject: Subject<Date> = new Subject<Date>();
-  levelSubject = new Subject<Levels>;
+  levelSubject = new Subject<Level>;
 
   constructor() {
   }

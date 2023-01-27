@@ -12,7 +12,7 @@ export const enemyArray: Enemy[] = [
         length: 20,
         height: 10,
         backgroundImagePath: null,
-        description: `Alien Patrol Object. Equipped with `,
+        description: `Alien Patrol Object. Equipped with 2 Low Frequency and Intensity Alien Lasers Type A0`,
         enemyClass: "ground",
         endurance: 100,
         armor: 0.5,
@@ -23,5 +23,7 @@ export const enemyArray: Enemy[] = [
         },
         enemySkills: null,
         attacksWarship: false, 
+        cssStyles: "enemy hooverableObject",
+        cssMainStyleName: "alienPatrolObject",
     }   
 ]

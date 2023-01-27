@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 // rxjs
 import { Observable, Subject, of } from 'rxjs';
-// arrays
-import { enemyArray } from '../Arrays/enemy-array';
+// interfaces
+import { Enemy } from '../Interfaces/enemy';
+// services
+import { EnemyArrayService } from './enemy-array.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +12,8 @@ import { enemyArray } from '../Arrays/enemy-array';
 export class EnemyCounterService {
 
   resolutionMessage: string = "resolved";
+  enemyArray: Enemy[] | null = null;
 
-  
   enemyCounterArray: {name: string, quantity: number}[] = [
     {
       name: "all",
@@ -19,10 +21,7 @@ export class EnemyCounterService {
     }
   ]
 
-  enemyCounter: Subject<number> = new Subject<number>();
-  alienPatrolObjectCounter: Subject<number> = new Subject<number>();
-
-  enemySubjectsCounterArray: {name: string, subjectQuantity: Subject<number>}[] = [
+  enemyCounterArraySubjects: {name: string, subjectQuantity: Subject<number>}[] = [
     {
       name: "all",
       subjectQuantity: new Subject<number>(),
@@ -33,34 +32,66 @@ export class EnemyCounterService {
     }
   ]
 
-  constructor() { 
+  constructor(private enemyArrayService: EnemyArrayService) { 
+    this.getEnemyArray();
     this.fillEnemyCounterArray();
-   }
+
+  }
+
+  async getEnemyArray(): Promise<string> {
+    const getEnemyArrayObserver = {
+      next: (enemyArray: Enemy[]) => {
+        this.enemyArray = enemyArray;
+      },
+      error: (error: Error) => {
+        console.error(`getEnemyArrayObserver on enemy.component encountered an issue: ${error}.`);
+      },
+      // complete: () => {
+      //   console.log("getEnemyArrayObserver on enemy.component completed");
+      // }
+    }
+
+    this.enemyArrayService.getEnemyArray().subscribe(getEnemyArrayObserver).unsubscribe();
+    return Promise.resolve(this.resolutionMessage);
+  }
 
   async fillEnemyCounterArray(): Promise<string> {
 
-    for(let i = 0; i < enemyArray.length; i++) {
-      this.enemyCounterArray[i+1].name = enemyArray[i].enemyName;
-      this.enemyCounterArray[i+1].quantity = 0;
+    for(let i = 0; i < this.enemyArray!.length; i++) {
+      this.enemyCounterArray.push({name: this.enemyArray![i].enemyName, quantity: 0});
     }
 
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async incrementEnemySubjectsArray(index: number): Promise<string> {
+  async incrementAllEnemyCounter(): Promise<string> {
     this.enemyCounterArray[0].quantity++;
-    this.enemySubjectsCounterArray[0].subjectQuantity.next(this.enemyCounterArray[0].quantity++);
+    this.enemyCounterArraySubjects[0].subjectQuantity.next(this.enemyCounterArray[0].quantity);
+
+    return Promise.resolve(this.resolutionMessage);
+  } 
+
+  async decrementAllEnemyCounter(): Promise<string> {
+    this.enemyCounterArray[0].quantity--;
+    this.enemyCounterArraySubjects[0].subjectQuantity.next(this.enemyCounterArray[0].quantity);
+
+    return Promise.resolve(this.resolutionMessage);
+  } 
+
+  async incrementEnemySubjectsArray(index: number): Promise<string> {
+    await this.incrementAllEnemyCounter();
+
     this.enemyCounterArray[index].quantity++;
-    this.enemySubjectsCounterArray[index].subjectQuantity.next(this.enemyCounterArray[index].quantity++);
+    this.enemyCounterArraySubjects[index].subjectQuantity.next(this.enemyCounterArray[index].quantity);
 
     return Promise.resolve(this.resolutionMessage);
   }
 
   async decrementEnemySubjectsArray(index: number): Promise<string> {
-    this.enemyCounterArray[0].quantity--;
-    this.enemySubjectsCounterArray[0].subjectQuantity.next(this.enemyCounterArray[0].quantity--);
+    await this.incrementAllEnemyCounter();
+
     this.enemyCounterArray[index].quantity--;
-    this.enemySubjectsCounterArray[index].subjectQuantity.next(this.enemyCounterArray[index].quantity--);
+    this.enemyCounterArraySubjects[index].subjectQuantity.next(this.enemyCounterArray[index].quantity);
 
     return Promise.resolve(this.resolutionMessage);
   }
@@ -69,4 +100,8 @@ export class EnemyCounterService {
 
     return of(this.enemyCounterArray[index].quantity);
   }
+
+  // async searchForName(name: string): Promise<number> {
+  //   return this.enemyArray!.findIndex((enemy: Enemy) => enemy.enemyName = name);
+  // }
 }

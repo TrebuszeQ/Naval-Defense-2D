@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 // arrays
 import { levelArray } from '../Arrays/level-array';
 // interfaces
-import { Levels } from '../interfaces/levels';
+import { Level } from '../interfaces/level';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class LevelArrayService {
 
   constructor() { }
 
-  getLevelArray(): Observable<Levels[]> {
+  getLevelArray(): Observable<Level[]> {
     
     return of(levelArray);
   }

@@ -2,9 +2,9 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 // interfaces
 import { WarshipType } from 'src/app/character/interfaces/warship-type';
 import { WarshipTypeService } from 'src/app/character/services/warship-type.service';
-import { Levels } from '../interfaces/levels';
+import { Level } from '../../interfaces/level';
 // services
-import { LevelService } from '../Services/level.service';
+import { LevelService } from '../../Services/level.service';
 
 @Component({
   selector: 'app-level',
@@ -15,7 +15,7 @@ import { LevelService } from '../Services/level.service';
 export class FirstLevelComponent implements OnInit {
 
   resolutionMessage: string = "resolved";
-  level: Levels | null = null;
+  level: Level | null = null;
   warshipType: WarshipType | null= null;
 
   constructor(private warshipTypeService: WarshipTypeService, private levelService: LevelService) { }
@@ -30,7 +30,7 @@ export class FirstLevelComponent implements OnInit {
 
   async getLevel(): Promise<string> {
     const getLevelObserver = {
-      next: (level: Levels) => {
+      next: (level: Level) => {
         this.level = level;
       },
       error: (error: Error) => {

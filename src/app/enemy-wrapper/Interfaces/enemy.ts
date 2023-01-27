@@ -20,4 +20,6 @@ export interface Enemy {
     } | null
     enemySkills: EnemySkills | null,
     attacksWarship: boolean, 
+    cssStyles: string,
+    cssMainStyleName: string,
 }

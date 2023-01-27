@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 // rxjs
 import { Observable, of } from 'rxjs';
 //  interfaces 
-import { Levels } from 'src/app/level-wrapper/levels/interfaces/levels';
+import { Level } from 'src/app/level-wrapper/levels/interfaces/level';
 // services
 import { LevelArrayService } from 'src/app/level-wrapper/levels/Services/level-array.service';
 @Injectable({
@@ -11,7 +11,7 @@ import { LevelArrayService } from 'src/app/level-wrapper/levels/Services/level-a
 
 export class LevelCarouselService {
 
-  levelArray!: Levels[];
+  levelArray!: Level[];
   levelCarouselMax: number = 0;
 
   constructor(private levelArrayService: LevelArrayService) {
@@ -27,7 +27,7 @@ export class LevelCarouselService {
 
   getLevelArray(): Promise<string> {
     const getLevelArrayObserver = {
-      next: (array: Levels[]) => {
+      next: (array: Level[]) => {
         this.levelArray = array;
       },
       error: (error: Error) => {

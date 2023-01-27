@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 // interfaces
-import { Levels } from '../level-wrapper/levels/interfaces/levels';
+import { Level } from '../level-wrapper/levels/interfaces/level';
 // services
 import { LevelService } from '../level-wrapper/levels/Services/level.service';
 import { LevelArrayService } from '../level-wrapper/levels/Services/level-array.service';
@@ -20,12 +20,12 @@ export class LevelCarouselComponent implements OnInit {
   faArrowRight = faArrowRight;
   faArrowLeft = faArrowLeft;
 
-  levelArray!: Levels[];
+  levelArray!: Level[];
 
   levelCarouselMax: number = 0;
   levelCarouselPosition: number = 0;
   moveAmount = 0;
-  carouselAimedLevel!: Levels;
+  carouselAimedLevel!: Level;
 
   constructor(private levelService: LevelService, private levelArrayService: LevelArrayService, private levelCarouselService: LevelCarouselService, private pregameConsoleService: PregameConsoleService ) {}
   
@@ -42,7 +42,7 @@ export class LevelCarouselComponent implements OnInit {
 
   async getLevelsArray(): Promise<string> {
     const getLevelArrayObserver = {
-      next: (array: Levels[]) => {
+      next: (array: Level[]) => {
         this.levelArray = array;
       },
       error: (error: Error) => {

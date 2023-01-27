@@ -10,7 +10,7 @@ import { LevelService } from '../level-wrapper/levels/Services/level.service';
 // interfaces
 import { TorpedoType } from '../torpedo/Interfaces/torpedo-type';
 import { WarshipType } from './interfaces/warship-type';
-import { Levels } from '../level-wrapper/levels/interfaces/levels';
+import { Level } from '../level-wrapper/levels/interfaces/level';
 // components
 import { TorpedoComponent } from '../torpedo/torpedo.component';
 import { WeaponComponent } from '../weapon/weapon.component';
@@ -30,7 +30,7 @@ export class CharacterComponent implements OnInit {
   stylesheet = document.styleSheets[0];
   warship = document.getElementById("warship");
   
-  level: Levels | null = null;
+  level: Level | null = null;
 
   gridRow: number = 0;
 
@@ -71,7 +71,7 @@ export class CharacterComponent implements OnInit {
   
   async getLevel(): Promise<string> {
     const getLevelObserver = {
-      next: (level: Levels) => {
+      next: (level: Level) => {
         this.level = level;
       },
       error: (error: Error) => {

@@ -7,7 +7,7 @@ import { AppComponent } from './app.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 // components
 import { LevelWrapperComponent } from './level-wrapper/level-wrapper.component';
-import { FirstLevelComponent } from './level-wrapper/levels/first-level/first-level.component';
+import { FirstLevelComponent } from './level-wrapper/levels/Components/first-level/first-level.component';
 import { CharacterComponent } from './character/character.component';
 import { WaterComponent } from './level-wrapper/levels/water/water.component';
 import { PregameComponent } from './pregame/pregame.component';

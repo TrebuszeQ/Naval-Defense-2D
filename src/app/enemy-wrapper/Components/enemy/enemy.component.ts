@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Enemy } from '../../Interfaces/enemy';
 import { EnemySkills } from '../../Interfaces/enemy-skills';
 import { EnemyWeapon } from '../../Interfaces/enemy-weapon';
-import { Levels } from 'src/app/level-wrapper/levels/interfaces/levels';
+import { Level } from 'src/app/level-wrapper/levels/interfaces/level';
 
 // arrays
 import { enemyArray } from '../../Arrays/enemy-array';
@@ -25,7 +25,7 @@ export class EnemyComponent implements OnInit, OnDestroy {
   resolutionMessage: string = "resolved";
 
   enemyArray: Enemy[] | null = null;
-  level: Levels | null = null;
+  level: Level | null = null;
   warshipX: number = 0;
   constructor(private enemyArrayService: EnemyArrayService, private warshipPositionService: WarshipPositionService, private levelService: LevelService) {
 
@@ -73,7 +73,7 @@ export class EnemyComponent implements OnInit, OnDestroy {
   
   async getLevel(): Promise<string> {
     const getLevelObserver = {
-      next: (level: Levels) => {
+      next: (level: Level) => {
         this.level = level;
       },
       error: (error: Error) => {

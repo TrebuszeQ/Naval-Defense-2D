@@ -1,17 +1,17 @@
 import { Pipe, PipeTransform } from '@angular/core';
 // interfaces
-import { Levels } from 'src/app/level-wrapper/levels/interfaces/levels';
+import { Level } from 'src/app/level-wrapper/levels/interfaces/level';
 
 @Pipe({
   name: 'levelDescription'
 })
 export class LevelDescriptionPipe implements PipeTransform {
 
-  transform(value: string, array: Levels[]): unknown {
+  transform(value: string, array: Level[]): unknown {
     return value;
   }
 
-  createList(array: Levels[]) {
+  createList(array: Level[]) {
 
   }
 }

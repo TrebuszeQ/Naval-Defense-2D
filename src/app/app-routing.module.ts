@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 // components
 import { LevelWrapperComponent } from './level-wrapper/level-wrapper.component';
-import { FirstLevelComponent } from './level-wrapper/levels/first-level/first-level.component';
+import { FirstLevelComponent } from './level-wrapper/levels/Components/first-level/first-level.component';
 import { PregameComponent } from './pregame/pregame.component';
 import { WarshipCarouselComponent } from './warship-carousel/warship-carousel.component';
 

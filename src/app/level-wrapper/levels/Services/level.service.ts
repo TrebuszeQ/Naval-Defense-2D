@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 // rxjs
 import { Observable, of, Subject } from 'rxjs';
 //  interfaces 
-import { Levels } from '../interfaces/levels';
+import { Level } from '../interfaces/level';
 
 
 @Injectable({
@@ -10,19 +10,19 @@ import { Levels } from '../interfaces/levels';
 })
 export class LevelService {
 
-  levelSelected!: Levels;
-  levelSubject = new Subject<Levels>();
+  levelSelected!: Level;
+  levelSubject = new Subject<Level>();
 
   constructor() {}
   
-  async setSelectedLevel(level: Levels): Promise<string> {
+  async setSelectedLevel(level: Level): Promise<string> {
     this.levelSelected = level;
     this.levelSubject.next(level);
 
     return Promise.resolve("resolved");
   }
 
-  getSelectedLevel(): Observable<Levels> {
+  getSelectedLevel(): Observable<Level> {
     return of(this.levelSelected);
   }
 }

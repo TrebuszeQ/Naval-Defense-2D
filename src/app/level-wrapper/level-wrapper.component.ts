@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Skills } from '../character/interfaces/skills';
 // interfaces
 import { WarshipType } from '../character/interfaces/warship-type';
 import { TorpedoType } from '../torpedo/Interfaces/torpedo-type';
 import { WeaponType } from '../weapon/Interfaces/weapon-type';
-import { Levels } from './levels/interfaces/levels';
+import { Level } from './levels/interfaces/level';
 // services
 import { WarshipTypeService } from '../character/services/warship-type.service';
 import { LevelService } from './levels/Services/level.service';
@@ -13,8 +13,10 @@ import { TorpedoTypeService } from '../torpedo/Services/torpedo-type.service';
 import { WeaponService } from '../weapon/Services/weapon.service';
 import { LevelTimingService } from './levels/Services/level-timing.service';
 import { EnemyCounterService } from '../enemy-wrapper/Services/enemy-counter.service';
+import { RightUiLogService } from './levels/Services/rightui-log.service';
 // arrays
 import { warshipTypeArray } from '../character/arrays/warship-types-array';
+
 
 
 
@@ -24,13 +26,17 @@ import { warshipTypeArray } from '../character/arrays/warship-types-array';
 @Component({
   selector: 'app-level-wrapper',
   templateUrl: './level-wrapper.component.html',
-  styleUrls: ['./level-wrapper.component.css']
+  styleUrls: ['./level-wrapper.component.css'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class LevelWrapperComponent implements OnInit {
 
   resolutionMessage: string = "resolved";
   time: Date | null = null;
-  level!: Levels;
+  level!: Level;
+
+  rightUiLog: string = '';
+  rightUiLogHidden: boolean = false;
 
   warship: WarshipType = warshipTypeArray[0];
 
@@ -43,7 +49,6 @@ export class LevelWrapperComponent implements OnInit {
   torpedoDetailsHidden: boolean = false;
 
   warshipX: number = 0;
-  
   speed: number = 0;
   crew: number = 0;
   armor: number = 0;
@@ -61,11 +66,12 @@ export class LevelWrapperComponent implements OnInit {
   controller = new AbortController();
   signal = this.controller.signal;
   // warshipY: number = 0;
-  constructor(private warshipTypeService: WarshipTypeService, private levelService: LevelService, private warshipPositionService: WarshipPositionService, private torpedoTypeService: TorpedoTypeService, private weaponService: WeaponService, private levelTimingService: LevelTimingService, private enemyCounterService: EnemyCounterService) { }
+  constructor(private warshipTypeService: WarshipTypeService, private levelService: LevelService, private warshipPositionService: WarshipPositionService, private torpedoTypeService: TorpedoTypeService, private weaponService: WeaponService, private levelTimingService: LevelTimingService, private enemyCounterService: EnemyCounterService, private rightUiLogService: RightUiLogService) { }
 
   async ngOnInit(): Promise<string> {
     await this.getLevel();
-    
+    await this.insertRighUiLogPRule();
+    await this.getRightUiLogSubject();
     await this.setLevelTimingTime();
     await this.getLevelTimingTimeSubject();
     await this.getWarship();
@@ -73,7 +79,7 @@ export class LevelWrapperComponent implements OnInit {
     // await this.getWarshipPosition();
     await this.getWarshipPositionSubject();
     await this.getLevelWidth();
-
+    await this.getAllEnemyCounter();
 
     await this.setCurrentWeapon();
     await this.setCurrentTorpedo();
@@ -85,7 +91,7 @@ export class LevelWrapperComponent implements OnInit {
 
   async getLevel(): Promise<string> {
     const getLevelObserver = {
-      next: (level: Levels) => {
+      next: (level: Level) => {
         this.level = level;
       },
       error: (error: Error) => {
@@ -156,6 +162,7 @@ export class LevelWrapperComponent implements OnInit {
 
     // push to service
     this.weaponService.setCurrentWeapon(weapon);
+    this.updateRighUiLogLocal(`${weapon.weaponName} selected`);
     this.setWeaponAmmo();
 
     return Promise.resolve(this.resolutionMessage);
@@ -174,6 +181,7 @@ export class LevelWrapperComponent implements OnInit {
 
     // push to service
     this.torpedoTypeService.setTorpedoType(torpedo);
+    this.updateRighUiLogLocal(`${torpedo.torpedoName} selected`);
 
     return Promise.resolve(this.resolutionMessage);
   }
@@ -261,12 +269,96 @@ export class LevelWrapperComponent implements OnInit {
   }
 
   async getAllEnemyCounter(): Promise<string> {
-    this.enemyCounterService.enemySubjectsCounterArray[0].subjectQuantity.subscribe({
+    this.enemyCounterService.enemyCounterArraySubjects[0].subjectQuantity.subscribe({
       next: (enemyCounter: number) => {
         this.allEnemyCounter = enemyCounter;
+      },
+      error: (error: Error) => {
+        console.error(`getAllEnemyCounter() on level-wrapper encountered an error: ${error}.`);
       }
     });
 
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async insertRighUiLogPRule(): Promise<string> {
+    const righUiLogPRule: string = 
+    `.righUiLogP {
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+      align-content: center;
+      justify-content: center;
+      justify-items: center;
+      position: relative;
+      max-width: 100%;
+      width: 100%;
+      max-height: 100%;
+      margin: 1% 2%;
+      padding: 0;
+      font-size: 80%;
+      box-sizing: border-box;
+    }
+    `
+    document.styleSheets[0].insertRule(righUiLogPRule);
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async getRightUiLogSubject(): Promise<string> {
+    const rightUiLogElement = document.getElementById("rightUiLog");
+
+    this.rightUiLogService.rightUiLogSubject.subscribe({
+      next: (content: string) => {
+        const li = document.createElement("li");
+        li.className = "selectable";
+        const p = document.createElement('p');
+        p.className = "righUiLogP";
+        const textNode = document.createTextNode(content);
+        rightUiLogElement!.appendChild(li).appendChild(p).appendChild(textNode);
+
+        li.addEventListener("click", () => {
+          this.removeLogEntry(li);
+        });
+      }
+    });
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async showRightUiLog(): Promise<string> {
+    const rightUiLogElement = document.getElementById("rightUiLog");
+
+    if(this.rightUiLogHidden == false) {
+      rightUiLogElement!.className = "leftUiUl hidden";
+      this.rightUiLogHidden = true;
+    } else {
+      rightUiLogElement!.className = "leftUiUl";
+      this.rightUiLogHidden = false;
+    }
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async removeLogEntry(element: HTMLElement): Promise<string> {
+    element.remove();
+
+    return Promise.resolve(this.resolutionMessage);
+  } 
+
+  async updateRighUiLogLocal(content: string): Promise<string> {
+    const rightUiLogElement = document.getElementById("rightUiLog");
+
+    const li = document.createElement("li");
+    li.className = "selectable";
+    const p = document.createElement('p');
+    p.className = "righUiLogP";
+    const textNode = document.createTextNode(content);
+    rightUiLogElement!.appendChild(li).appendChild(p).appendChild(textNode);
+
+    li.addEventListener("click", () => {
+      this.removeLogEntry(li);
+    });
+    
     return Promise.resolve(this.resolutionMessage);
   }
 }
