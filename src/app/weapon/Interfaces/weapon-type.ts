@@ -1,5 +1,5 @@
 // types
-import { AttackVector } from "../Types/attack-vector";
+import { AttackVector } from "../Types/vector";
 
 export interface WeaponType {
     weaponName: string,

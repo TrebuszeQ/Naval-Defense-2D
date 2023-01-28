@@ -9,7 +9,7 @@ export const enemyWeaponArray: EnemyWeapon[] = [
         muzzleVelo: null,
         ammoCapacity: Infinity,
         range: [2000, 2000, 200],
-        attackVector: ["surface", "air", "underwater"],
+        attackVector: ["ground", "air", "submarine"],
         damage: [0.2, 0.5],
         armorPenetration: 0.5,
         train: 120,

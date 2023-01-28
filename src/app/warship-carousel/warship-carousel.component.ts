@@ -14,7 +14,7 @@ import { faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 // arrays
 import { warshipTypeArray } from '../character/arrays/warship-types-array';
 // types
-import { AttackVector } from '../weapon/Types/attack-vector';
+import { vector } from '../weapon/Types/vector';
 
 
 
@@ -195,7 +195,7 @@ export class WarshipCarouselComponent implements OnInit {
   async selectWarship(): Promise<string> {
     this.warshipTypeService.setSelectedWarship(this.carouselAimedWarship);
     await this.sendMessageToPregameConsole(this.carouselAimedWarship.name);
-
+    
     return Promise.resolve(this.resolutionMessage);
   }
 
@@ -250,9 +250,9 @@ export class WarshipCarouselComponent implements OnInit {
     <p>${quantity}</p>
     <h4>Range</h4>
     <ul class="warshipWeaponRangeUl">
-      <li>surface: ${await this.displayWeaponRange(weapon.range[0])},</li>
-      <li>air: ${await this.displayWeaponRange(weapon.range[1])},</li>
-      <li>underwater: ${await this.displayWeaponRange(weapon.range[2])},</li>   
+      <li>surface: ${await this.displayWeaponRange(weapon.range.ground)},</li>
+      <li>air: ${await this.displayWeaponRange(weapon.range.air)},</li>
+      <li>underwater: ${await this.displayWeaponRange(weapon.range.submarine)},</li>   
     </ul>
     `
 

@@ -17,12 +17,6 @@ import { RightUiLogService } from './levels/Services/rightui-log.service';
 // arrays
 import { warshipTypeArray } from '../character/arrays/warship-types-array';
 
-
-
-
-
-
-
 @Component({
   selector: 'app-level-wrapper',
   templateUrl: './level-wrapper.component.html',
@@ -284,20 +278,7 @@ export class LevelWrapperComponent implements OnInit {
   async insertRighUiLogPRule(): Promise<string> {
     const righUiLogPRule: string = 
     `.righUiLogP {
-      display: flex;
-      flex-flow: column nowrap;
-      align-items: center;
-      align-content: center;
-      justify-content: center;
-      justify-items: center;
-      position: relative;
-      max-width: 100%;
-      width: 100%;
-      max-height: 100%;
       margin: 1% 2%;
-      padding: 0;
-      font-size: 80%;
-      box-sizing: border-box;
     }
     `
     document.styleSheets[0].insertRule(righUiLogPRule);

@@ -7,7 +7,7 @@ export const levelArray: Level[] = [
     {
         name: "North Atlantic Ocean Submarine Datacenter",
         difficulty: 1,
-        description: `<center>DESCRIPTION</center> <br> Defend submarine datacenter before aliens cut you out of ethernet!.`,
+        description: `<center>DESCRIPTION</center> <br> Defend submarine datacenter before aliens cut you out of Internet!`,
         componentName: "first-level",
         backgroundImagePath: "/assets/images/levels/SargassoSea-1-1200x600.jpg",
         startingDate: new Date('August 19, 2023 08:00:00'),

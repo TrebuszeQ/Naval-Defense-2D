@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EnemyPositionService } from './enemy-position.service';
+import { EnemyStatsService } from './enemy-stats.service';
 
 describe('EnemyPositionService', () => {
-  let service: EnemyPositionService;
+  let service: EnemyStatsService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(EnemyPositionService);
+    service = TestBed.inject(EnemyStatsService);
   });
 
   it('should be created', () => {

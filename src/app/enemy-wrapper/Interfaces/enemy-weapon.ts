@@ -1,5 +1,5 @@
 // type
-import { AttackVector } from "src/app/weapon/Types/attack-vector";
+import { vector } from "src/app/weapon/Types/vector";
 
 export interface EnemyWeapon {
     weaponName: string,
@@ -8,7 +8,7 @@ export interface EnemyWeapon {
     muzzleVelo: number | null,
     ammoCapacity: number,
     range: number[],
-    attackVector: AttackVector[],
+    attackVector: vector[],
     damage: number[],
     armorPenetration: number,
     train: number | null,

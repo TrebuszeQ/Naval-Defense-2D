@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 // interfaces
 import { Enemy } from './Interfaces/enemy';
 import { Level } from '../level-wrapper/levels/interfaces/level';
+import { EnemyStats } from './Interfaces/enemy-stats';
 // arrays
 // services
 import { EnemyArrayService } from './Services/enemy-array.service';
@@ -11,6 +12,9 @@ import { LevelTimingService } from '../level-wrapper/levels/Services/level-timin
 import { LevelService } from '../level-wrapper/levels/Services/level.service';
 import { WaterService } from '../level-wrapper/levels/water/Services/water.service';
 import { RightUiLogService } from '../level-wrapper/levels/Services/rightui-log.service';
+import { EnemyStatsService } from './Services/enemy-stats.service';
+import { CombatService } from '../combat.service';
+import { EnemySelectionService } from './Services/enemy-selection.service';
 
 @Component({
   selector: 'app-enemy-wrapper',
@@ -24,10 +28,11 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
   level: Level | null = null;
   enemyArray: Enemy[] = [];
   waterLevel: number = 0;
+  selectedEnemy: EnemyStats | null = null;
   allEnemyCounter: number = 0;
   logFeedback: string = '';
 
-  constructor(private enemyArrayService: EnemyArrayService, private enemyCounterService: EnemyCounterService, private levelTimingService: LevelTimingService, private levelService: LevelService, private waterService: WaterService, private rightUiLogService: RightUiLogService) {
+  constructor(private enemyArrayService: EnemyArrayService, private enemyCounterService: EnemyCounterService, private levelTimingService: LevelTimingService, private levelService: LevelService, private waterService: WaterService, private rightUiLogService: RightUiLogService, private enemyStatsService: EnemyStatsService, private combatService: CombatService, private selectEnemyService: EnemySelectionService) {
   }
   
   async ngOnInit(): Promise<string> {
@@ -191,12 +196,18 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     return Promise.resolve(this.resolutionMessage);
   }
 
+  async getEnemyStats(): Promise<string> {
+
+
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
   async spawnEnemy(enemy: Enemy): Promise<string> {
     const enemyElement = document.createElement("app-enemy");
-    let logFeedback: string = '';
     const enemyName = enemy.enemyName;
     const nameNew = enemy.cssMainStyleName; 
-
+    
     
     if(await this.getSingleCounterOnce(enemyName) == 0) {
       const rule = `.${enemy.cssMainStyleName} {
@@ -212,12 +223,16 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     enemyElement.className = `${nameNew} enemy hooverableObject`;
 
     enemyElement.addEventListener("click", (event: MouseEvent) => {
-      this.selectEnemy(enemyElement);
+      this.selectedEnemy = {elementID: enemyElement.id, enemyType: enemy, x: 0, y: (42 - this.waterLevel)};
+      this.selectEnemy();
     })
 
     const enemyWrapperElement = document.getElementById("enemyWrapper");
     enemyWrapperElement!.appendChild(enemyElement);
     this.enemyCounterService.incrementEnemySubjectsArray(await this.searchForEnemyWithName(enemyName));
+
+    const enemyStatsItem: EnemyStats = {elementID: `${nameNew + await this.getSingleCounterOnce(enemyName)}`, enemyType: enemy, x: 0, y: (42 - this.waterLevel)};
+    this.enemyStatsService.appendEnemyPositionArray(enemyStatsItem);
     
     this.logFeedback += `${enemy.enemyName} detected`;
 
@@ -241,10 +256,12 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     // +1 because enemyCounterArray on service starts with [0] = "all" and enemyArray not
   }
 
-  async selectEnemy(element: HTMLElement): Promise<string> {
-    this.logFeedback = `Aiming ${element.id}.`;
+  async selectEnemy(): Promise<string> {
+    this.logFeedback = `Aiming ${this.selectedEnemy!.elementID}`;
 
+    this.selectEnemyService.selectEnemy(this.selectedEnemy!);
     await this.appendRightUiLogFeedback();
+    this.combatService.startCombatBySelection();
 
     return Promise.resolve(this.resolutionMessage);
   }

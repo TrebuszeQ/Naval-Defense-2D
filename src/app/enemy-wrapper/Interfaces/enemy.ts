@@ -1,8 +1,8 @@
 // interfaces
 import { EnemySkills } from "./enemy-skills";
 import { EnemyWeapon } from "./enemy-weapon";
-
-export type enemyClass = "ground" | "air" | "submarine";
+// types
+import { vector } from "src/app/weapon/Types/vector";
 
 export interface Enemy {
     enemyName: string,
@@ -10,7 +10,7 @@ export interface Enemy {
     height: number,
     backgroundImagePath: string | null,
     description: string,
-    enemyClass: enemyClass,
+    enemyClass: vector,
     endurance: number,
     armor: number,
     maxSpeed: number,
