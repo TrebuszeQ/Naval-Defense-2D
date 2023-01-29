@@ -14,7 +14,6 @@ import { WaterService } from '../level-wrapper/levels/water/Services/water.servi
 import { RightUiLogService } from '../level-wrapper/levels/Services/rightui-log.service';
 import { EnemyStatsService } from './Services/enemy-stats.service';
 import { CombatService } from '../combat.service';
-import { EnemySelectionService } from './Services/enemy-selection.service';
 
 @Component({
   selector: 'app-enemy-wrapper',
@@ -28,11 +27,11 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
   level: Level | null = null;
   enemyArray: Enemy[] = [];
   waterLevel: number = 0;
-  selectedEnemy: EnemyStats | null = null;
+  selectedEnemyStats: EnemyStats | null = null;
   allEnemyCounter: number = 0;
   logFeedback: string = '';
 
-  constructor(private enemyArrayService: EnemyArrayService, private enemyCounterService: EnemyCounterService, private levelTimingService: LevelTimingService, private levelService: LevelService, private waterService: WaterService, private rightUiLogService: RightUiLogService, private enemyStatsService: EnemyStatsService, private combatService: CombatService, private selectEnemyService: EnemySelectionService) {
+  constructor(private enemyArrayService: EnemyArrayService, private enemyCounterService: EnemyCounterService, private levelTimingService: LevelTimingService, private levelService: LevelService, private waterService: WaterService, private rightUiLogService: RightUiLogService, private enemyStatsService: EnemyStatsService, private combatService: CombatService) {
   }
   
   async ngOnInit(): Promise<string> {
@@ -196,13 +195,21 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async getEnemyStats(): Promise<string> {
-
-
+  async getSelectedEnemyStatsSubject(): Promise<string> {
+    const index = await this.enemyStatsService.findEnemyByElementID();
+    this.enemyStatsService.enemyStatsArraySubject[index].subscribe({
+      next: (enemyStatsItem: EnemyStats) => {
+        this.selectedEnemyStats = enemyStatsItem;
+        console.log(`subject: ${enemyStatsItem}`);
+      },
+      error: (error: Error) => {
+        console.error(`getSelectedEnemyStats on enemy-wrapper.component encountered an error: ${error}.`);
+      }
+    });
 
     return Promise.resolve(this.resolutionMessage);
   }
-
+  
   async spawnEnemy(enemy: Enemy): Promise<string> {
     const enemyElement = document.createElement("app-enemy");
     const enemyName = enemy.enemyName;
@@ -222,21 +229,22 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     enemyElement.id = `${nameNew + await this.getSingleCounterOnce(enemyName)}`;
     enemyElement.className = `${nameNew} enemy hooverableObject`;
 
-    enemyElement.addEventListener("click", (event: MouseEvent) => {
-      this.selectedEnemy = {elementID: enemyElement.id, enemyType: enemy, x: 0, y: (42 - this.waterLevel)};
-      this.selectEnemy();
-    })
-
     const enemyWrapperElement = document.getElementById("enemyWrapper");
     enemyWrapperElement!.appendChild(enemyElement);
     this.enemyCounterService.incrementEnemySubjectsArray(await this.searchForEnemyWithName(enemyName));
 
-    const enemyStatsItem: EnemyStats = {elementID: `${nameNew + await this.getSingleCounterOnce(enemyName)}`, enemyType: enemy, x: 0, y: (42 - this.waterLevel)};
-    this.enemyStatsService.appendEnemyPositionArray(enemyStatsItem);
+
+    const enemyStatsItem: EnemyStats = {elementID: `${nameNew + await this.getSingleCounterOnce(enemyName)}`, enemyType: enemy, x: 0, y: (42 - this.waterLevel), endurance: enemy.endurance};
+    this.selectedEnemyStats = enemyStatsItem;
+    this.enemyStatsService.appendEnemyStatsArray(enemyStatsItem);
     
     this.logFeedback += `${enemy.enemyName} detected`;
 
     await this.appendRightUiLogFeedback();
+
+    const firstClickListener = enemyElement.addEventListener("click", (event: MouseEvent) => {
+      this.selectEnemy();
+    });
 
     return Promise.resolve(this.resolutionMessage);
   }
@@ -257,9 +265,10 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
   }
 
   async selectEnemy(): Promise<string> {
-    this.logFeedback = `Aiming ${this.selectedEnemy!.elementID}`;
+    this.enemyStatsService.selectEnemy(this.selectedEnemyStats!);
 
-    this.selectEnemyService.selectEnemy(this.selectedEnemy!);
+    this.logFeedback = `Aiming ${this.selectedEnemyStats!.elementID}`;
+
     await this.appendRightUiLogFeedback();
     this.combatService.startCombatBySelection();
 

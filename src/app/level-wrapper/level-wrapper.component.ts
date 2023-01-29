@@ -64,6 +64,7 @@ export class LevelWrapperComponent implements OnInit {
 
   async ngOnInit(): Promise<string> {
     await this.getLevel();
+    await this.setStartingWarshipX();
     await this.insertRighUiLogPRule();
     await this.getRightUiLogSubject();
     await this.setLevelTimingTime();
@@ -133,6 +134,13 @@ export class LevelWrapperComponent implements OnInit {
   //   this.warshipPositionService.getWarshipPosition().subscribe(getWarshipPositionObserver);
   //   return Promise.resolve(this.resolutionMessage);
   // }
+
+  async setStartingWarshipX(): Promise<string> {
+    const levelWidth = getComputedStyle(document.getElementById("level")!).width;
+    this.warshipX = (this.level!.startingPosition * Number.parseFloat(levelWidth)) / 100
+
+    return Promise.resolve(this.resolutionMessage);
+  }
 
   async getWarshipPositionSubject(): Promise <string>{
     this.warshipPositionService.warshipXSubject.subscribe({

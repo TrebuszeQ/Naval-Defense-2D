@@ -1,4 +1,5 @@
 // interfaces
+import { Subject } from "rxjs";
 import { Enemy } from "./enemy";
 
 export interface EnemyStats {
@@ -8,3 +9,11 @@ export interface EnemyStats {
     y: number,
     endurance: number,
 };
+
+export interface EnemyStatsSubjects {
+    elementID: Subject<string>,
+    enemyType: Subject<Enemy>,
+    x: Subject<number>,
+    y: Subject<number>, 
+    endurance: Subject<number>
+}

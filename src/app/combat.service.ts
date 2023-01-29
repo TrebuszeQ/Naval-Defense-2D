@@ -5,6 +5,7 @@ import { Enemy } from './enemy-wrapper/Interfaces/enemy';
 import { TorpedoType } from './torpedo/Interfaces/torpedo-type';
 import { WeaponType } from './weapon/Interfaces/weapon-type';
 import { EnemyStats } from './enemy-wrapper/Interfaces/enemy-stats';
+import { CombatItem } from './combat-item';
 // services
 import { WarshipPositionService } from './character/services/warship-position.service';
 import { WarshipTypeService } from './character/services/warship-type.service';
@@ -15,10 +16,7 @@ import { TorpedoService } from './torpedo/Services/torpedo.service';
 import { TorpedoTrajectoryService } from './torpedo/Services/torpedo-trajectory.service';
 import { TorpedoTypeService } from './torpedo/Services/torpedo-type.service';
 import { TorpedoEffectsService } from './torpedo/Services/torpedo-effects.service';
-import { EnemySelectionService } from './enemy-wrapper/Services/enemy-selection.service';
 import { RightUiLogService } from './level-wrapper/levels/Services/rightui-log.service';
-// components
-import { EnemyComponent } from './enemy-wrapper/Components/enemy/enemy.component';
 // types
 import { vector } from './weapon/Types/vector';
 
@@ -35,14 +33,17 @@ export class CombatService {
   warshipX: number = 0;
   selectedWeapon: WeaponType | null = null;
   enemy: Enemy | null = null;
-  selectedEnemy: EnemyStats | null = null;
+  selectedEnemyStats: EnemyStats | null = null;
   torpedo: TorpedoType | null = null;
+  combatArray: CombatItem[] | null = null;
+  selectedEnemiesStatsArray: EnemyStats[] | null = null;
 
-  constructor(private warshipTypeService: WarshipTypeService, private warshipPositionService: WarshipPositionService, private weaponService: WeaponService, private enemyPositionService: EnemyStatsService, private enemyCounterService: EnemyCounterService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService, private torpedoEffectsService: TorpedoEffectsService, private enemySelectionService: EnemySelectionService, private rightUiLogService: RightUiLogService) { 
+  constructor(private warshipTypeService: WarshipTypeService, private warshipPositionService: WarshipPositionService, private weaponService: WeaponService, private enemyPositionService: EnemyStatsService, private enemyCounterService: EnemyCounterService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService, private torpedoEffectsService: TorpedoEffectsService, private rightUiLogService: RightUiLogService, private enemyStatsService: EnemyStatsService) { 
     this.getWarshipType();
     this.getWarshipPositionSubject();
     this.getWeapon();
     this.getSelectedEnemySubject();
+    this.getSelectedEnemiesArraySubject();
   }
 
   async appendRightUiLogFeedback(): Promise<string> {
@@ -53,7 +54,6 @@ export class CombatService {
   }
 
   async getWarshipType() {
-    
     const warshipTypeObserver = {
       next: (warshipType: WarshipType) => { 
         this.warshipType = warshipType;
@@ -88,9 +88,9 @@ export class CombatService {
   }
 
   async getSelectedEnemySubject(): Promise<string> {
-    this.enemySelectionService.selectedEnemySubject.subscribe({
+    this.enemyStatsService.selectedEnemyStatsSubject.subscribe({
       next: (enemyPosition: EnemyStats) => {
-        this.selectedEnemy = enemyPosition;
+        this.selectedEnemyStats = enemyPosition;
         this.enemy = enemyPosition.enemyType;
       },
       error: (error: Error) => {
@@ -101,11 +101,90 @@ export class CombatService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async startCombatBySelection(): Promise<string> {
-
-
+  async getSelectedEnemiesArraySubject(): Promise<string> {
+    this.enemyStatsService.selectedEnemiesStatsArraySubject.subscribe({
+      next: (selectedEnemiesStatsArray: EnemyStats[]) => {
+        this.selectedEnemiesStatsArray = selectedEnemiesStatsArray;
+      },
+      error: (error: Error) => {
+        console.error(`getSelectedEnemiesArraySubject() encountered an error: ${error}.`);
+      }
+    })
 
     return Promise.resolve(this.resolutionMessage);
+  }
+
+  async checkIfEnemyIsAlreadySelected(): Promise<boolean> {
+    let checker = true;
+    const x = this.combatArray!.find((combatItem: CombatItem) => {
+      this.selectedEnemyStats == combatItem.enemyStats
+    });
+    if((this.combatArray! == null)) {
+      checker = true;
+    } 
+    else if((this.combatArray! != null) && (typeof x != undefined)) {
+      checker = false;
+    }
+
+    return Promise.resolve(checker);
+  }
+
+  async checkIfEnemyIsAlreadySelectedBySelectedWeapon(): Promise<boolean> {
+    let checker = true;
+  
+    const x = this.combatArray!.find((combatItem: CombatItem) => {
+      (combatItem.enemyStats == this.selectedEnemyStats && combatItem.weapon == this.selectedWeapon);
+    })
+
+    if((this.combatArray! == null)) {
+      checker = true;
+    } 
+    else if((this.combatArray! != null) && (typeof x != undefined)) {
+      checker = false;
+    }
+
+    return Promise.resolve(checker);
+  }
+
+  async appendCombatArray(): Promise<string> {
+    const combatItem: CombatItem = {enemyStats: this.selectedEnemyStats!, weapon: this.selectedWeapon!, weaponQuantity: await this.getWeaponQuantity()};
+
+    this.combatArray!.push(combatItem);
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async startCombatBySelection(): Promise<string> {
+    if(this.selectedWeapon != null) {
+      this.checkWeaponVector();
+    }
+    else {
+      this.logFeedback = "Weapon not selected";
+      this.appendRightUiLogFeedback();
+    }
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async checkIfWeaponIsBusy(): Promise<boolean> {
+    let checker = false;
+    let counter = 0;
+    this.combatArray!.forEach((combatItem: CombatItem) => {
+      if(combatItem.weapon = this.selectedWeapon!) {
+        counter++;
+      };
+    });
+
+    const weaponQuantity = await this.getWeaponQuantity();
+
+    if(counter > weaponQuantity) {
+      checker = true;
+    }
+    else if(counter <= weaponQuantity) {
+      checker = false;
+    }
+
+    return Promise.resolve(checker);
   }
 
   async checkWeaponVector(): Promise<string> {
@@ -123,11 +202,30 @@ export class CombatService {
   }
 
   async checkWeaponRange(): Promise<string> {
-    if((this.selectedWeapon!.range.air <= this.selectedEnemy!.x) || (this.selectedWeapon!.range.ground <= this.selectedEnemy!.x) || (this.selectedWeapon!.range.submarine <= this.selectedEnemy!.x)) {
+    if(((this.selectedWeapon!.range.ground / 10) >= (this.warshipX - this.selectedEnemyStats!.x)) || ((this.selectedWeapon!.range.air / 10) >= (this.warshipX - this.selectedEnemyStats!.x)) || ((this.selectedWeapon!.range.submarine / 10) >= (this.warshipX - this.selectedEnemyStats!.x))) {
 
+    } 
+    else {
+      this.logFeedback = `Enemy out of range`;
+      this.appendRightUiLogFeedback();
     }
 
     return Promise.resolve(this.resolutionMessage)
+  }
+
+  async getWeaponIndexInWarshipWeapons(): Promise<number> {
+    const index = this.warshipType!.availableWeapons!.weapon.findIndex((weaponType: WeaponType) => {
+      weaponType = this.selectedWeapon!;
+    })
+    
+    return Promise.resolve(index);
+  }
+
+  async getWeaponQuantity(): Promise<number> {
+    const index = await this.getWeaponIndexInWarshipWeapons();
+    const quantity = this.warshipType!.availableWeapons!.quantity[index];
+
+    return Promise.resolve(quantity);
   }
 
   async createCombatWorker(): Promise<string> {

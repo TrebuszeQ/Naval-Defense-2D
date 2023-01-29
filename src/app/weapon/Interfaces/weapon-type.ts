@@ -1,5 +1,5 @@
 // types
-import { AttackVector } from "../Types/vector";
+import { vector } from "../Types/vector";
 
 export interface WeaponType {
     weaponName: string,
@@ -8,9 +8,9 @@ export interface WeaponType {
     reloadingRate: number,
     muzzleVelo: number,
     ammoCapacity: number,
-    range: number[],
+    range: {ground: number, air: number, submarine: number},
     barrelLife: number,
-    attackVector: AttackVector[],
+    attackVector: vector[],
     damage: number[],
     armorPenetration: number,
     train: number | null,
