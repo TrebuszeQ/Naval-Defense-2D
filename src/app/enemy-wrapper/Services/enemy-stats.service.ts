@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 // rxjs
 import { Observable, of, Subject } from 'rxjs';
 // interfaces
-import { Enemy } from '../Interfaces/enemy';
-import { EnemyStats, EnemyStatsSubjects } from '../Interfaces/enemy-stats';
+import { ActiveEnemy, ActiveEnemySubjects } from '../Interfaces/active-enemy';
+import { WeaponType } from 'src/app/weapon/Interfaces/weapon-type';
 // services
 
 
@@ -16,68 +16,78 @@ export class EnemyStatsService {
   resolutionMessage: string = "resolved";
   maxGridRow: number = 42;
   waterLevel: number = 0;
-  selectedEnemyStats: EnemyStats | null = null;
-  selectedEnemyStatsSubject: Subject<EnemyStats> = new Subject<EnemyStats>;
-  selectedEnemiesStatsArray: EnemyStats[] | null = null;
-  selectedEnemiesStatsArraySubject: Subject<EnemyStats[]> = new Subject<EnemyStats[]>();
   index: number = 0;
-  enemyStatsArray: EnemyStats[] = [];
-  enemyStatsArraySubject: Subject<EnemyStats>[] = [new Subject<EnemyStats>()];
-  enemyStatsArraySubjects: EnemyStatsSubjects[] = [];
+  selectedActiveEnemy: ActiveEnemy | null = null;
+  selectedActiveEnemySubject: Subject<ActiveEnemy> = new Subject<ActiveEnemy>;
+  activeEnemyArray: ActiveEnemy[] = [];
+  activeEnemyArraySubject: Subject<ActiveEnemy>[] = [];
   constructor() {}
 
-  async selectEnemy(enemyStats: EnemyStats) {
-    this.selectedEnemyStats = enemyStats;
-    this.selectedEnemyStatsSubject.next(enemyStats);
-    this.selectedEnemiesStatsArray!.push(enemyStats);
-    this.selectedEnemiesStatsArraySubject.next(this.selectedEnemiesStatsArray!);
-
-    return Promise.resolve("resolve");
-  }
-
-  async appendEnemyStatsArray(enemyStatsItem: EnemyStats): Promise<string> {
-    const checker: boolean = this.enemyStatsArray.includes(enemyStatsItem);
-
-    if(checker == false) {
-      this.enemyStatsArray.push(enemyStatsItem);
-      this.enemyStatsArraySubject[this.enemyStatsArraySubject.length - 1].next(enemyStatsItem);
-    }
+  async selectEnemy(activeEnemy: ActiveEnemy) {
+    this.selectedActiveEnemy = activeEnemy;
+    this.selectedActiveEnemySubject.next(activeEnemy);
 
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async setEnemyStatsByItem(): Promise<string> {
-    this.enemyStatsArraySubject[this.index].next(this.selectedEnemyStats!);
+  async findEnemyIndexByElementId(elementID: string): Promise<number> {
+    const index = this.activeEnemyArray.findIndex((activeEnemy: ActiveEnemy) => {
+      activeEnemy.elementID == elementID;
+    })
 
-    return Promise.resolve(this.resolutionMessage);
-  }
-
-  async setEnemyStatsX(): Promise<string> {
-    this.enemyStatsArray[this.index].x = this.selectedEnemyStats!.x;
-    this.enemyStatsArraySubjects[this.index].x.next(this.selectedEnemyStats!.x);
-
-    return Promise.resolve(this.resolutionMessage);
-  }
-
-  async setEnemyStatsY(): Promise<string> {
-    this.enemyStatsArray[this.index].y = this.selectedEnemyStats!.y;
-    this.enemyStatsArraySubjects[this.index].x.next(this.selectedEnemyStats!.y);
-
-    return Promise.resolve(this.resolutionMessage);
-  }
-
-  async setEnemyStatsEndurance(): Promise<string> {
-    this.enemyStatsArray[this.index].endurance = this.selectedEnemyStats!.endurance;
-    this.enemyStatsArraySubjects[this.index].endurance.next(this.selectedEnemyStats!.endurance);
-
-    return Promise.resolve(this.resolutionMessage);
-  }
-
-  async findEnemyByElementID(): Promise<number> {
-    const index = this.enemyStatsArray.findIndex((enemyStat: EnemyStats) => {
-      enemyStat.elementID = this.selectedEnemyStats!.elementID;
-    });
-  
     return Promise.resolve(index);
+  }
+
+  async appendActiveEnemyArray(activeEnemy: ActiveEnemy): Promise<string> {
+    this.activeEnemyArray.push(activeEnemy);
+    this.activeEnemyArraySubject.push(new Subject());
+    this.activeEnemyArraySubject[this.activeEnemyArray.length - 1].next(activeEnemy);
+
+    this.activeEnemyArraySubject[this.activeEnemyArray.length - 1].subscribe({
+      next: (activeEnemySubject: ActiveEnemy) => {
+        if(activeEnemySubject.endurance <= 0) {
+          
+        }
+      }
+    })
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async setEnemyStatsByItem(activeEnemy: ActiveEnemy, elementID: string): Promise<string> {
+    const index = await this.findEnemyIndexByElementId(elementID);
+    this.activeEnemyArray[index] = activeEnemy;
+    this.activeEnemyArraySubject[index].next(activeEnemy);
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async removeDeadEnemy() {}
+
+  async decreaseEnemyEndurance(activeEnemy: ActiveEnemy, amount: number): Promise<string> {
+    const index = await this.findEnemyIndexByElementId(activeEnemy.elementID);
+
+    if(this.activeEnemyArray[index].endurance <= 0) {
+
+    }
+    else {
+      this.activeEnemyArray[index].endurance -= amount;
+      this.activeEnemyArraySubject[index].next(this.activeEnemyArray[index]);
+    }
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async watchEnemyEndurance(elementID: string): Promise<string> {
+    const index = await this.findEnemyIndexByElementId(elementID);
+
+    this.activeEnemyArraySubject[index].subscribe({
+      next: async (activeEnemySubject: ActiveEnemy) => {
+        if(activeEnemySubject.endurance <= 0) {
+          await this.removeDeadEnemy();
+        };
+      }
+    })
+
+    return Promise.resolve(this.resolutionMessage);
   }
 }

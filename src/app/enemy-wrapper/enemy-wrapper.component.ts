@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 // interfaces
 import { Enemy } from './Interfaces/enemy';
 import { Level } from '../level-wrapper/levels/interfaces/level';
-import { EnemyStats } from './Interfaces/enemy-stats';
+import { ActiveEnemy } from './Interfaces/active-enemy';
 // arrays
 // services
 import { EnemyArrayService } from './Services/enemy-array.service';
@@ -13,7 +13,7 @@ import { LevelService } from '../level-wrapper/levels/Services/level.service';
 import { WaterService } from '../level-wrapper/levels/water/Services/water.service';
 import { RightUiLogService } from '../level-wrapper/levels/Services/rightui-log.service';
 import { EnemyStatsService } from './Services/enemy-stats.service';
-import { CombatService } from '../combat.service';
+import { CombatService } from '../combat/Services/combat.service';
 
 @Component({
   selector: 'app-enemy-wrapper',
@@ -27,7 +27,7 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
   level: Level | null = null;
   enemyArray: Enemy[] = [];
   waterLevel: number = 0;
-  selectedEnemyStats: EnemyStats | null = null;
+  selectedActiveEnemy: ActiveEnemy | null = null;
   allEnemyCounter: number = 0;
   logFeedback: string = '';
 
@@ -195,11 +195,12 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     return Promise.resolve(this.resolutionMessage);
   }
 
+  // to edit
   async getSelectedEnemyStatsSubject(): Promise<string> {
     const index = await this.enemyStatsService.findEnemyByElementID();
-    this.enemyStatsService.enemyStatsArraySubject[index].subscribe({
-      next: (enemyStatsItem: EnemyStats) => {
-        this.selectedEnemyStats = enemyStatsItem;
+    this.enemyStatsService.ActiveEnemyArraySubject[index].subscribe({
+      next: (enemyStatsItem: ActiveEnemy) => {
+        this.selectedActiveEnemy = enemyStatsItem;
         console.log(`subject: ${enemyStatsItem}`);
       },
       error: (error: Error) => {
@@ -234,9 +235,8 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     this.enemyCounterService.incrementEnemySubjectsArray(await this.searchForEnemyWithName(enemyName));
 
 
-    const enemyStatsItem: EnemyStats = {elementID: `${nameNew + await this.getSingleCounterOnce(enemyName)}`, enemyType: enemy, x: 0, y: (42 - this.waterLevel), endurance: enemy.endurance};
-    this.selectedEnemyStats = enemyStatsItem;
-    this.enemyStatsService.appendEnemyStatsArray(enemyStatsItem);
+    const enemyStatsItem: ActiveEnemy = {elementID: `${nameNew + await this.getSingleCounterOnce(enemyName)}`, enemyType: enemy, x: 0, y: (42 - this.waterLevel), endurance: enemy.endurance};
+    this.enemyStatsService.appendActiveEnemyArray(enemyStatsItem)
     
     this.logFeedback += `${enemy.enemyName} detected`;
 
@@ -265,9 +265,9 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
   }
 
   async selectEnemy(): Promise<string> {
-    this.enemyStatsService.selectEnemy(this.selectedEnemyStats!);
+    this.enemyStatsService.selectEnemy(this.selectedActiveEnemy!);
 
-    this.logFeedback = `Aiming ${this.selectedEnemyStats!.elementID}`;
+    this.logFeedback = `Aiming ${this.selectedActiveEnemy!.elementID}`;
 
     await this.appendRightUiLogFeedback();
     this.combatService.startCombatBySelection();

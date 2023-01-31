@@ -1,8 +1,9 @@
-// interfaces
+// rxjs
 import { Subject } from "rxjs";
+// interfaces
 import { Enemy } from "./enemy";
 
-export interface EnemyStats {
+export interface ActiveEnemy {
     elementID: string, 
     enemyType: Enemy, 
     x: number, 
@@ -10,7 +11,7 @@ export interface EnemyStats {
     endurance: number,
 };
 
-export interface EnemyStatsSubjects {
+export interface ActiveEnemySubjects {
     elementID: Subject<string>,
     enemyType: Subject<Enemy>,
     x: Subject<number>,
