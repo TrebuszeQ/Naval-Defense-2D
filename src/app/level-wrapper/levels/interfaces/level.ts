@@ -16,6 +16,7 @@ export interface Level {
     startingPosition: number,
     resources: number,
     infrastructureEndurance: number,
+    enemies: Enemy[];
     levelScenario: levelScrenario[]
     effectsScenario: {
         timeArray: number[],

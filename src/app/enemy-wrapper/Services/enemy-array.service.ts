@@ -14,7 +14,23 @@ export class EnemyArrayService {
   constructor() { }
 
   getEnemyArray(): Observable<Enemy[]> {
-
+    
     return of(enemyArray);
+  }
+
+  async getEnemyByName(enemyName: string): Promise<Enemy | undefined> {
+    const enemy = enemyArray.find((enemy: Enemy) => {
+      return enemy.enemyName == enemyName;
+    });
+
+    return Promise.resolve(enemy);
+  }
+
+  async getEnemyIndexByName(enemyName: string): Promise<number> {
+    const index = enemyArray.findIndex((enemy: Enemy) => {
+      return enemy.enemyName == enemyName;
+    });
+
+    return Promise.resolve(index);
   }
 }

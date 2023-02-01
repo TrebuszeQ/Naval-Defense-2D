@@ -1,9 +1,9 @@
 // interfaces
-import { EnemyStats } from "../../enemy-wrapper/Interfaces/active-enemy";
+import { ActiveEnemy } from "../../enemy-wrapper/Interfaces/active-enemy";
 import { WeaponType } from "../../weapon/Interfaces/weapon-type";
 
 export interface WarshipCombatItem {
-    enemyStats: EnemyStats, 
+    enemyStats: ActiveEnemy, 
     weapon: WeaponType, 
     weaponQuantity: number,
 }

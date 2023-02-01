@@ -53,7 +53,7 @@ export class CharacterComponent implements OnInit {
     this.warship = document.getElementById("warship");
     
     await this.getLevel();
-    await this.setWarshipX();
+    await this.getStartingWarshipX();
     await this.getWarshipType();
     await this.placeWarshipOnWater();
 
@@ -87,13 +87,16 @@ export class CharacterComponent implements OnInit {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async setWarshipX(): Promise<string> {
-    const levelElement = document.getElementById("level");
-    const levelWidth = getComputedStyle(levelElement!).width;
-
-    this.warshipX = (this.level!.startingPosition * Number.parseFloat(levelWidth)) / 100;
-    this.warshipPositionService.warshipX = this.warshipX;
-
+  async getStartingWarshipX(): Promise<string> {
+    const getStartingWarshipXObserver = { 
+      next: (warshipX: number) => {
+        this.warshipX = warshipX;
+      },
+      error: (error: Error) => {
+        console.error(`getStartingWarshipX on character.component encountered an error: ${error}`);
+      },
+    };
+    this.warshipPositionService.getStartingWarshipX().subscribe(getStartingWarshipXObserver).unsubscribe();
     return Promise.resolve(this.resolutionMessage);
   }
 

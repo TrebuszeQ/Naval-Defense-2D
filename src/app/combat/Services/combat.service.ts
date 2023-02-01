@@ -32,18 +32,17 @@ export class CombatService {
   warshipType: WarshipType | null =null;
   warshipX: number = 0;
   selectedWeapon: WeaponType | null = null;
-  enemy: Enemy | null = null;
-  selectedEnemyStats: ActiveEnemy | null = null;
+  selectedActiveEnemy: ActiveEnemy | null = null;
   torpedo: TorpedoType | null = null;
   warshipCombatArray: WarshipCombatItem[] = [];
   selectedEnemiesStatsArray: ActiveEnemy[] = [];
 
   constructor(private warshipTypeService: WarshipTypeService, private warshipPositionService: WarshipPositionService, private weaponService: WeaponService, private enemyPositionService: EnemyStatsService, private enemyCounterService: EnemyCounterService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService, private torpedoEffectsService: TorpedoEffectsService, private rightUiLogService: RightUiLogService, private enemyStatsService: EnemyStatsService) { 
     this.getWarshipType();
+    this.getStartingWarshipX();
     this.getWarshipPositionSubject();
-    this.getWeapon();
-    this.getSelectedEnemySubject();
-    this.getSelectedEnemiesArraySubject();
+    this.getWeaponSubject();
+    this.getSelectedActiveEnemySubject();
   }
 
   async appendRightUiLogFeedback(): Promise<string> {
@@ -67,6 +66,19 @@ export class CombatService {
     return Promise.resolve(this.resolutionMessage);
   }
 
+  async getStartingWarshipX(): Promise<string> {
+    const getStartingWarshipXObserver = { 
+      next: (warshipX: number) => {
+        this.warshipX = warshipX;
+      },
+      error: (error: Error) => {
+        console.error(`getStartingWarshipX on character.component encountered an error: ${error}`);
+      },
+    };
+    this.warshipPositionService.getStartingWarshipX().subscribe(getStartingWarshipXObserver).unsubscribe();
+    return Promise.resolve(this.resolutionMessage);
+  }
+
   async getWarshipPositionSubject(): Promise <string>{
     this.warshipPositionService.warshipXSubject.subscribe({
       next: (warshipX: number) => {
@@ -77,7 +89,7 @@ export class CombatService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async getWeapon(): Promise<string> {
+  async getWeaponSubject(): Promise<string> {
     this.weaponService.currentWeaponSubject.subscribe({
       next: (weapon: WeaponType) => {
         this.selectedWeapon = weapon;
@@ -87,29 +99,15 @@ export class CombatService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async getSelectedEnemySubject(): Promise<string> {
-    this.enemyStatsService.selectedEnemyStatsSubject.subscribe({
-      next: (enemyPosition: ActiveEnemy) => {
-        this.selectedEnemyStats = enemyPosition;
-        this.enemy = enemyPosition.enemyType;
+  async getSelectedActiveEnemySubject(): Promise<string> {
+    this.enemyStatsService.selectedActiveEnemySubject.subscribe({
+      next: (activeEnemy: ActiveEnemy) => {
+        this.selectedActiveEnemy = activeEnemy;
       },
       error: (error: Error) => {
-        console.error(`getSelectedEnemySubject on combat.service encountered an error: ${error}.`);
+        console.error(`getSelectedActiveEnemySubject on combar.service encountered an error: ${error}.`);
       }
     });
-
-    return Promise.resolve(this.resolutionMessage);
-  }
-
-  async getSelectedEnemiesArraySubject(): Promise<string> {
-    this.enemyStatsService.selectedEnemiesStatsArraySubject.subscribe({
-      next: (selectedEnemiesStatsArray: ActiveEnemy[]) => {
-        this.selectedEnemiesStatsArray = selectedEnemiesStatsArray;
-      },
-      error: (error: Error) => {
-        console.error(`getSelectedEnemiesArraySubject() encountered an error: ${error}.`);
-      }
-    })
 
     return Promise.resolve(this.resolutionMessage);
   }
@@ -117,7 +115,7 @@ export class CombatService {
   async checkIfEnemyIsAlreadySelected(): Promise<boolean> {
     let checker = true;
     const x = this.warshipCombatArray!.find((combatItem: WarshipCombatItem) => {
-      this.selectedEnemyStats == combatItem.enemyStats
+      return this.selectedActiveEnemy == combatItem.enemyStats
     });
     if((this.warshipCombatArray! == null)) {
       checker = false;
@@ -133,7 +131,7 @@ export class CombatService {
     let checker = true;
   
     const x = this.warshipCombatArray!.find((combatItem: WarshipCombatItem) => {
-      (combatItem.enemyStats == this.selectedEnemyStats && combatItem.weapon == this.selectedWeapon);
+      return (combatItem.enemyStats == this.selectedActiveEnemy && combatItem.weapon == this.selectedWeapon);
     })
 
     if((this.warshipCombatArray! == null)) {
@@ -142,7 +140,7 @@ export class CombatService {
     } 
     else if((this.warshipCombatArray! != null) && (typeof x != undefined)) {
       checker = true;
-      this.logFeedback = `${this.selectedEnemyStats!.elementID} already selected by ${this.selectedWeapon!.weaponName}.`;
+      this.logFeedback = `${this.selectedActiveEnemy!.elementID} already selected by ${this.selectedWeapon!.weaponName}.`;
       await this.appendRightUiLogFeedback();
     }
 
@@ -158,7 +156,7 @@ export class CombatService {
   }
 
   async appendCombatArray(): Promise<string> {
-    const combatItem: WarshipCombatItem = {enemyStats: this.selectedEnemyStats!, weapon: this.selectedWeapon!, weaponQuantity: await this.getWeaponQuantity()};
+    const combatItem: WarshipCombatItem = {enemyStats: this.selectedActiveEnemy!, weapon: this.selectedWeapon!, weaponQuantity: await this.getWeaponQuantity()};
 
     this.warshipCombatArray!.push(combatItem);
 
@@ -201,11 +199,11 @@ export class CombatService {
   async checkWeaponVector(): Promise<string> {
     const checker: boolean = false;
 
-    if(this.selectedWeapon!.attackVector.includes(this.enemy!.enemyClass)) {
+    if(this.selectedWeapon!.attackVector.includes(this.selectedActiveEnemy!.enemyType!.enemyClass)) {
       this.checkWeaponRange();
     }
     else {
-      this.logFeedback = `Weapon can't target ${this.enemy!.enemyClass} enemies`;
+      this.logFeedback = `Weapon can't target ${this.selectedActiveEnemy!.enemyType!.enemyClass} enemies`;
       this.appendRightUiLogFeedback();
     }
 
@@ -213,7 +211,7 @@ export class CombatService {
   }
 
   async checkWeaponRange(): Promise<string> {
-    if(((this.selectedWeapon!.range.ground / 10) >= (this.warshipX - this.selectedEnemyStats!.x)) || ((this.selectedWeapon!.range.air / 10) >= (this.warshipX - this.selectedEnemyStats!.x)) || ((this.selectedWeapon!.range.submarine / 10) >= (this.warshipX - this.selectedEnemyStats!.x))) {
+    if(((this.selectedWeapon!.range.ground / 10) >= (this.warshipX - this.selectedActiveEnemy!.x)) || ((this.selectedWeapon!.range.air / 10) >= (this.warshipX - this.selectedActiveEnemy!.x)) || ((this.selectedWeapon!.range.submarine / 10) >= (this.warshipX - this.selectedActiveEnemy!.x))) {
       await this.checkIfEnemyIsAlreadySelectedBySelectedWeapon();
     } 
     else {
@@ -226,8 +224,8 @@ export class CombatService {
 
   async getWeaponIndexInWarshipWeapons(): Promise<number> {
     const index = this.warshipType!.availableWeapons!.weapon.findIndex((weaponType: WeaponType) => {
-      weaponType = this.selectedWeapon!;
-    })
+      return weaponType = this.selectedWeapon!;
+    });
     
     return Promise.resolve(index);
   }
@@ -253,5 +251,30 @@ export class CombatService {
     }
     
     return Promise.resolve(this.resolutionMessage);
+  }
+
+  async calculateDamage(activeEnemy: ActiveEnemy, weapon: WeaponType): Promise<number> {
+    const random: number = Math.floor(Math.random());
+    const damageArray: number[] = weapon.damage;
+    let damage: number = 0;
+    if(random >= 5) {
+      damage = damageArray[0];
+    }
+    else {
+      damage = damageArray[1];
+    }
+
+    
+    const enduranceTaken = weapon.armorPenetration + (weapon.firingRate * damage);
+
+    if(enduranceTaken <= activeEnemy.enemyType.armor) {
+      this.logFeedback = `${activeEnemy.elementID} takes no damage.`;
+      this.appendRightUiLogFeedback();
+    }
+    else {
+      this.enemyStatsService.decreaseEnemyEndurance(activeEnemy, enduranceTaken);
+    }
+    
+    return Promise.resolve(damage)
   }
 }

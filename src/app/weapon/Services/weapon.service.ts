@@ -43,17 +43,9 @@ export class WeaponService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  // async findSelectedWeaponIndex(): Promise<number> {
-  //   const index = this.warshipType!.availableWeapons!.weapon.findIndex((weaponToFind: WeaponType) => {
-  //     weaponToFind == this.currentWeapon;
-  //   });
-
-  //   return Promise.resolve(index);
-  // }
-
   async findWeaponIndexInWeaponArray(weapon: WeaponType): Promise<number> {
     const index: number = this.weaponArray!.findIndex((weaponArrayItem: WeaponArrayItem) => {
-      weaponArrayItem.weapon == weapon;
+      return weaponArrayItem.weapon == weapon;
     });
 
     return Promise.resolve(index);

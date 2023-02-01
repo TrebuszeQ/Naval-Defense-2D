@@ -14,6 +14,7 @@ export const levelArray: Level[] = [
         startingPosition: 60,
         resources: 100,
         infrastructureEndurance: 10000,
+        enemies: [enemyArray[0]],
         levelScenario: [
             {wave: 1, enemyArray: [enemyArray[0]], quantity: [1]}, 
             {wave: 2, enemyArray: [enemyArray[0]], quantity: [1]},

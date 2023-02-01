@@ -25,9 +25,10 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
   resolutionMessage: string = "resolved";
   time: Date | null = null;
   level: Level | null = null;
-  enemyArray: Enemy[] = [];
+  // enemyArray: Enemy[] = [];
   waterLevel: number = 0;
   selectedActiveEnemy: ActiveEnemy | null = null;
+  enemyToDestroy: ActiveEnemy | null = null;
   allEnemyCounter: number = 0;
   logFeedback: string = '';
 
@@ -38,12 +39,14 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     await this.getLevel();
     await this.setLevelTimingTime();
     await this.getLevelTimingTimeSubject();
-    await this.getEnemyArray();
+    // await this.getEnemyArray();
     await this.getAllEnemyCounter();
+    await this.getEnemyToDestroySubject();
 
     await this.getWaterLevel();
     await this.addEnemyCssRule();
     await this.playScenario();
+
     return Promise.resolve(this.resolutionMessage);
   }
 
@@ -70,22 +73,22 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async getEnemyArray(): Promise<string> {
-    const getEnemyArrayObserver = {
-      next: (enemyArray: Enemy[]) => {
-        this.enemyArray = enemyArray;
-      },
-      error: (error: Error) => {
-        console.error(`getEnemyArrayObserver on enemy-wrapper.component encountered an issue: ${error}.`);
-      },
-      // complete: () => {
-      //   console.log("getEnemyArrayObserver on enemy.component completed");
-      // }
-    }
+  // async getEnemyArray(): Promise<string> {
+  //   const getEnemyArrayObserver = {
+  //     next: (enemyArray: Enemy[]) => {
+  //       this.enemyArray = enemyArray;
+  //     },
+  //     error: (error: Error) => {
+  //       console.error(`getEnemyArrayObserver on enemy-wrapper.component encountered an issue: ${error}.`);
+  //     },
+  //     // complete: () => {
+  //     //   console.log("getEnemyArrayObserver on enemy.component completed");
+  //     // }
+  //   }
 
-    this.enemyArrayService.getEnemyArray().subscribe(getEnemyArrayObserver).unsubscribe();
-    return Promise.resolve(this.resolutionMessage);
-  }
+  //   this.enemyArrayService.getEnemyArray().subscribe(getEnemyArrayObserver).unsubscribe();
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
 
   async getAllEnemyCounter(): Promise<string> {
     this.enemyCounterService.enemyCounterArraySubjects[0].subjectQuantity.subscribe({
@@ -110,7 +113,7 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
       //   console.log("getSingleCounterOnceObserver on enemt-wrapper.component completed.");
       // }
     }
-    const index = await this.searchForEnemyWithName(name);
+    const index = await this.enemyCounterService.findEnemyIndexByName(name);
 
     this.enemyCounterService.getSingleCounter(index).subscribe(getSingleCounterOnceObserver).unsubscribe();
 
@@ -194,22 +197,6 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
 
     return Promise.resolve(this.resolutionMessage);
   }
-
-  // to edit
-  async getSelectedEnemyStatsSubject(): Promise<string> {
-    const index = await this.enemyStatsService.findEnemyByElementID();
-    this.enemyStatsService.ActiveEnemyArraySubject[index].subscribe({
-      next: (enemyStatsItem: ActiveEnemy) => {
-        this.selectedActiveEnemy = enemyStatsItem;
-        console.log(`subject: ${enemyStatsItem}`);
-      },
-      error: (error: Error) => {
-        console.error(`getSelectedEnemyStats on enemy-wrapper.component encountered an error: ${error}.`);
-      }
-    });
-
-    return Promise.resolve(this.resolutionMessage);
-  }
   
   async spawnEnemy(enemy: Enemy): Promise<string> {
     const enemyElement = document.createElement("app-enemy");
@@ -232,8 +219,9 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
 
     const enemyWrapperElement = document.getElementById("enemyWrapper");
     enemyWrapperElement!.appendChild(enemyElement);
-    this.enemyCounterService.incrementEnemySubjectsArray(await this.searchForEnemyWithName(enemyName));
-
+    
+    const index = await this.enemyArrayService.getEnemyIndexByName(enemy.enemyName);
+    this.enemyCounterService.incrementEnemySubjectsArray(index);
 
     const enemyStatsItem: ActiveEnemy = {elementID: `${nameNew + await this.getSingleCounterOnce(enemyName)}`, enemyType: enemy, x: 0, y: (42 - this.waterLevel), endurance: enemy.endurance};
     this.enemyStatsService.appendActiveEnemyArray(enemyStatsItem)
@@ -243,8 +231,28 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     await this.appendRightUiLogFeedback();
 
     const firstClickListener = enemyElement.addEventListener("click", (event: MouseEvent) => {
-      this.selectEnemy();
+      this.selectEnemy(enemyStatsItem);
     });
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async getEnemyToDestroySubject(): Promise<string> {
+    this.enemyStatsService.enemyToDestroy.subscribe({
+      next: (enemyToDestroy: ActiveEnemy) => {
+        this.enemyToDestroy = enemyToDestroy;
+      },
+      error: (error: Error) => {
+        console.error(`getEnemyToDestroySubject() encountered an error: ${error}.`);
+      }
+    })
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async destroyEnemy(): Promise<string> {
+    const element = document.getElementById(this.enemyToDestroy!.elementID);
+    document.removeChild(element!);
 
     return Promise.resolve(this.resolutionMessage);
   }
@@ -256,36 +264,15 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     else return path;
   }
 
-  async searchForEnemyWithName(enemyName: string): Promise<number> {
-    return this.enemyArray.findIndex((enemy: Enemy) => {
+  async selectEnemy(selectedEnemy: ActiveEnemy): Promise<string> {
+    this.selectedActiveEnemy = selectedEnemy;
+    this.enemyStatsService.selectEnemy(selectedEnemy);
 
-      return enemy.enemyName == enemyName;
-    }) + 1;
-    // +1 because enemyCounterArray on service starts with [0] = "all" and enemyArray not
-  }
-
-  async selectEnemy(): Promise<string> {
-    this.enemyStatsService.selectEnemy(this.selectedActiveEnemy!);
-
-    this.logFeedback = `Aiming ${this.selectedActiveEnemy!.elementID}`;
+    this.logFeedback = `Aiming ${selectedEnemy.elementID}`;
 
     await this.appendRightUiLogFeedback();
     this.combatService.startCombatBySelection();
 
     return Promise.resolve(this.resolutionMessage);
   }
-  // async nameToCamelCase(name: string): Promise<string> {
-  //   let newName: string = name[0].toLowerCase();
-  //   for(let i = 1; i < name.length; i++) {
-  //     if(name[i] == ' ') {
-  //       newName += '';
-  //       newName += name[i+1].toUpperCase();
-  //       i += 1;
-  //     } else {
-  //       newName += name[i];
-  //     }
-  //   }
-
-  //   return Promise.resolve(newName);
-  // }
 }

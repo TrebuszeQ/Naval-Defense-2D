@@ -1,10 +1,14 @@
 import { Injectable } from '@angular/core';
 // rxjs
 import { Observable, Subject, of } from 'rxjs';
+
 // interfaces
 import { Enemy } from '../Interfaces/enemy';
+import { Level } from 'src/app/level-wrapper/levels/interfaces/level';
 // services
 import { EnemyArrayService } from './enemy-array.service';
+import { LevelService } from 'src/app/level-wrapper/levels/Services/level.service';
+
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +17,7 @@ export class EnemyCounterService {
 
   resolutionMessage: string = "resolved";
   enemyArray: Enemy[] | null = null;
+  level: Level | null = null;
 
   enemyCounterArray: {name: string, quantity: number}[] = [
     {
@@ -26,16 +31,37 @@ export class EnemyCounterService {
       name: "all",
       subjectQuantity: new Subject<number>(),
     },
-    {
-      name: this.enemyCounterArray[0].name,
-      subjectQuantity: new Subject<number>(),
-    }
   ]
 
-  constructor(private enemyArrayService: EnemyArrayService) { 
+  constructor(private enemyArrayService: EnemyArrayService, private levelService: LevelService) { 
     this.getEnemyArray();
+    this.getLevel();
     this.fillEnemyCounterArray();
+  }
 
+  async getLevel(): Promise<string> {
+    const getLevelObserver = {
+      next: (level: Level) => {
+        this.level = level;
+      },
+      error: (error: Error) => {
+        console.error(`getLevelObserver on enemy-counter.service encountered an issue: ${error}.`);
+      },
+      // complete: () => {
+      //   console.log("getLevelObserver on enemy-counter.service completed.");
+      // }
+    }
+
+    this.levelService.getSelectedLevel().subscribe(getLevelObserver).unsubscribe();
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async findEnemyIndexByName(enemyName: string): Promise<number> {
+    const index = this.enemyCounterArray.findIndex((enemy: {name: string, quantity: number}) => {
+      return enemy.name = enemyName;
+    });
+
+    return Promise.resolve(index);
   }
 
   async getEnemyArray(): Promise<string> {
@@ -57,8 +83,9 @@ export class EnemyCounterService {
 
   async fillEnemyCounterArray(): Promise<string> {
 
-    for(let i = 0; i < this.enemyArray!.length; i++) {
-      this.enemyCounterArray.push({name: this.enemyArray![i].enemyName, quantity: 0});
+    for(let i = 0; i < this.level!.enemies.length; i++) {
+      this.enemyCounterArray.push({name: this.level!.enemies[i].enemyName, quantity: 0});
+      this.enemyCounterArraySubjects.push({name: this.level!.enemies[i].enemyName, subjectQuantity: new Subject<number>});
     }
 
     return Promise.resolve(this.resolutionMessage);
@@ -97,7 +124,6 @@ export class EnemyCounterService {
   }
 
   getSingleCounter(index: number): Observable<number>  {
-
     return of(this.enemyCounterArray[index].quantity);
   }
 

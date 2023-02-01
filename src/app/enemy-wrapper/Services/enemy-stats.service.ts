@@ -5,7 +5,8 @@ import { Observable, of, Subject } from 'rxjs';
 import { ActiveEnemy, ActiveEnemySubjects } from '../Interfaces/active-enemy';
 import { WeaponType } from 'src/app/weapon/Interfaces/weapon-type';
 // services
-
+import { EnemyCounterService } from './enemy-counter.service';
+import { RightUiLogService } from 'src/app/level-wrapper/levels/Services/rightui-log.service';
 
 
 @Injectable({
@@ -21,7 +22,16 @@ export class EnemyStatsService {
   selectedActiveEnemySubject: Subject<ActiveEnemy> = new Subject<ActiveEnemy>;
   activeEnemyArray: ActiveEnemy[] = [];
   activeEnemyArraySubject: Subject<ActiveEnemy>[] = [];
-  constructor() {}
+  enemyToDestroy: Subject<ActiveEnemy> = new Subject();
+  logFeedback: string = "";
+  constructor(private enemyCounterService: EnemyCounterService, private rightUiLogService: RightUiLogService) {}
+
+  async appendRightUiLogFeedback(): Promise<string> {
+    this.rightUiLogService.updateRightUiLog(this.logFeedback);
+
+    this.logFeedback = '';
+    return Promise.resolve(this.resolutionMessage);
+  }
 
   async selectEnemy(activeEnemy: ActiveEnemy) {
     this.selectedActiveEnemy = activeEnemy;
@@ -32,7 +42,7 @@ export class EnemyStatsService {
 
   async findEnemyIndexByElementId(elementID: string): Promise<number> {
     const index = this.activeEnemyArray.findIndex((activeEnemy: ActiveEnemy) => {
-      activeEnemy.elementID == elementID;
+      return activeEnemy.elementID == elementID;
     })
 
     return Promise.resolve(index);
@@ -43,37 +53,39 @@ export class EnemyStatsService {
     this.activeEnemyArraySubject.push(new Subject());
     this.activeEnemyArraySubject[this.activeEnemyArray.length - 1].next(activeEnemy);
 
-    this.activeEnemyArraySubject[this.activeEnemyArray.length - 1].subscribe({
-      next: (activeEnemySubject: ActiveEnemy) => {
-        if(activeEnemySubject.endurance <= 0) {
-          
-        }
-      }
-    })
+    await this.watchEnemyEndurance(activeEnemy.elementID);
 
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async setEnemyStatsByItem(activeEnemy: ActiveEnemy, elementID: string): Promise<string> {
-    const index = await this.findEnemyIndexByElementId(elementID);
+  async setEnemyStatsByItem(activeEnemy: ActiveEnemy): Promise<string> {
+    const index = await this.findEnemyIndexByElementId(activeEnemy.elementID);
     this.activeEnemyArray[index] = activeEnemy;
     this.activeEnemyArraySubject[index].next(activeEnemy);
 
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async removeDeadEnemy() {}
+  async removeDeadEnemy(index: number): Promise<string> {
+    this.enemyToDestroy.next(this.activeEnemyArray[index]);
+    this.activeEnemyArray = this.activeEnemyArray.splice(index, 1);
+    this.activeEnemyArraySubject[index].unsubscribe();
+    this.activeEnemyArraySubject.splice(index, 1);
+    
+    const index2 = await this.enemyCounterService.findEnemyIndexByName(this.activeEnemyArray[index].elementID);
+    await this.enemyCounterService.decrementAllEnemyCounter();
+    await this.enemyCounterService.decrementEnemySubjectsArray(index2);
+
+
+    return Promise.resolve(this.resolutionMessage);
+  }
 
   async decreaseEnemyEndurance(activeEnemy: ActiveEnemy, amount: number): Promise<string> {
     const index = await this.findEnemyIndexByElementId(activeEnemy.elementID);
 
-    if(this.activeEnemyArray[index].endurance <= 0) {
-
-    }
-    else {
       this.activeEnemyArray[index].endurance -= amount;
       this.activeEnemyArraySubject[index].next(this.activeEnemyArray[index]);
-    }
+
     return Promise.resolve(this.resolutionMessage);
   }
 
@@ -83,10 +95,10 @@ export class EnemyStatsService {
     this.activeEnemyArraySubject[index].subscribe({
       next: async (activeEnemySubject: ActiveEnemy) => {
         if(activeEnemySubject.endurance <= 0) {
-          await this.removeDeadEnemy();
+          await this.removeDeadEnemy(index);
         };
       }
-    })
+    });
 
     return Promise.resolve(this.resolutionMessage);
   }

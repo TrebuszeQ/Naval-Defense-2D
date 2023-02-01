@@ -136,11 +136,28 @@ export class LevelWrapperComponent implements OnInit {
   // }
 
   async setStartingWarshipX(): Promise<string> {
-    const levelWidth = getComputedStyle(document.getElementById("level")!).width;
-    this.warshipX = (this.level!.startingPosition * Number.parseFloat(levelWidth)) / 100
+    const levelElement = document.getElementById("level");
+    const width = window.getComputedStyle(levelElement!).width;
+
+    
+    this.warshipX = this.level!.startingPosition * parseFloat(width) / 100;
+    this.warshipPositionService.warshipX = this.warshipX;
 
     return Promise.resolve(this.resolutionMessage);
   }
+
+  // async getStartingWarshipX(): Promise<string> {
+  //   const getStartingWarshipXObserver = { 
+  //     next: (warshipX: number) => {
+  //       this.warshipX = warshipX;
+  //     },
+  //     error: (error: Error) => {
+  //       console.error(`getStartingWarshipX on character.component encountered an error: ${error}`);
+  //     },
+  //   };
+  //   this.warshipPositionService.getStartingWarshipX().subscribe(getStartingWarshipXObserver).unsubscribe();
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
 
   async getWarshipPositionSubject(): Promise <string>{
     this.warshipPositionService.warshipXSubject.subscribe({
