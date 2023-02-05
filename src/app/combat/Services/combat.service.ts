@@ -22,6 +22,7 @@ import { vector } from 'src/app/weapon/Types/vector';
 
 
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -35,7 +36,6 @@ export class CombatService {
   selectedActiveEnemy: ActiveEnemy | null = null;
   torpedo: TorpedoType | null = null;
   warshipCombatArray: WarshipCombatItem[] = [];
-  selectedEnemiesStatsArray: ActiveEnemy[] = [];
 
   constructor(private warshipTypeService: WarshipTypeService, private warshipPositionService: WarshipPositionService, private weaponService: WeaponService, private enemyPositionService: EnemyStatsService, private enemyCounterService: EnemyCounterService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService, private torpedoEffectsService: TorpedoEffectsService, private rightUiLogService: RightUiLogService, private enemyStatsService: EnemyStatsService) { 
     this.getWarshipType();
@@ -100,51 +100,18 @@ export class CombatService {
   }
 
   async getSelectedActiveEnemySubject(): Promise<string> {
-    this.enemyStatsService.selectedActiveEnemySubject.subscribe({
-      next: (activeEnemy: ActiveEnemy) => {
-        this.selectedActiveEnemy = activeEnemy;
-      },
-      error: (error: Error) => {
-        console.error(`getSelectedActiveEnemySubject on combar.service encountered an error: ${error}.`);
-      }
-    });
+    if(this.enemyStatsService.selectedActiveEnemySubject != null) {
+      this.enemyStatsService.selectedActiveEnemySubject.subscribe({
+        next: (activeEnemy: ActiveEnemy) => {
+          this.selectedActiveEnemy = activeEnemy;
+        },
+        error: (error: Error) => {
+          console.error(`getSelectedActiveEnemySubject on combar.service encountered an error: ${error}.`);
+        }
+      });
+    }
 
     return Promise.resolve(this.resolutionMessage);
-  }
-
-  async checkIfEnemyIsAlreadySelected(): Promise<boolean> {
-    let checker = true;
-    const x = this.warshipCombatArray!.find((combatItem: WarshipCombatItem) => {
-      return this.selectedActiveEnemy == combatItem.enemyStats
-    });
-    if((this.warshipCombatArray! == null)) {
-      checker = false;
-    } 
-    else if((this.warshipCombatArray! != null) && (typeof x != undefined)) {
-      checker = true;
-    }
-
-    return Promise.resolve(checker);
-  }
-
-  async checkIfEnemyIsAlreadySelectedBySelectedWeapon(): Promise<boolean> {
-    let checker = true;
-  
-    const x = this.warshipCombatArray!.find((combatItem: WarshipCombatItem) => {
-      return (combatItem.enemyStats == this.selectedActiveEnemy && combatItem.weapon == this.selectedWeapon);
-    })
-
-    if((this.warshipCombatArray! == null)) {
-      checker = false;
-      this.appendCombatArray();
-    } 
-    else if((this.warshipCombatArray! != null) && (typeof x != undefined)) {
-      checker = true;
-      this.logFeedback = `${this.selectedActiveEnemy!.elementID} already selected by ${this.selectedWeapon!.weaponName}.`;
-      await this.appendRightUiLogFeedback();
-    }
-
-    return Promise.resolve(checker);
   }
 
   async decrementAmmo(weapon: WeaponType): Promise<string> {
@@ -152,6 +119,12 @@ export class CombatService {
       this.weaponService.decrementWeaponAmmo(weapon, weapon.firingRate);
     }, 1000);
     
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async resetSelection(): Promise<string> {
+    this.enemyStatsService.resetSelection();
+
     return Promise.resolve(this.resolutionMessage);
   }
 
@@ -165,7 +138,7 @@ export class CombatService {
 
   async startCombatBySelection(): Promise<string> {
     if(this.selectedWeapon != null) {
-      await this.checkWeaponVector();
+      await this.doWeaponHasVector();
     }
     else {
       this.logFeedback = "Weapon not selected";
@@ -175,51 +148,14 @@ export class CombatService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async checkIfWeaponIsBusy(): Promise<boolean> {
-    let checker = false;
-    let counter = 0;
-    this.warshipCombatArray!.forEach((combatItem: WarshipCombatItem) => {
-      if(combatItem.weapon = this.selectedWeapon!) {
-        counter++;
-      };
-    });
+  async startAutomaticCombat(): Promise<string> {
 
-    const weaponQuantity = await this.getWeaponQuantity();
+  }
 
-    if(counter > weaponQuantity) {
-      checker = true;
-    }
-    else if(counter <= weaponQuantity) {
-      checker = false;
-    }
+  async isEnemyInDistance(): Promise<boolean> {
+    let checker: boolean = true;
 
     return Promise.resolve(checker);
-  }
-
-  async checkWeaponVector(): Promise<string> {
-    const checker: boolean = false;
-
-    if(this.selectedWeapon!.attackVector.includes(this.selectedActiveEnemy!.enemyType!.enemyClass)) {
-      this.checkWeaponRange();
-    }
-    else {
-      this.logFeedback = `Weapon can't target ${this.selectedActiveEnemy!.enemyType!.enemyClass} enemies`;
-      this.appendRightUiLogFeedback();
-    }
-
-    return Promise.resolve(this.resolutionMessage);
-  }
-
-  async checkWeaponRange(): Promise<string> {
-    if(((this.selectedWeapon!.range.ground / 10) >= (this.warshipX - this.selectedActiveEnemy!.x)) || ((this.selectedWeapon!.range.air / 10) >= (this.warshipX - this.selectedActiveEnemy!.x)) || ((this.selectedWeapon!.range.submarine / 10) >= (this.warshipX - this.selectedActiveEnemy!.x))) {
-      await this.checkIfEnemyIsAlreadySelectedBySelectedWeapon();
-    } 
-    else {
-      this.logFeedback = `Enemy out of range`;
-      this.appendRightUiLogFeedback();
-    }
-
-    return Promise.resolve(this.resolutionMessage)
   }
 
   async getWeaponIndexInWarshipWeapons(): Promise<number> {
@@ -238,11 +174,11 @@ export class CombatService {
   }
 
   async createCombatWorker(): Promise<string> {
+
     if (typeof Worker !== 'undefined') {
       // Create a new
-      const worker = new Worker(new URL('src/app/combat/Services/combat.service.ts', import.meta.url));
+      const worker = new Worker(new URL('src/app/combat/Workers/combat.worker.ts', import.meta.url));
       worker.onmessage = ({ data }) => {
-        console.log(`page got message: ${data}`);
       };
       worker.postMessage('hello');
     } else {
@@ -263,7 +199,6 @@ export class CombatService {
     else {
       damage = damageArray[1];
     }
-
     
     const enduranceTaken = weapon.armorPenetration + (weapon.firingRate * damage);
 
@@ -277,4 +212,78 @@ export class CombatService {
     
     return Promise.resolve(damage)
   }
+
+  async isEnemyAlreadySelectedBySelectedWeapon(): Promise<boolean> {
+    let checker = true;
+  
+    const warshipCombatItem = this.warshipCombatArray!.find((combatItem: WarshipCombatItem) => {
+      return (combatItem.enemyStats == this.selectedActiveEnemy && combatItem.weapon == this.selectedWeapon);
+    })
+    
+    if((this.warshipCombatArray! == null)) {
+      checker = false;
+      this.appendCombatArray();
+      this.calculateDamage(this.selectedActiveEnemy!, this.selectedWeapon!);
+    } 
+    else if((this.warshipCombatArray! != null) && (typeof warshipCombatItem != undefined)) {
+      checker = true;
+      this.logFeedback = `${this.selectedActiveEnemy!.elementID} already selected by ${this.selectedWeapon!.weaponName}.`;
+      await this.appendRightUiLogFeedback();
+    }
+
+    return Promise.resolve(checker);
+  }
+
+  async isWeaponBusy(): Promise<boolean> {
+    let checker = false;
+    let counter = 0;
+    this.warshipCombatArray!.forEach((combatItem: WarshipCombatItem) => {
+      if(combatItem.weapon = this.selectedWeapon!) {
+        counter++;
+      } 
+    });
+
+    const weaponQuantity = await this.getWeaponQuantity();
+
+    if(counter > weaponQuantity) {
+      checker = true;
+      this.logFeedback = `${this.selectedWeapon} is busy.`;
+    }
+    else if(counter <= weaponQuantity) {
+      checker = false;
+      await this.isEnemyAlreadySelectedBySelectedWeapon();
+    }
+
+    return Promise.resolve(checker);
+  }
+
+  async doWeaponHasVector(): Promise<boolean> {
+    let checker: boolean = false;
+
+    if(this.selectedWeapon!.attackVector.includes(this.selectedActiveEnemy!.enemyType!.enemyClass)) {
+      this.doWeaponHasRange();
+      checker = true;
+    }
+    else {
+      this.logFeedback = `Weapon can't target ${this.selectedActiveEnemy!.enemyType!.enemyClass} enemies`;
+      this.appendRightUiLogFeedback();
+    }
+
+    return Promise.resolve(checker);
+  }
+
+  async doWeaponHasRange(): Promise<boolean> {
+    let checker = false;
+    if(((this.selectedWeapon!.range.ground / 10) >= (this.warshipX - this.selectedActiveEnemy!.x)) || ((this.selectedWeapon!.range.air / 10) >= (this.warshipX - this.selectedActiveEnemy!.x)) || ((this.selectedWeapon!.range.submarine / 10) >= (this.warshipX - this.selectedActiveEnemy!.x))) {
+      await this.isWeaponBusy();
+      checker = true;
+    } 
+    else {
+      this.logFeedback = `Enemy out of range`;
+      this.appendRightUiLogFeedback();
+    }
+
+    return Promise.resolve(checker)
+  }
+  
 }

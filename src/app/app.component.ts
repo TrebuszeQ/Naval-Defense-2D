@@ -10,4 +10,8 @@ export class AppComponent {
   title = 'warships';
   faArrowRight = faArrowRight;
   faArrowLeft = faArrowLeft;
+
+  constructor() {
+  }
+
 }
