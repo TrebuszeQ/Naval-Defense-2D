@@ -143,14 +143,7 @@ export class EnemyStatsService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async calculateDistance(activeEnemy: ActiveEnemy): Promise<number> {
-    let distance: number = activeEnemy.x - this.warshipX!;
-    if(distance < 0) {
-      distance *= -1;
-    };
-    await this.combatService.isEnemyInDistance();
-    return Promise.resolve(distance);
-  }
+  
 
   async getStartingWarshipPosition(): Promise<string> {
     const getStartingWarshipXObserver = { 
@@ -174,7 +167,8 @@ export class EnemyStatsService {
 
         if(this.activeEnemyArray != null) {
           this.activeEnemyArray.forEach( async (activeEnemy: ActiveEnemy) => {
-            await this.calculateDistance(activeEnemy);
+            // wip
+            // await this.combatService.calculateDistance(activeEnemy);
           });
         }
         
