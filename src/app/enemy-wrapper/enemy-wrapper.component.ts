@@ -73,23 +73,6 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  // async getEnemyArray(): Promise<string> {
-  //   const getEnemyArrayObserver = {
-  //     next: (enemyArray: Enemy[]) => {
-  //       this.enemyArray = enemyArray;
-  //     },
-  //     error: (error: Error) => {
-  //       console.error(`getEnemyArrayObserver on enemy-wrapper.component encountered an issue: ${error}.`);
-  //     },
-  //     // complete: () => {
-  //     //   console.log("getEnemyArrayObserver on enemy.component completed");
-  //     // }
-  //   }
-
-  //   this.enemyArrayService.getEnemyArray().subscribe(getEnemyArrayObserver).unsubscribe();
-  //   return Promise.resolve(this.resolutionMessage);
-  // }
-
   async getAllEnemyCounter(): Promise<string> {
     this.enemyCounterService.enemyCounterArraySubjects[0].subjectQuantity.subscribe({
       next: (enemyCounter: number) => {
@@ -230,9 +213,10 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
 
     await this.appendRightUiLogFeedback();
 
-    const firstClickListener = enemyElement.addEventListener("click", (event: MouseEvent) => {
-      this.selectEnemy(enemyStatsItem);
-    });
+    // wip
+    // const firstClickListener = enemyElement.addEventListener("click", (event: MouseEvent) => {
+    //   this.selectEnemy(enemyStatsItem);
+    // });
 
     return Promise.resolve(this.resolutionMessage);
   }

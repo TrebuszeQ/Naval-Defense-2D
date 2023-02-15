@@ -8,6 +8,8 @@ import { EnemyCounterService } from './enemy-counter.service';
 import { RightUiLogService } from 'src/app/level-wrapper/levels/Services/rightui-log.service';
 import { WarshipPositionService } from 'src/app/character/services/warship-position.service';
 import { CombatService } from 'src/app/combat/Services/combat.service';
+// arrays
+import { activeEnemyArray, activeEnemyArraySubject } from '../Arrays/active-enemy-array';
 
 
 @Injectable({
@@ -21,15 +23,19 @@ export class EnemyStatsService {
   index: number = 0;
   selectedActiveEnemy: ActiveEnemy | null = null;
   selectedActiveEnemySubject: Subject<ActiveEnemy> | null = new Subject<ActiveEnemy>();
-  activeEnemyArray: ActiveEnemy[] = [];
-  activeEnemyArraySubject: Subject<ActiveEnemy>[] = [];
+  activeEnemyArray = activeEnemyArray;
+  activeEnemyArraySubject = activeEnemyArraySubject;
   enemyToDestroy: Subject<ActiveEnemy> = new Subject();
   logFeedback: string = "";
   warshipX: number | null = null;
-  constructor(private enemyCounterService: EnemyCounterService, private rightUiLogService: RightUiLogService, private warshipPositionService: WarshipPositionService, private combatService: CombatService) {
+  constructor(private enemyCounterService: EnemyCounterService, private rightUiLogService: RightUiLogService, private warshipPositionService: WarshipPositionService, ) {
     this.getStartingWarshipPosition();
     this.getWarshipPositionSubject();
   }
+
+  // getActiveEnemyArrayObservable() {
+  //   return of(activeEnemyArray);
+  // }
 
   async appendRightUiLogFeedback(): Promise<string> {
     this.rightUiLogService.updateRightUiLog(this.logFeedback);
@@ -143,8 +149,6 @@ export class EnemyStatsService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  
-
   async getStartingWarshipPosition(): Promise<string> {
     const getStartingWarshipXObserver = { 
       next: async (warshipX: number) => {
@@ -164,14 +168,6 @@ export class EnemyStatsService {
     this.warshipPositionService.warshipXSubject.subscribe({
       next: async (warshipX: number) => {
         this.warshipX = warshipX;
-
-        if(this.activeEnemyArray != null) {
-          this.activeEnemyArray.forEach( async (activeEnemy: ActiveEnemy) => {
-            // wip
-            // await this.combatService.calculateDistance(activeEnemy);
-          });
-        }
-        
       },
       error: async (error: Error) => {
         console.error(`getWatershipPositionSubject() on enemy-stats.service encountered an error: ${error}`);

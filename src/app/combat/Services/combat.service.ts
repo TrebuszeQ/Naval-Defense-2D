@@ -19,9 +19,8 @@ import { TorpedoEffectsService } from 'src/app/torpedo/Services/torpedo-effects.
 import { RightUiLogService } from 'src/app/level-wrapper/levels/Services/rightui-log.service';
 // types
 import { vector } from 'src/app/weapon/Types/vector';
-// ngrx
+// rxjs
 import { Subject } from 'rxjs';
-
 
 
 @Injectable({
@@ -38,6 +37,7 @@ export class CombatService {
   torpedo: TorpedoType | null = null;
   warshipCombatArray: WarshipCombatItem[] = [];
   warshipCombatArraySubject: Subject <WarshipCombatItem>[] = [];
+  activeEnemyArray: ActiveEnemy[] = [];
 
   constructor(private warshipTypeService: WarshipTypeService, private warshipPositionService: WarshipPositionService, private weaponService: WeaponService, private enemyPositionService: EnemyStatsService, private enemyCounterService: EnemyCounterService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService, private torpedoEffectsService: TorpedoEffectsService, private rightUiLogService: RightUiLogService, private enemyStatsService: EnemyStatsService) { 
     this.getWarshipType();
@@ -85,6 +85,11 @@ export class CombatService {
     this.warshipPositionService.warshipXSubject.subscribe({
       next: (warshipX: number) => {
         this.warshipX = warshipX;
+        if(this.activeEnemyArray != null) {
+          this.activeEnemyArray.forEach( async (activeEnemy: ActiveEnemy) => {
+            await this.calculateDistance(activeEnemy);
+          });
+        }
       }
     });
     
@@ -108,6 +113,12 @@ export class CombatService {
     };
     
     return Promise.resolve(distance);
+  }
+
+  async getActiveEnemyArray(): Promise<string> {
+    // this.enemyStatsService.activeEnemyArraySubject[]
+
+    return Promise.resolve(this.resolutionMessage);
   }
 
   async getSelectedActiveEnemySubject(): Promise<string> {
@@ -311,6 +322,7 @@ export class CombatService {
     return Promise.resolve(damage)
   }
 
+  // wip
   async startDealingDamage(): Promise<string> {
     
 
@@ -338,6 +350,7 @@ export class CombatService {
     return Promise.resolve(checker);
   }
 
+  // wip
   async maintainCombat(combatItem: WarshipCombatItem): Promise<string> {
     const distance = await this.calculateDistance(combatItem.activeEnemy);
     const combatInterval = setInterval(async () => {
@@ -352,7 +365,7 @@ export class CombatService {
 
     return Promise.resolve(this.resolutionMessage);
   }
-
+  // wip
   async breakCombat(): Promise<string> {
 
     return Promise.resolve(this.resolutionMessage);
