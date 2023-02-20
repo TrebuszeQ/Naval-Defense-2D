@@ -9,6 +9,7 @@ export interface ActiveEnemy {
     x: number, 
     y: number,
     endurance: number,
+    distance: number,
 };
 
 export interface ActiveEnemySubjects {
@@ -16,5 +17,6 @@ export interface ActiveEnemySubjects {
     enemyType: Subject<Enemy>,
     x: Subject<number>,
     y: Subject<number>, 
-    endurance: Subject<number>
+    endurance: Subject<number>,
+    distance: Subject<number>,
 }

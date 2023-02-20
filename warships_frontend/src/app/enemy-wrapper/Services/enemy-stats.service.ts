@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 // rxjs
-import { Observable, of, Subject } from 'rxjs';
+import { count, Observable, of, Subject } from 'rxjs';
 // interfaces
 import { ActiveEnemy } from '../Interfaces/active-enemy';
 // services
@@ -23,8 +23,8 @@ export class EnemyStatsService {
   index: number = 0;
   selectedActiveEnemy: ActiveEnemy | null = null;
   selectedActiveEnemySubject: Subject<ActiveEnemy> | null = new Subject<ActiveEnemy>();
-  activeEnemyArray = activeEnemyArray;
-  activeEnemyArraySubject = activeEnemyArraySubject;
+  activeEnemyArray: ActiveEnemy[] = activeEnemyArray;
+  activeEnemyArraySubject: Subject<ActiveEnemy>[] = activeEnemyArraySubject;
   enemyToDestroy: Subject<ActiveEnemy> = new Subject();
   logFeedback: string = "";
   warshipX: number | null = null;
@@ -112,13 +112,15 @@ export class EnemyStatsService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async decreaseEnemyEndurance(activeEnemy: ActiveEnemy, amount: number): Promise<string> {
+  async decreaseEnemyEndurance(activeEnemy: ActiveEnemy, amount: number): Promise<number> {
     const index = await this.findEnemyIndexByElementId(activeEnemy.elementID);
 
-      this.activeEnemyArray[index].endurance -= amount;
-      this.activeEnemyArraySubject[index].next(this.activeEnemyArray[index]);
+      const enemyTakingDamage = this.activeEnemyArray[index];
 
-    return Promise.resolve(this.resolutionMessage);
+      enemyTakingDamage.endurance -= amount;
+      this.activeEnemyArraySubject[index].next(enemyTakingDamage);
+
+    return Promise.resolve(enemyTakingDamage.endurance);
   }
 
   async watchEnemyEndurance(elementID: string): Promise<string> {
@@ -168,6 +170,16 @@ export class EnemyStatsService {
     this.warshipPositionService.warshipXSubject.subscribe({
       next: async (warshipX: number) => {
         this.warshipX = warshipX;
+        let counter: number = 0;
+        if(this.activeEnemyArray != null) {
+          for(let enemy of this.activeEnemyArray) {
+            counter++;
+            const distance = await this.calculateDistanceX(enemy);
+            this.activeEnemyArray[counter].distance = distance;
+            const forSubject: ActiveEnemy = this.activeEnemyArray[counter];
+            this.activeEnemyArraySubject[counter].next(forSubject);
+          }
+        }
       },
       error: async (error: Error) => {
         console.error(`getWatershipPositionSubject() on enemy-stats.service encountered an error: ${error}`);
@@ -175,5 +187,10 @@ export class EnemyStatsService {
     });
 
     return Promise.resolve(this.resolutionMessage);
+  }
+  
+  async calculateDistanceX(activeEnemy: ActiveEnemy): Promise<number> {
+    const distance: number = activeEnemy.x - this.warshipX!;
+    return Promise.resolve(distance);
   }
 }

@@ -5,7 +5,7 @@ import { Enemy } from 'src/app/enemy-wrapper/Interfaces/enemy';
 import { TorpedoType } from 'src/app/torpedo/Interfaces/torpedo-type';
 import { WeaponType } from 'src/app/weapon/Interfaces/weapon-type';
 import { ActiveEnemy } from 'src/app/enemy-wrapper/Interfaces/active-enemy';
-import { WarshipCombatItem } from '../Interfaces/combat-item';
+import { WarshipCombatData } from '../Interfaces/combat-data';
 // services
 import { WarshipPositionService } from 'src/app/character/services/warship-position.service';
 import { WarshipTypeService } from 'src/app/character/services/warship-type.service';
@@ -35,9 +35,10 @@ export class CombatService {
   selectedWeapon: WeaponType | null = null;
   selectedActiveEnemy: ActiveEnemy | null = null;
   torpedo: TorpedoType | null = null;
-  warshipCombatArray: WarshipCombatItem[] = [];
-  warshipCombatArraySubject: Subject <WarshipCombatItem>[] = [];
+  warshipCombatArray: WarshipCombatData[] = [];
+  warshipCombatArraySubject: Subject <WarshipCombatData>[] = [];
   activeEnemyArray: ActiveEnemy[] = [];
+  firingInterval: null | NodeJS.Timer = null;
 
   constructor(private warshipTypeService: WarshipTypeService, private warshipPositionService: WarshipPositionService, private weaponService: WeaponService, private enemyPositionService: EnemyStatsService, private enemyCounterService: EnemyCounterService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService, private torpedoEffectsService: TorpedoEffectsService, private rightUiLogService: RightUiLogService, private enemyStatsService: EnemyStatsService) { 
     this.getWarshipType();
@@ -85,11 +86,6 @@ export class CombatService {
     this.warshipPositionService.warshipXSubject.subscribe({
       next: (warshipX: number) => {
         this.warshipX = warshipX;
-        if(this.activeEnemyArray != null) {
-          this.activeEnemyArray.forEach( async (activeEnemy: ActiveEnemy) => {
-            await this.calculateDistance(activeEnemy);
-          });
-        }
       }
     });
     
@@ -106,20 +102,27 @@ export class CombatService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async calculateDistance(activeEnemy: ActiveEnemy): Promise<number> {
-    let distance: number = activeEnemy.x - this.warshipX!;
-    if(distance < 0) {
-      distance *= -1;
-    };
+  // async calculateDistance(activeEnemy: ActiveEnemy): Promise<number> {
+  //   let distance: number = activeEnemy.x - this.warshipX!;
+  //   if(distance < 0) {
+  //     distance *= -1;
+  //   };
     
-    return Promise.resolve(distance);
-  }
+  //   return Promise.resolve(distance);
+  // }
 
-  async getActiveEnemyArray(): Promise<string> {
-    // this.enemyStatsService.activeEnemyArraySubject[]
+  // async getActiveEnemyArraySubject(): Promise<string> {
+  //   const activeEnemyArraySubject = this.enemyStatsService.activeEnemyArraySubject;
+  //   for(let enemy of activeEnemyArraySubject) {
+  //     enemy.subscribe({
+  //       next: (activeEnemy: ActiveEnemy) {
+  //         this.activeEnemyArray[]
+  //       }
+  //     })
+  //   }
 
-    return Promise.resolve(this.resolutionMessage);
-  }
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
 
   async getSelectedActiveEnemySubject(): Promise<string> {
     if(this.enemyStatsService.selectedActiveEnemySubject != null) {
@@ -151,9 +154,9 @@ export class CombatService {
   }
 
   async appendCombatArray(): Promise<string> {
-    const combatItem: WarshipCombatItem = {activeEnemy: this.selectedActiveEnemy!, weapon: this.selectedWeapon!, weaponQuantity: await this.getWeaponQuantity()};
+    const combatItem: WarshipCombatData = {activeEnemy: this.selectedActiveEnemy!, weapon: this.selectedWeapon!, weaponQuantity: await this.getWeaponQuantity()};
     this.warshipCombatArray!.push(combatItem);
-    this.warshipCombatArraySubject.push(new Subject<WarshipCombatItem>());
+    this.warshipCombatArraySubject.push(new Subject<WarshipCombatData>());
     if(this.warshipCombatArraySubject.length > 0) {
       this.warshipCombatArraySubject[this.warshipCombatArraySubject.length - 1].next(combatItem);
     }
@@ -163,15 +166,27 @@ export class CombatService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async appendCombatArrayAuto(activeEnemy: ActiveEnemy, weapon: WeaponType): Promise<string> {
-    const combatItem: WarshipCombatItem = {activeEnemy: activeEnemy, weapon: weapon, weaponQuantity: await this.getWeaponQuantityAuto(weapon)};
-    this.warshipCombatArray!.push(combatItem);
-    this.warshipCombatArraySubject.push(new Subject<WarshipCombatItem>());
+  // async appendCombatArrayAuto(activeEnemy: ActiveEnemy, weapon: WeaponType): Promise<string> {
+  //   const combatItem: WarshipCombatData = {activeEnemy: activeEnemy, weapon: weapon, weaponQuantity: await this.getWeaponQuantityAuto(weapon)};
+  //   this.warshipCombatArray!.push(combatItem);
+  //   this.warshipCombatArraySubject.push(new Subject<WarshipCombatData>());
+  //   if(this.warshipCombatArraySubject.length > 0) {
+  //     this.warshipCombatArraySubject[this.warshipCombatArraySubject.length - 1].next(combatItem);
+  //   }
+  //   else {
+  //     this.warshipCombatArraySubject[0].next(combatItem);
+  //   }
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
+
+  async appendCombatArrayAuto2(warshipCombatData: WarshipCombatData): Promise<string> {
+    this.warshipCombatArray!.push(warshipCombatData);
+    this.warshipCombatArraySubject.push(new Subject<WarshipCombatData>());
     if(this.warshipCombatArraySubject.length > 0) {
-      this.warshipCombatArraySubject[this.warshipCombatArraySubject.length - 1].next(combatItem);
+      this.warshipCombatArraySubject[this.warshipCombatArraySubject.length - 1].next(warshipCombatData);
     }
     else {
-      this.warshipCombatArraySubject[0].next(combatItem);
+      this.warshipCombatArraySubject[0].next(warshipCombatData);
     }
     return Promise.resolve(this.resolutionMessage);
   }
@@ -187,72 +202,152 @@ export class CombatService {
 
     return Promise.resolve(this.resolutionMessage);
   }
-
+  // wip
   async startAutomaticCombat(): Promise<string> {
+    let automaticCheckDistances = setInterval(async () => {});
+    let weapons: {weapon: WeaponType, quantity: number}[];
+
+
+    if(this.activeEnemyArray != null || this.activeEnemyArray != 0) {
+      const activeEnemyArraySorted = this.activeEnemyArray.sort((a: ActiveEnemy, b: ActiveEnemy) => {
+        return a.distance - b.distance;
+      });
+
+      automaticCheckDistances = setInterval(async () => {
+        if(this.warshipCombatArray.length == 0) {
+          weapons = this.warshipType!.availableWeapons!;
+        } 
+        else {
+          let counter = 0;
+          weapons = await this.selectFreeWeaponAuto2(); 
+          for(let weaponObj of weapons) {
+            let activeEnemy: ActiveEnemy = activeEnemyArraySorted[counter];
+            const hasVector: boolean = await this.doWeaponHasVectorAuto2(activeEnemy, weaponObj.weapon);
+            if(hasVector == true) {
+              let warshipCombatData: WarshipCombatData = {activeEnemy: activeEnemy, weapon: weaponObj.weapon, weaponQuantity: weaponObj.quantity};
+              const isInRange = this.isEnemyInRangeAuto2(activeEnemy, weaponObj.weapon);
+              await this.appendCombatArrayAuto2(warshipCombatData);
+              await this.maintainCombat(warshipCombatData);
+            }
+          }
+        }
+      }, 1000);
+      
+      
+    }
 
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async isEnemyInRangeAuto(activeEnemy: ActiveEnemy, weapon: WeaponType, distance: number): Promise<boolean> {
-    let checker: boolean = true;
+  // async isEnemyInRangeAuto(activeEnemy: ActiveEnemy, weapon: WeaponType): Promise<boolean> {
+  //   let checker: boolean = true;
+    
+  //   switch(activeEnemy.enemyType.enemyClass) {
+  //     case "air":
+  //       if(weapon.range.air <= activeEnemy.distance) {
+  //         await this.appendCombatArrayAuto(activeEnemy, weapon);
+  //         await this.calculateDamage(this.selectedActiveEnemy!, this.selectedWeapon!);
+  //       } 
+  //     break;
+      
+  //     case "ground":
+  //       if(weapon.range.ground <= activeEnemy.distance) {
+  //         await this.appendCombatArrayAuto(activeEnemy, weapon);
+  //         await this.calculateDamage(this.selectedActiveEnemy!, this.selectedWeapon!);
+  //       } 
+  //     break;
+
+  //     case "submarine":
+  //       if(weapon.range.submarine <= activeEnemy.distance) {
+  //         await this.appendCombatArrayAuto(activeEnemy, weapon);
+  //         await this.calculateDamage(this.selectedActiveEnemy!, this.selectedWeapon!);
+  //       } 
+  //     break;
+  //   }
+  //   return Promise.resolve(checker);
+  // }
+
+  async isEnemyInRangeAuto2(activeEnemy: ActiveEnemy, weapon: WeaponType): Promise<boolean> {
+    let checker: boolean = false;
     
     switch(activeEnemy.enemyType.enemyClass) {
       case "air":
-        if(weapon.range.air <= distance) {
-          await this.appendCombatArrayAuto(activeEnemy, weapon);
-          await this.calculateDamage(this.selectedActiveEnemy!, this.selectedWeapon!);
+
+        if(weapon.range.air <= activeEnemy.distance) {
+          return true;
         } 
       break;
       
       case "ground":
-        if(weapon.range.ground <= distance) {
-          await this.appendCombatArrayAuto(activeEnemy, weapon);
-          await this.calculateDamage(this.selectedActiveEnemy!, this.selectedWeapon!);
+        if(weapon.range.ground <= activeEnemy.distance) {
+          return true;
         } 
       break;
 
       case "submarine":
-        if(weapon.range.submarine <= distance) {
-          await this.appendCombatArrayAuto(activeEnemy, weapon);
-          await this.calculateDamage(this.selectedActiveEnemy!, this.selectedWeapon!);
+        if(weapon.range.submarine <= activeEnemy.distance) {
+          return true;
         } 
       break;
     }
     return Promise.resolve(checker);
   }
 
-  async doWeaponHasVectorAuto(activeEnemy: ActiveEnemy, weapon: WeaponType, distance: number): Promise<boolean> {
-    let checker: boolean = true;
-    let containsVector: boolean = weapon.attackVector.includes(activeEnemy.enemyType.enemyClass);
-    if(containsVector == true) {
-      await this.isEnemyInRangeAuto(activeEnemy, weapon, distance);
-    }
+  // async doWeaponHasVectorAuto(activeEnemy: ActiveEnemy, weapon: WeaponType, distance: number): Promise<boolean> {
+  //   let checker: boolean = true;
+  //   let containsVector: boolean = weapon.attackVector.includes(activeEnemy.enemyType.enemyClass);
+  //   if(containsVector == true) {
+  //     await this.isEnemyInRangeAuto(activeEnemy, weapon);
+  //   }
 
-    return Promise.resolve(checker);
+  //   return Promise.resolve(checker);
+  // }
+
+  async doWeaponHasVectorAuto2(activeEnemy: ActiveEnemy, weapon: WeaponType): Promise<boolean> {
+    const containsVector: boolean = weapon.attackVector.includes(activeEnemy.enemyType.enemyClass);
+
+    return Promise.resolve(containsVector);
   }
 
-  async selectFreeWeaponAuto(activeEnemy: ActiveEnemy,distance: number): Promise<string> {
-    if(this.warshipCombatArray != null && this.warshipCombatArray.length == 0) {
-      for(let i = 0; i < this.warshipType!.availableWeapons!.weapon.length; i++) {
-        await this.doWeaponHasVectorAuto(activeEnemy, this.warshipType!.availableWeapons!.weapon[i], distance);
-      } 
-    } 
-    else if (this.warshipCombatArray != null && this.warshipCombatArray.length != 0) {
-      for(let i = 0; i < this.warshipType!.availableWeapons!.weapon.length; i++) {
-        const includes = this.warshipCombatArray.find((warshipCombatItem: WarshipCombatItem) => {
-          return this.warshipType!.availableWeapons!.weapon[i] == warshipCombatItem.weapon
-        })
-        if(includes == undefined) {
-          await this.doWeaponHasVectorAuto(activeEnemy, this.warshipType!.availableWeapons!.weapon[i], distance);
+  // async selectFreeWeaponAuto(activeEnemy: ActiveEnemy,distance: number): Promise<string> {
+  //   if(this.warshipCombatArray != null && this.warshipCombatArray.length == 0) {
+  //     for(let i = 0; i < this.warshipType!.availableWeapons!.weapon.length; i++) {
+  //       await this.doWeaponHasVectorAuto(activeEnemy, this.warshipType!.availableWeapons!.weapon[i], distance);
+  //     } 
+  //   } 
+  //   else if (this.warshipCombatArray != null && this.warshipCombatArray.length != 0) {
+  //     for(let i = 0; i < this.warshipType!.availableWeapons!.weapon.length; i++) {
+  //       const includes = this.warshipCombatArray.find((warshipCombatItem: WarshipCombatData) => {
+  //         return this.warshipType!.availableWeapons!.weapon[i] == warshipCombatItem.weapon
+  //       })
+  //       if(includes == undefined) {
+  //         await this.doWeaponHasVectorAuto(activeEnemy, this.warshipType!.availableWeapons!.weapon[i], distance);
+  //       }
+  //     }
+  //   } 
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
+
+  async selectFreeWeaponAuto2(): Promise<{weapon: WeaponType, quantity: number}[]>{
+    const availableWeapons = this.warshipType!.availableWeapons!;
+    let weapons = [];
+  if (this.warshipCombatArray != null && this.warshipCombatArray.length != 0) {
+      for(let i = 0; i < availableWeapons.weapon.length; i++) {
+        const includes = this.warshipCombatArray.findIndex((warshipCombatItem: WarshipCombatData) => {
+          return availableWeapons.weapon[i] == warshipCombatItem.weapon;
+        });
+        if(includes == -1) {
+          let weaponObject: {weapon: WeaponType, quantity: number} = {weapon: availableWeapons.weapon[i], quantity: availableWeapons.quantity[i]}
+          weapons.push(weaponObject);
         }
       }
     } 
-    return Promise.resolve(this.resolutionMessage);
+    return Promise.resolve(weapons);
   }
-
+  
   async getWeaponIndexInWarshipWeaponsAuto(weapon: WeaponType): Promise<number> {
     const index = this.warshipType!.availableWeapons!.weapon.findIndex((weaponType: WeaponType) => {
-      return weaponType = weapon;
+      return weaponType == weapon;
     });
     
     return Promise.resolve(index);
@@ -267,7 +362,7 @@ export class CombatService {
   
   async getWeaponIndexInWarshipWeapons(): Promise<number> {
     const index = this.warshipType!.availableWeapons!.weapon.findIndex((weaponType: WeaponType) => {
-      return weaponType = this.selectedWeapon!;
+      return weaponType == this.selectedWeapon!;
     });
     
     return Promise.resolve(index);
@@ -314,17 +409,32 @@ export class CombatService {
       this.appendRightUiLogFeedback();
     }
     else {
-      const firingInterval = setInterval(async () => {
-        this.enemyStatsService.decreaseEnemyEndurance(activeEnemy, enduranceTaken);
-      }, 1000); 
+      await this.dealDamage(activeEnemy, enduranceTaken)
     }
     
     return Promise.resolve(damage)
   }
 
   // wip
-  async startDealingDamage(): Promise<string> {
-    
+  async dealDamage(activeEnemy: ActiveEnemy, enduranceTaken: number): Promise<string> {
+    const firingInterval = setInterval(async () => {
+      const endurance = await this.enemyStatsService.decreaseEnemyEndurance(activeEnemy, enduranceTaken);
+      if(endurance <= 0) {
+        const index = await this.enemyStatsService.findEnemyIndexByElementId(activeEnemy.elementID);
+        await this.enemyStatsService.removeDeadEnemy(index);
+        await this.stopDealingDamage();
+      }
+    }, 1000); 
+    this.firingInterval = firingInterval;
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async stopDealingDamage(): Promise<string> {
+    if(this.firingInterval != null) {
+      clearInterval(this.firingInterval!);
+      this.firingInterval = null;
+    } 
 
     return Promise.resolve(this.resolutionMessage);
   }
@@ -332,7 +442,7 @@ export class CombatService {
   async isEnemyAlreadySelectedBySelectedWeapon(): Promise<boolean> {
     let checker = true;
   
-    const warshipCombatItem = this.warshipCombatArray!.find((combatItem: WarshipCombatItem) => {
+    const warshipCombatItem = this.warshipCombatArray!.find((combatItem: WarshipCombatData) => {
       return (combatItem.activeEnemy == this.selectedActiveEnemy && combatItem.weapon == this.selectedWeapon);
     })
     
@@ -351,18 +461,22 @@ export class CombatService {
   }
 
   // wip
-  async maintainCombat(combatItem: WarshipCombatItem): Promise<string> {
-    const distance = await this.calculateDistance(combatItem.activeEnemy);
-    const combatInterval = setInterval(async () => {
-      const remainsInDistance = await this.isEnemyInRangeAuto(combatItem.activeEnemy, combatItem.weapon, distance);
-      if(remainsInDistance == true) {
-        await this.calculateDamage(combatItem.activeEnemy, combatItem.weapon);
-      } 
-      else {
-
-      }
-    });
-
+  async maintainCombat(WarshipCombatData: WarshipCombatData): Promise<string> {
+    let combatInterval = setInterval(async () => {});
+    if(this.activeEnemyArray != null || this.activeEnemyArray != 0) {
+      combatInterval = setInterval(async () => {
+        const remainsInDistance = await this.isEnemyInRangeAuto2(WarshipCombatData.activeEnemy, WarshipCombatData.weapon);
+        if(remainsInDistance == true) {
+          await this.calculateDamage(WarshipCombatData.activeEnemy, WarshipCombatData.weapon);
+        } 
+        else {
+          await this.stopDealingDamage();
+        }
+      }, 1000);
+    }
+    else {
+      clearInterval(combatInterval);
+    }
     return Promise.resolve(this.resolutionMessage);
   }
   // wip
@@ -374,7 +488,7 @@ export class CombatService {
   async isWeaponBusy(): Promise<boolean> {
     let checker = false;
     let counter = 0;
-    this.warshipCombatArray!.forEach((combatItem: WarshipCombatItem) => {
+    this.warshipCombatArray!.forEach((combatItem: WarshipCombatData) => {
       if(combatItem.weapon = this.selectedWeapon!) {
         counter++;
       } 
