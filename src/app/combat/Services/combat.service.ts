@@ -46,6 +46,7 @@ export class CombatService {
     this.getWarshipPositionSubject();
     this.getWeaponSubject();
     this.getSelectedActiveEnemySubject();
+    this.createAutoCombatWorker();
   }
 
   async appendRightUiLogFeedback(): Promise<string> {

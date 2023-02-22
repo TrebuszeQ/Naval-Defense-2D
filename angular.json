@@ -63,7 +63,8 @@
               "browserTarget": "naval-defense-2d:build:production"
             },
             "development": {
-              "browserTarget": "naval-defense-2d:build:development"
+              "browserTarget": "naval-defense-2d:build:development",
+              "proxyConfig": "src/proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
