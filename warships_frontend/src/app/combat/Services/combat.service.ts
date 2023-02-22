@@ -375,17 +375,18 @@ export class CombatService {
     return Promise.resolve(quantity);
   }
 
-  async createCombatWorker(): Promise<string> {
+  async createAutoCombatWorker(): Promise<string> {
 
     if (typeof Worker !== 'undefined') {
       // Create a new
-      const worker = new Worker(new URL('src/app/combat/Workers/combat.worker.ts', import.meta.url));
+      const worker = new Worker(new URL('src/app/combat/Workers/automatic-combat-worker.worker', import.meta.url));
       worker.onmessage = ({ data }) => {
       };
       worker.postMessage('hello');
     } else {
       // Web Workers are not supported in this environment.
       // You should add a fallback so that your program still executes correctly.
+      throw new Error("The game won't work because this browser or environment don't support web workers.");
     }
     
     return Promise.resolve(this.resolutionMessage);

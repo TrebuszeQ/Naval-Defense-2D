@@ -123,20 +123,6 @@ export class EnemyStatsService {
     return Promise.resolve(enemyTakingDamage.endurance);
   }
 
-  async watchEnemyEndurance(elementID: string): Promise<string> {
-    const index = await this.findEnemyIndexByElementId(elementID);
-
-    this.activeEnemyArraySubject[index].subscribe({
-      next: async (activeEnemySubject: ActiveEnemy) => {
-        if(activeEnemySubject.endurance <= 0) {
-          await this.removeDeadEnemy(index);
-        };
-      }
-    });
-
-    return Promise.resolve(this.resolutionMessage);
-  }
-
   async watchEnemy(elementID: string): Promise<string> {
     const index = await this.findEnemyIndexByElementId(elementID);
 
