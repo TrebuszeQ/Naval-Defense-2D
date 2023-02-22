@@ -206,7 +206,7 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     const index = await this.enemyArrayService.getEnemyIndexByName(enemy.enemyName);
     this.enemyCounterService.incrementEnemySubjectsArray(index);
 
-    const enemyStatsItem: ActiveEnemy = {elementID: `${nameNew + await this.getSingleCounterOnce(enemyName)}`, enemyType: enemy, x: 0, y: (42 - this.waterLevel), endurance: enemy.endurance};
+    const enemyStatsItem: ActiveEnemy = {elementID: `${nameNew + await this.getSingleCounterOnce(enemyName)}`, enemyType: enemy, x: 0, y: (42 - this.waterLevel), endurance: enemy.endurance, distance: 0};
     this.enemyStatsService.appendActiveEnemyArray(enemyStatsItem)
     
     this.logFeedback += `${enemy.enemyName} detected`;

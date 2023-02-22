@@ -215,7 +215,7 @@ export class CombatService {
 
       automaticCheckDistances = setInterval(async () => {
         if(this.warshipCombatArray.length == 0) {
-          weapons = this.warshipType!.availableWeapons!;
+          // weapons = this.warshipType!.availableWeapons!;
         } 
         else {
           let counter = 0;

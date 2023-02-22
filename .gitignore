@@ -8,7 +8,6 @@
 
 # Node
 /node_modules
-/warships_frontend/node_modules
 npm-debug.log
 yarn-error.log
 
@@ -30,7 +29,6 @@ yarn-error.log
 .history/*
 
 # Miscellaneous
-/warships_frontend/.angular/cache
 /.angular/cache
 .sass-cache/
 /connect.lock

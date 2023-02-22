@@ -1,9 +1,6 @@
-# Warships
+# NavalDefense2d
 
-To run this game run ng serve and navigate to http://localhost:4200/pregame.
-This may not work on some days because I'm working on it.
-
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.0.2.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.0.2.
 
 ## Development server
 
