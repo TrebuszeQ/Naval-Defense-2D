@@ -157,13 +157,13 @@ export class EnemyStatsService {
       next: async (warshipX: number) => {
         this.warshipX = warshipX;
         let counter: number = 0;
-        if(this.activeEnemyArray != null) {
+        if(this.activeEnemyArray != null && this.activeEnemyArray.length != 0) {
           for(let enemy of this.activeEnemyArray) {
-            counter++;
             const distance = await this.calculateDistanceX(enemy);
             this.activeEnemyArray[counter].distance = distance;
             const forSubject: ActiveEnemy = this.activeEnemyArray[counter];
             this.activeEnemyArraySubject[counter].next(forSubject);
+            counter++;
           }
         }
       },

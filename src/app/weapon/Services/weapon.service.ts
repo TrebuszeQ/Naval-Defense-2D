@@ -25,7 +25,7 @@ export class WeaponService {
   constructor(private warshipTypeService: WarshipTypeService) { 
     this.getWarshipType();
     this.initializeWeaponArray();
-    this.watchAmmoAmountAndRefillIf0();
+    // this.watchAmmoAmountAndRefillIf0();
   }
 
   async getWarshipType() {
@@ -79,10 +79,14 @@ export class WeaponService {
   }
 
   async refillWeaponAmmo(weapon: WeaponType): Promise<string> {
-    const index = await this.findWeaponIndexInWeaponArray(weapon);
-    const quantity = this.warshipType!.availableWeapons!.quantity[index];
-
-    this.weaponArray[index].ammo = weapon.ammoCapacity * quantity;
+    const timeout = setTimeout(async () => {
+      const index = await this.findWeaponIndexInWeaponArray(weapon);
+      const quantity = this.warshipType!.availableWeapons!.quantity[index];
+      this.weaponArray[index].ammo = weapon.ammoCapacity * quantity;
+      this.weaponArraySubject[index].next(this.weaponArray[index]);  
+    }, weapon.reloadingRate * 1000);
+    timeout;
+    clearTimeout(timeout);
 
     return Promise.resolve(this.resolutionMessage);
   }
@@ -96,21 +100,21 @@ export class WeaponService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async watchAmmoAmountAndRefillIf0(): Promise<string> {
-    for(let i = 0; i < this.weaponArraySubject.length; i++) {
-      this.weaponArraySubject[i].subscribe({
-        next: async (weaponArrayItem: WeaponArrayItem) => {
-          if(weaponArrayItem.ammo <= 0) {
-            const timeout = setTimeout(() => {
-              this.refillWeaponAmmo(weaponArrayItem.weapon);
-              clearTimeout(timeout);
-            }, weaponArrayItem.weapon.reloadingRate * 1000);  
-          };
-        }
-      });
-    };
+  // async watchAmmoAmountAndRefillIf0(): Promise<string> {
+  //   for(let i = 0; i < this.weaponArraySubject.length; i++) {
+  //     this.weaponArraySubject[i].subscribe({
+  //       next: async (weaponArrayItem: WeaponArrayItem) => {
+  //         if(weaponArrayItem.ammo <= 0) {
+  //           const timeout = setTimeout(() => {
+  //             this.refillWeaponAmmo(weaponArrayItem.weapon);
+  //             clearTimeout(timeout);
+  //           }, weaponArrayItem.weapon.reloadingRate * 1000);  
+  //         };
+  //       }
+  //     });
+  //   };
   
-    return Promise.resolve(this.resolutionMessage);
-  }
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
 
 }

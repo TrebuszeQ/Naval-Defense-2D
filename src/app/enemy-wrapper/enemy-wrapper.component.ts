@@ -255,7 +255,7 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     this.logFeedback = `Aiming ${selectedEnemy.elementID}`;
 
     await this.appendRightUiLogFeedback();
-    this.combatService.startCombatBySelection();
+    // this.combatService.startCombatBySelection();
 
     return Promise.resolve(this.resolutionMessage);
   }
