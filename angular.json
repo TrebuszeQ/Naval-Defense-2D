@@ -27,7 +27,8 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "webWorkerTsConfig": "tsconfig.worker.json"
           },
           "configurations": {
             "production": {
@@ -63,8 +64,7 @@
               "browserTarget": "naval-defense-2d:build:production"
             },
             "development": {
-              "browserTarget": "naval-defense-2d:build:development",
-              "proxyConfig": "src/proxy.conf.json"
+              "browserTarget": "naval-defense-2d:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -90,13 +90,14 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "webWorkerTsConfig": "tsconfig.worker.json"
           }
         }
       }
     }
   },
   "cli": {
-    "analytics": "9fcc75b4-066a-4002-94a1-dfff953664ce"
+    "analytics": "5458df8e-092d-4293-8886-20a1d280da5c"
   }
 }

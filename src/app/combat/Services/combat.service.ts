@@ -46,7 +46,8 @@ export class CombatService {
     this.getWarshipPositionSubject();
     this.getWeaponSubject();
     this.getSelectedActiveEnemySubject();
-    this.createAutoCombatWorker();
+    this.spawnCombatWorker();
+    // this.spawnMaintainCombatWorker();
   }
 
   async appendRightUiLogFeedback(): Promise<string> {
@@ -203,24 +204,35 @@ export class CombatService {
 
     return Promise.resolve(this.resolutionMessage);
   }
+
+  selectEnemyAuto(): Promise<ActiveEnemy[]> | null{
+    if(this.activeEnemyArray != null || this.activeEnemyArray != 0) {
+      const activeEnemyArraySorted = this.activeEnemyArray.sort((a: ActiveEnemy, b: ActiveEnemy) => {
+        return a.distance - b.distance;
+      });
+      
+      return Promise.resolve(activeEnemyArraySorted);
+    }
+    return Promise.resolve(this.activeEnemyArray)
+  }
+
   // wip
   async startAutomaticCombat(): Promise<string> {
-    let automaticCheckDistances = setInterval(async () => {});
     let weapons: {weapon: WeaponType, quantity: number}[];
 
-
+    // if there are enemies sort them by distance
     if(this.activeEnemyArray != null || this.activeEnemyArray != 0) {
       const activeEnemyArraySorted = this.activeEnemyArray.sort((a: ActiveEnemy, b: ActiveEnemy) => {
         return a.distance - b.distance;
       });
 
-      automaticCheckDistances = setInterval(async () => {
-        if(this.warshipCombatArray.length == 0) {
-          // weapons = this.warshipType!.availableWeapons!;
-        } 
-        else {
-          let counter = 0;
-          weapons = await this.selectFreeWeaponAuto2(); 
+      if(this.warshipCombatArray.length == 0) {
+        // weapons = this.warshipType!.availableWeapons!;
+      } 
+      else {
+        let counter = 0;
+        weapons = await this.selectFreeWeaponAuto2(); 
+        if(weapons.length != 0) {
           for(let weaponObj of weapons) {
             let activeEnemy: ActiveEnemy = activeEnemyArraySorted[counter];
             const hasVector: boolean = await this.doWeaponHasVectorAuto2(activeEnemy, weaponObj.weapon);
@@ -228,14 +240,111 @@ export class CombatService {
               let warshipCombatData: WarshipCombatData = {activeEnemy: activeEnemy, weapon: weaponObj.weapon, weaponQuantity: weaponObj.quantity};
               const isInRange = this.isEnemyInRangeAuto2(activeEnemy, weaponObj.weapon);
               await this.appendCombatArrayAuto2(warshipCombatData);
-              await this.maintainCombat(warshipCombatData);
+              // await this.maintainCombat(warshipCombatData);
             }
           }
         }
-      }, 1000);
-      
-      
+      } 
     }
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async spawnCombatWorker(): Promise<string> {
+    if (typeof Worker !== 'undefined') {
+      // Create a new
+      var combatWorker = new Worker(new URL('src/app/combat/Workers/combat.worker.ts', import.meta.url));
+      combatWorker.onmessage = async () => {
+        this.startAutomaticCombat();
+      };
+      combatWorker.postMessage('');
+      
+    } else {
+      throw new Error("Game won't work because your browser or environment doesn't allow to use web workers.");
+    }
+
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  // async spawnMaintainCombatWorker(): Promise<string> {
+  //   if (typeof Worker !== 'undefined') {
+  //     // Create a new
+  //     var maintainCombatWorker = new Worker(new URL('src/app/combat/Workers/mantain-combat.worker.ts', import.meta.url));
+  //     maintainCombatWorker.onmessage = async () => {
+        
+  //     };
+  //     maintainCombatWorker.postMessage('');
+      
+  //   } else {
+  //     throw new Error("Game won't work because your browser or environment doesn't allow to use web workers.");
+  //   }
+
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
+
+  async spawnWorkerForEachWeapon(): Promise<string> {
+    const weapons = this.warshipType!.availableWeapons;
+    if(weapons != null) {
+      if (typeof Worker !== 'undefined') {
+        for(let i = 0; i < weapons.weapon.length; i++) {
+          await this.spawnWeaponWorker(i, weapons.weapon[i]);
+        }
+      } else {
+        throw new Error("Game won't work because your browser or environment doesn't allow to use web workers.");
+      }
+    }
+    
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  async reactToWeaponWorkerMessage(worker: Worker, data: any) {
+    
+    switch(data) {
+      case "free":
+        const enemy: null | ActiveEnemy[] = await this.selectEnemyAuto();
+        if(enemy != null) {
+          worker.postMessage(enemy);
+        }
+      break;
+
+      case 0:
+      break;
+
+      case (data as {enemy: ActiveEnemy, weapon: WeaponType}):
+        const quantity = await this.lookForWeaponQuantity(data.weapon);
+        const warshipCombatData: WarshipCombatData = {activeEnemy: data, weapon: data.weapon, weaponQuantity: quantity};
+        await this.appendCombatArrayAuto2(warshipCombatData);
+      break;
+
+      case (data as {logFeedback: true, message: string}):
+        this.logFeedback = data.message;
+        this.appendRightUiLogFeedback();
+      break;
+
+      case (data as {activeEnemy: ActiveEnemy, enduranceTaken: Number}):
+        await this.dealDamage(data.activeEnemy, data.enduranceTaken);
+      break;
+    }
+
+  }
+
+  async lookForWeaponQuantity(weapon: WeaponType) {
+    let quantity: number = 0;
+    const warshipWeapon = this.warshipType!.availableWeapons!;
+    let index = warshipWeapon.weapon.findIndex((weapon2: WeaponType) => {
+      return weapon === weapon2;
+    });
+    quantity = warshipWeapon.quantity[index];
+    return Promise.resolve(quantity)
+  }
+
+  async spawnWeaponWorker(i: number, weaponType: WeaponType): Promise<string> {
+
+      const weaponWorker = new Worker(new URL(`src/app/combat/Workers/weapon-worker-${i}.worker.ts`, import.meta.url));
+      weaponWorker.onmessage = async ({data}) => {
+        await this.reactToWeaponWorkerMessage(weaponWorker, data);
+      };
+      weaponWorker.postMessage(weaponType.weaponName);
 
     return Promise.resolve(this.resolutionMessage);
   }
@@ -376,23 +485,6 @@ export class CombatService {
     return Promise.resolve(quantity);
   }
 
-  async createAutoCombatWorker(): Promise<string> {
-
-    if (typeof Worker !== 'undefined') {
-      // Create a new
-      const worker = new Worker(new URL('src/app/combat/Workers/automatic-combat-worker.worker', import.meta.url));
-      worker.onmessage = ({ data }) => {
-      };
-      worker.postMessage('hello');
-    } else {
-      // Web Workers are not supported in this environment.
-      // You should add a fallback so that your program still executes correctly.
-      throw new Error("The game won't work because this browser or environment don't support web workers.");
-    }
-    
-    return Promise.resolve(this.resolutionMessage);
-  }
-
   async calculateDamage(activeEnemy: ActiveEnemy, weapon: WeaponType): Promise<number> {
     const random: number = Math.floor(Math.random());
     const damageArray: number[] = weapon.damage;
@@ -463,24 +555,20 @@ export class CombatService {
   }
 
   // wip
-  async maintainCombat(WarshipCombatData: WarshipCombatData): Promise<string> {
-    let combatInterval = setInterval(async () => {});
-    if(this.activeEnemyArray != null || this.activeEnemyArray != 0) {
-      combatInterval = setInterval(async () => {
-        const remainsInDistance = await this.isEnemyInRangeAuto2(WarshipCombatData.activeEnemy, WarshipCombatData.weapon);
-        if(remainsInDistance == true) {
-          await this.calculateDamage(WarshipCombatData.activeEnemy, WarshipCombatData.weapon);
-        } 
-        else {
-          await this.stopDealingDamage();
-        }
-      }, 1000);
-    }
-    else {
-      clearInterval(combatInterval);
-    }
-    return Promise.resolve(this.resolutionMessage);
-  }
+  // async maintainCombat(WarshipCombatData: WarshipCombatData): Promise<string> {
+  //   for(let i = 0; i < this.warshipCombatArray.length; i++) {
+
+  //   }
+  //   const remainsInDistance = await this.isEnemyInRangeAuto2(WarshipCombatData.activeEnemy, WarshipCombatData.weapon);
+  //   if(remainsInDistance == true) {
+  //     await this.calculateDamage(WarshipCombatData.activeEnemy, WarshipCombatData.weapon);
+  //   } 
+  //   else {
+  //     await this.stopDealingDamage();
+  //   }
+
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
   // wip
   async breakCombat(): Promise<string> {
 

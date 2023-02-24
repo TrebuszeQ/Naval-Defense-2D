@@ -1,12 +1,11 @@
-
 /// <reference lib="webworker" />
 
 addEventListener('message', () => {
   const response = ``;
-  automaticCombatInterval;
+  maintainCombatInterval;
 });
 
-const automaticCombatInterval = setInterval(() => {
+const maintainCombatInterval = setInterval(() => {
   postMessage("");
 }, 1000);
 
