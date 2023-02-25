@@ -9,7 +9,7 @@ import { RightUiLogService } from 'src/app/level-wrapper/levels/Services/rightui
 import { WarshipPositionService } from 'src/app/character/services/warship-position.service';
 import { CombatService } from 'src/app/combat/Services/combat.service';
 // arrays
-import { activeEnemyArray, activeEnemyArraySubject } from '../Arrays/active-enemy-array';
+import { activeEnemyArray, activeEnemyArraySubject, activeEnemyArraySubjectAll } from '../Arrays/active-enemy-array';
 
 
 @Injectable({
@@ -25,6 +25,7 @@ export class EnemyStatsService {
   selectedActiveEnemySubject: Subject<ActiveEnemy> | null = new Subject<ActiveEnemy>();
   activeEnemyArray: ActiveEnemy[] = activeEnemyArray;
   activeEnemyArraySubject: Subject<ActiveEnemy>[] = activeEnemyArraySubject;
+  activeEnemyArraySubjectAll: Subject<ActiveEnemy[]> = activeEnemyArraySubjectAll;
   enemyToDestroy: Subject<ActiveEnemy> = new Subject();
   logFeedback: string = "";
   warshipX: number | null = null;
@@ -68,7 +69,9 @@ export class EnemyStatsService {
     this.activeEnemyArray.push(activeEnemy);
     this.activeEnemyArraySubject.push(new Subject());
     this.activeEnemyArraySubject[this.activeEnemyArray.length - 1].next(activeEnemy);
-
+    this.activeEnemyArraySubjectAll.next(this.activeEnemyArray);
+    // console.log(this.activeEnemyArraySubject, "enemy-stats");
+    // console.log(this.activeEnemyArraySubjectAll);
     await this.watchEnemy(activeEnemy.elementID);
 
     return Promise.resolve(this.resolutionMessage);

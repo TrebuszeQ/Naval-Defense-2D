@@ -3,5 +3,6 @@ import { Subject } from "rxjs";
 // interfaces 
 import { ActiveEnemy } from "../Interfaces/active-enemy";
 
-export const activeEnemyArray: ActiveEnemy[] = [];
-export const activeEnemyArraySubject: Subject<ActiveEnemy>[] = [];
+export let activeEnemyArray: ActiveEnemy[] = [];
+export let activeEnemyArraySubject: Subject<ActiveEnemy>[] = [];
+export let activeEnemyArraySubjectAll: Subject<ActiveEnemy[]> = new Subject<ActiveEnemy[]>();

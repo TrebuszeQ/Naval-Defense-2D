@@ -113,25 +113,10 @@ class WeaponWorker {
     //       await this.combat(this.activeEnemy!, "start");
     //   }
     // });
-    this.setContactInterval();
   }
 
-  async communicateYourStatus(): Promise<boolean> {
-    let checker = true;
-
-    if(this.busy == false) {
-      postMessage("free");
-    }
-
-    return Promise.resolve(checker);
-  }
-
-  async setContactInterval() {
-    const worker1Interval = setInterval(() => {
-      this.communicateYourStatus();
-    }, 1000);
-    worker1Interval;
-
+  async communicateYouAreFree() {
+    postMessage(false);
     return Promise.resolve(this.resolutionMessage);
   }
 
@@ -144,8 +129,17 @@ class WeaponWorker {
           if(isInRange == true && this.busy == false) {
             await this.combat(enemy, "start");
           }
+          else {
+            postMessage(false);
+          }
+        }
+        else {
+          postMessage(false);
         }
       }
+    }
+    else {
+      postMessage(false);
     }
     return Promise.resolve(this.resolutionMessage);
   }
@@ -230,6 +224,7 @@ class WeaponWorker {
         clearInterval(this.calculateDamageInterval);
         this.activeEnemy = null;
         this.busy = false;
+        await this.communicateYouAreFree();
       break;
     }
     return Promise.resolve(this.resolutionMessage);
@@ -257,47 +252,29 @@ class WeaponWorker {
 }
 
 let x: any;
-const exampleWeapon: WeaponType = {
-  weaponName: "DS30M Mark 2 30mm ASCG",
-  caliber: "30mm",
-  firingRate: 10.8,
-  reloadingRate: 3600,
-  muzzleVelo: 1080,
-  ammoCapacity: 400,
-  range: {ground: 3000, air: 2750, submarine: 0},
-  barrelLife: 5000,
-  attackVector: ["ground", "air"],
-  damage: [1, 2],
-  armorPenetration: 1.08,
-  train: 185,
-}
 
 const weaponWorker1 = new WeaponWorker();
 addEventListener('message', async ({ data }) => {
-  console.log(data);
-  console.log(typeof(exampleWeapon));
+  // console.log(data, "worker");
   switch(data) {
-    case typeof(typeof(exampleWeapon)): 
+    case data as WeaponType: 
       weaponWorker1.weapon = data;
       weaponWorker1.currentAmmoCapacity = data.ammoCapacity;
-      console.log("initiated");
+      weaponWorker1.communicateYouAreFree();
     break;
 
-    case typeof(x as Enemy):
+    case data as Enemy:
       weaponWorker1.enemy = data;
     break;
 
-    case typeof(x as ActiveEnemy[]):
+    case data as ActiveEnemy[]:
       weaponWorker1.activeEnemyArray = data;
       await weaponWorker1.checkIfCombatCanBeInitiated();
     break;
 
-    case typeof(x as WeaponType):
-      weaponWorker1.weapon = data;
-    break;
-
     case "dead":
       await weaponWorker1.combat(weaponWorker1.activeEnemy!, "terminate");
+      weaponWorker1.communicateYouAreFree();
     break;
 
     case "refilled": 

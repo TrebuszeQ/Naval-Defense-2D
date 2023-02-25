@@ -39,6 +39,7 @@ export class CombatService {
   warshipCombatArraySubject: Subject <WarshipCombatData>[] = [];
   activeEnemyArray: ActiveEnemy[] = [];
   firingInterval: null | NodeJS.Timer = null;
+  workerArray: {worker: Worker, busy: boolean}[] = [];
 
   constructor(private warshipTypeService: WarshipTypeService, private warshipPositionService: WarshipPositionService, private weaponService: WeaponService, private enemyPositionService: EnemyStatsService, private enemyCounterService: EnemyCounterService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService, private torpedoEffectsService: TorpedoEffectsService, private rightUiLogService: RightUiLogService, private enemyStatsService: EnemyStatsService) { 
     this.getWarshipType();
@@ -46,6 +47,7 @@ export class CombatService {
     this.getWarshipPositionSubject();
     this.getWeaponSubject();
     this.getSelectedActiveEnemySubject();
+    this.getActiveEnemyArraySubjectAll();
     this.spawnCombatWorker();
     // this.spawnMaintainCombatWorker();
     this.spawnWorkerForEachWeapon();
@@ -116,16 +118,36 @@ export class CombatService {
 
   // async getActiveEnemyArraySubject(): Promise<string> {
   //   const activeEnemyArraySubject = this.enemyStatsService.activeEnemyArraySubject;
+    
   //   for(let enemy of activeEnemyArraySubject) {
   //     enemy.subscribe({
-  //       next: (activeEnemy: ActiveEnemy) {
-  //         this.activeEnemyArray[]
+  //       next: (activeEnemy: ActiveEnemy) => {
+  //         this.activeEnemyArray.push(activeEnemy);
+  //         console.log(this.activeEnemyArray);
   //       }
-  //     })
+  //     });
   //   }
 
   //   return Promise.resolve(this.resolutionMessage);
   // }
+
+  async getActiveEnemyArraySubjectAll(): Promise<string> {
+      const activeEnemyArraySubject = this.enemyStatsService.activeEnemyArraySubjectAll;
+      
+      activeEnemyArraySubject.subscribe({
+        next: (activeEnemyArrayAll: ActiveEnemy[]) => {
+          this.activeEnemyArray = activeEnemyArrayAll;
+          for(let object of this.workerArray) {
+            // console.log(this.workerArray);
+            if(object.busy != true) {
+              this.reactToWeaponWorkerMessage(object.worker, false);
+            }  
+          }
+        }
+      });
+  
+    return Promise.resolve(this.resolutionMessage);
+  }
 
   async getSelectedActiveEnemySubject(): Promise<string> {
     if(this.enemyStatsService.selectedActiveEnemySubject != null) {
@@ -302,119 +324,125 @@ export class CombatService {
   async spawnWeaponWorker(i: number, weaponType: WeaponType): Promise<string> {
       switch(i) {
         case 1:
-          let weaponWorker = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
-          weaponWorker.onmessage = async ({data}) => {
-            await this.reactToWeaponWorkerMessage(weaponWorker, data);
+          const weaponWorker1 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
+          this.workerArray.push({worker: weaponWorker1, busy: false});
+          weaponWorker1.onmessage = async ({data}) => {
+            await this.reactToWeaponWorkerMessage(weaponWorker1, data);
           };
-          weaponWorker.postMessage(weaponType);
+          weaponWorker1.postMessage(weaponType);
       
           return Promise.resolve(this.resolutionMessage);
         case 2:
-          weaponWorker = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
-          weaponWorker.onmessage = async ({data}) => {
-            await this.reactToWeaponWorkerMessage(weaponWorker, data);
+          const weaponWorker2 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
+          this.workerArray.push({worker: weaponWorker2, busy: false});
+          weaponWorker2.onmessage = async ({data}) => {
+            await this.reactToWeaponWorkerMessage(weaponWorker2, data);
           };
-          weaponWorker.postMessage(weaponType);
+          weaponWorker2.postMessage(weaponType);
       
           return Promise.resolve(this.resolutionMessage);
         break;
         case 3:
-          weaponWorker = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
-          weaponWorker.onmessage = async ({data}) => {
-            await this.reactToWeaponWorkerMessage(weaponWorker, data);
+          const weaponWorker3 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
+          this.workerArray.push({worker: weaponWorker3, busy: false});
+          weaponWorker3.onmessage = async ({data}) => {
+            await this.reactToWeaponWorkerMessage(weaponWorker3, data);
           };
-          weaponWorker.postMessage(weaponType);
+          weaponWorker3.postMessage(weaponType);
       
           return Promise.resolve(this.resolutionMessage);
         break;
         case 4:
-          weaponWorker = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
-          weaponWorker.onmessage = async ({data}) => {
-            await this.reactToWeaponWorkerMessage(weaponWorker, data);
+          const weaponWorker4 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
+          this.workerArray.push({worker: weaponWorker4, busy: false});
+          weaponWorker4.onmessage = async ({data}) => {
+            await this.reactToWeaponWorkerMessage(weaponWorker4, data);
           };
-          weaponWorker.postMessage(weaponType);
+          weaponWorker4.postMessage(weaponType);
       
           return Promise.resolve(this.resolutionMessage);
         break;
         case 5:
-          weaponWorker = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
-          weaponWorker.onmessage = async ({data}) => {
-            await this.reactToWeaponWorkerMessage(weaponWorker, data);
+          const weaponWorker5 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
+          this.workerArray.push({worker: weaponWorker5, busy: false});
+          weaponWorker5.onmessage = async ({data}) => {
+            await this.reactToWeaponWorkerMessage(weaponWorker5, data);
           };
-          weaponWorker.postMessage(weaponType);
+          weaponWorker5.postMessage(weaponType);
       
           return Promise.resolve(this.resolutionMessage);
         break;
         case 6:
-          weaponWorker = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
-          weaponWorker.onmessage = async ({data}) => {
-            await this.reactToWeaponWorkerMessage(weaponWorker, data);
+          const weaponWorker6 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
+          this.workerArray.push({worker: weaponWorker6, busy: false});
+          weaponWorker6.onmessage = async ({data}) => {
+            await this.reactToWeaponWorkerMessage(weaponWorker6, data);
           };
-          weaponWorker.postMessage(weaponType);
+          weaponWorker6.postMessage(weaponType);
       
           return Promise.resolve(this.resolutionMessage);
         break;
         case 7:
-          weaponWorker = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
-          weaponWorker.onmessage = async ({data}) => {
-            await this.reactToWeaponWorkerMessage(weaponWorker, data);
+          const weaponWorker7 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
+          this.workerArray.push({worker: weaponWorker7, busy: false});
+          weaponWorker7.onmessage = async ({data}) => {
+            await this.reactToWeaponWorkerMessage(weaponWorker7, data);
           };
-          weaponWorker.postMessage(weaponType);
+          weaponWorker7.postMessage(weaponType);
       
           return Promise.resolve(this.resolutionMessage);
         break;
         case 8:
-          weaponWorker = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
-          weaponWorker.onmessage = async ({data}) => {
-            await this.reactToWeaponWorkerMessage(weaponWorker, data);
+          const weaponWorker8 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
+          this.workerArray.push({worker: weaponWorker8, busy: false});
+          weaponWorker8.onmessage = async ({data}) => {
+            await this.reactToWeaponWorkerMessage(weaponWorker8, data);
           };
-          weaponWorker.postMessage(weaponType);
+          weaponWorker8.postMessage(weaponType);
       
           return Promise.resolve(this.resolutionMessage);
         break;
         case 9:
-          weaponWorker = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
-          weaponWorker.onmessage = async ({data}) => {
-            await this.reactToWeaponWorkerMessage(weaponWorker, data);
+          const weaponWorker9 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
+          this.workerArray.push({worker: weaponWorker9, busy: false});
+          weaponWorker9.onmessage = async ({data}) => {
+            await this.reactToWeaponWorkerMessage(weaponWorker9, data);
           };
-          weaponWorker.postMessage(weaponType);
+          weaponWorker9.postMessage(weaponType);
       
           return Promise.resolve(this.resolutionMessage);
         break;
         case 10:
-          weaponWorker = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
-          weaponWorker.onmessage = async ({data}) => {
-            await this.reactToWeaponWorkerMessage(weaponWorker, data);
+          const weaponWorker10 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
+          this.workerArray.push({worker: weaponWorker10, busy: false});
+          weaponWorker10.onmessage = async ({data}) => {
+            await this.reactToWeaponWorkerMessage(weaponWorker10, data);
           };
-          weaponWorker.postMessage(weaponType);
+          weaponWorker10.postMessage(weaponType);
       
           return Promise.resolve(this.resolutionMessage);
         break;
         default:
-          weaponWorker = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
-          weaponWorker.onmessage = async ({data}) => {
-            await this.reactToWeaponWorkerMessage(weaponWorker, data);
-          };
-          weaponWorker.postMessage(weaponType);
-      
-          return Promise.resolve(this.resolutionMessage);
+        return Promise.resolve(this.resolutionMessage);
       }
   }
 
   async reactToWeaponWorkerMessage(worker: Worker, data: any) {
-    
+    // console.log(data, "service");
     switch(data) {
-      case "free":
+      
+      case false:
         const enemy: null | ActiveEnemy[] = await this.selectEnemyAuto();
         if(enemy != null && enemy.length != 0) {
+          const index = await this.findWorkerInArray(worker);
+          this.workerArray[index].busy = true;
           worker.postMessage(enemy);
         }
       break;
 
-      case 0:
-      break;
-
       case (data as {enemy: ActiveEnemy, weapon: WeaponType}):
+        const index = await this.findWorkerInArray(worker);
+        this.workerArray[index].busy = true;
         const quantity = await this.lookForWeaponQuantity(data.weapon);
         const warshipCombatData: WarshipCombatData = {activeEnemy: data, weapon: data.weapon, weaponQuantity: quantity};
         await this.appendCombatArrayAuto2(warshipCombatData);
@@ -439,6 +467,13 @@ export class CombatService {
       break;
     }
 
+  }
+
+  async findWorkerInArray(worker: Worker): Promise<number> {
+    const index: number = this.workerArray.findIndex((item: {worker: Worker, busy: boolean}) => {
+      return item.worker == worker;
+    })
+    return Promise.resolve(index);
   }
 
   async lookForWeaponQuantity(weapon: WeaponType) {
@@ -615,6 +650,7 @@ export class CombatService {
   async dealDamage(activeEnemy: ActiveEnemy, enduranceTaken: number, worker: Worker): Promise<string> {
     let enemyStatus: "dead" | "alive" = "alive"
       const endurance = await this.enemyStatsService.decreaseEnemyEndurance(activeEnemy, enduranceTaken);
+      console.log(endurance);
       if(endurance <= 0) {
         const index = await this.enemyStatsService.findEnemyIndexByElementId(activeEnemy.elementID);
         await this.enemyStatsService.removeDeadEnemy(index);

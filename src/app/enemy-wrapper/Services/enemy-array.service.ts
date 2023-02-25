@@ -14,7 +14,6 @@ export class EnemyArrayService {
   constructor() { }
 
   getEnemyArray(): Observable<Enemy[]> {
-    
     return of(enemyArray);
   }
 
