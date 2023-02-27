@@ -21,6 +21,7 @@ import { RightUiLogService } from 'src/app/level-wrapper/levels/Services/rightui
 import { vector } from 'src/app/weapon/Types/vector';
 // rxjs
 import { Subject } from 'rxjs';
+import { faBriefcaseClock } from '@fortawesome/free-solid-svg-icons';
 
 
 @Injectable({
@@ -138,8 +139,7 @@ export class CombatService {
         next: (activeEnemyArrayAll: ActiveEnemy[]) => {
           this.activeEnemyArray = activeEnemyArrayAll;
           for(let object of this.workerArray) {
-            // console.log(this.workerArray);
-            if(object.busy != true) {
+            if(object.busy != true) {    
               this.reactToWeaponWorkerMessage(object.worker, false);
             }  
           }
@@ -432,15 +432,17 @@ export class CombatService {
     switch(data) {
       
       case false:
+        // console.log("false", "service");
         const enemy: null | ActiveEnemy[] = await this.selectEnemyAuto();
         if(enemy != null && enemy.length != 0) {
           const index = await this.findWorkerInArray(worker);
           this.workerArray[index].busy = true;
-          worker.postMessage(enemy);
+          worker.postMessage(enemy as ActiveEnemy[]);
         }
       break;
 
       case (data as {enemy: ActiveEnemy, weapon: WeaponType}):
+        // console.log("{enemy:, weapon:}", "service");
         const index = await this.findWorkerInArray(worker);
         this.workerArray[index].busy = true;
         const quantity = await this.lookForWeaponQuantity(data.weapon);
@@ -449,19 +451,23 @@ export class CombatService {
       break;
 
       case (data as {logFeedback: true, message: string}):
+        // console.log("{logFeedack:, message:}", "service");
         this.logFeedback = data.message;
         this.appendRightUiLogFeedback();
       break;
 
       case (data as {activeEnemy: ActiveEnemy, enduranceTaken: Number}):
+        // console.log("{activeEenemy:, enduranceTaken:", "service");
         await this.dealDamage(data.activeEnemy, data.enduranceTaken, worker);
       break;
 
       case (data as {weapon: WeaponType, ammoCapacity: number}):
+        // console.log("weapon:, ammoCapacity:", "service");
         await this.weaponService.decrementWeaponAmmo(data.weapon, data.ammoCapacity);
       break;
 
       case (data as {outOfAmmo: true, weapon: WeaponType}):
+        // console.log("outOfAmmo:, weapon:", "service");
         await this.weaponService.refillWeaponAmmo(data.weapon);
         worker.postMessage("refilled");
       break;

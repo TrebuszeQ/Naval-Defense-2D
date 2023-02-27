@@ -84,39 +84,12 @@ class WeaponWorker {
   calculateDamageInterval = setInterval(() => {});
   currentAmmoCapacity: number | null = null;
   constructor() {
-    // addEventListener('message', async ({ data }) => {
-    //   switch(data) {
-    //     case typeof(x as WeaponType): 
-    //       this.weapon = data;
-    //       console.log("initiated");
-    //     break;
-    
-    //     case typeof(x as Enemy):
-    //       this.enemy = data;
-    //     break;
-    
-    //     case typeof(x as ActiveEnemy[]):
-    //       this.activeEnemyArray = data;
-    //       await this.checkIfCombatCanBeInitiated();
-    //     break;
-
-    //     case typeof(x as WeaponType):
-    //       this.weapon = data;
-    //     break;
-
-    //     case "dead":
-    //       await this.combat(this.activeEnemy!, "terminate");
-    //     break;
-
-    //     case "refilled": 
-    //       await this.refillAmmo();
-    //       await this.combat(this.activeEnemy!, "start");
-    //   }
-    // });
   }
 
   async communicateYouAreFree() {
-    postMessage(false);
+    setTimeout(async () => {
+      postMessage(false);
+    }, 1000);
     return Promise.resolve(this.resolutionMessage);
   }
 
@@ -130,16 +103,16 @@ class WeaponWorker {
             await this.combat(enemy, "start");
           }
           else {
-            postMessage(false);
+            await this.communicateYouAreFree();
           }
         }
         else {
-          postMessage(false);
+          await this.communicateYouAreFree();
         }
       }
     }
     else {
-      postMessage(false);
+      await this.communicateYouAreFree();
     }
     return Promise.resolve(this.resolutionMessage);
   }
@@ -256,50 +229,32 @@ let x: any;
 const weaponWorker1 = new WeaponWorker();
 addEventListener('message', async ({ data }) => {
   // console.log(data, "worker");
-  switch(data) {
-    case data as WeaponType: 
-      weaponWorker1.weapon = data;
-      weaponWorker1.currentAmmoCapacity = data.ammoCapacity;
-      weaponWorker1.communicateYouAreFree();
-    break;
-
-    case data as Enemy:
-      weaponWorker1.enemy = data;
-    break;
-
-    case data as ActiveEnemy[]:
-      weaponWorker1.activeEnemyArray = data;
-      await weaponWorker1.checkIfCombatCanBeInitiated();
-    break;
-
-    case "dead":
-      await weaponWorker1.combat(weaponWorker1.activeEnemy!, "terminate");
-      weaponWorker1.communicateYouAreFree();
-    break;
-
-    case "refilled": 
-      await weaponWorker1.refillAmmo();
-      await weaponWorker1.combat(weaponWorker1.activeEnemy!, "start");
+  if(data.weaponName != undefined) {
+    data = data as WeaponType;
+    // console.log("weaponType", "worker");
+    weaponWorker1.weapon = data;
+    weaponWorker1.currentAmmoCapacity = data.ammoCapacity;
+    weaponWorker1.communicateYouAreFree();
+  }
+  else if(data.enemyName != undefined) {
+    data = data as Enemy;
+    console.log("enemy", "worker");
+    weaponWorker1.enemy = data;
+  }
+  else if(data instanceof Array) {
+    data = data as ActiveEnemy[];
+    console.log("activeEnemy[]", "worker");
+    weaponWorker1.activeEnemyArray = data;
+    await weaponWorker1.checkIfCombatCanBeInitiated();
+  }
+  else if(data === "dead") {
+    console.log("dead", "worker");
+    await weaponWorker1.combat(weaponWorker1.activeEnemy!, "terminate");
+    weaponWorker1.communicateYouAreFree();
+  }
+  else if(data === "refilled") {
+    console.log("refilled", "worker"); 
+    await weaponWorker1.refillAmmo();
+    await weaponWorker1.combat(weaponWorker1.activeEnemy!, "start");
   }
 });
-// addEventListener('message', ({ data }) => {
-//   switch(data) {
-//     case typeof(weapon): 
-//       weapon = data;
-//     break;
-
-//     case typeof(enemy):
-//       enemy = data;
-//     break;
-
-//     case typeof(activeEnemyArray): {
-//       activeEnemyArray = data;
-      
-//     }
-//   }
-//   if(data == typeof(weapon)) {
-//     weapon = data;
-//   }
-//   const response = `worker response to ${data}`;
-//   postMessage(response);
-// });
