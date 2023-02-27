@@ -87,56 +87,56 @@ class WeaponWorker {
   }
 
   async communicateYouAreFree() {
-    setTimeout(async () => {
-      postMessage(false);
-    }, 1000);
+    this.busy = false;
+    // setTimeout(async () => {
+    //   postMessage({busy: this.busy});
+    // }, 1000);
+    postMessage({busy: this.busy});
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async checkIfCombatCanBeInitiated() {
-    if(this.weapon!.ammoCapacity > 0) {
-      for(let enemy of this.activeEnemyArray) {
-        let hasVector = await this.doWeaponHasVectorWorker(enemy);
-        if(hasVector == true) {
-          let isInRange = await this.isEnemyInRangeWorker(enemy);
-          if(isInRange == true && this.busy == false) {
-            await this.combat(enemy, "start");
-          }
-          else {
-            await this.communicateYouAreFree();
-          }
-        }
-        else {
-          await this.communicateYouAreFree();
+  async checkIfCombatCanBeInitiated(): Promise<boolean> {
+    this.busy = true;
+    let checker: boolean = false;
+    for(let enemy of this.activeEnemyArray) {
+      this.activeEnemy = enemy;
+      const hasVector = await this.doWeaponHasVectorWorker();
+      console.log("hasVector");
+      if(hasVector == true) {
+        const isInRange = await this.isEnemyInRangeWorker();
+        console.log("isInRange");
+        if(isInRange == true) {
+          checker = true;
+          await this.combat(enemy, "start");
+          return Promise.resolve(true);
         }
       }
     }
-    else {
-      await this.communicateYouAreFree();
-    }
-    return Promise.resolve(this.resolutionMessage);
+    console.log('cant be initiated');
+    return Promise.resolve(checker);
   }
 
-  async isEnemyInRangeWorker(activeEnemy: ActiveEnemy): Promise<boolean> {
+  async isEnemyInRangeWorker(): Promise<boolean> {
     let checker: boolean = false;
     const weapon = this.weapon!;
+    const activeEnemy: ActiveEnemy = this.activeEnemy!;
     
     switch(activeEnemy.enemyType.enemyClass) {
       case "air":
 
-        if(weapon.range.air <= activeEnemy.distance) {
+        if(weapon.range.air >= activeEnemy.distance) {
           return true;
         } 
       break;
       
       case "ground":
-        if(weapon.range.ground <= activeEnemy.distance) {
+        if(weapon.range.ground >= activeEnemy.distance) {
           return true;
         } 
       break;
 
       case "submarine":
-        if(weapon.range.submarine <= activeEnemy.distance) {
+        if(weapon.range.submarine >= activeEnemy.distance) {
           return true;
         } 
       break;
@@ -144,7 +144,8 @@ class WeaponWorker {
     return Promise.resolve(checker);
   }
 
-  async doWeaponHasVectorWorker(activeEnemy: ActiveEnemy): Promise<boolean> {
+  async doWeaponHasVectorWorker(): Promise<boolean> {
+    const activeEnemy: ActiveEnemy = this.activeEnemy!;
     const containsVector: boolean = this.weapon!.attackVector.includes(activeEnemy.enemyType.enemyClass);
 
     return Promise.resolve(containsVector);
@@ -167,26 +168,41 @@ class WeaponWorker {
   async calculateEnduranceTaken(damage: number): Promise<number> {
     const weapon = this.weapon!;
     const enduranceTaken = weapon.armorPenetration + (weapon.firingRate * damage);
+    console.log("endurance:" + this.activeEnemy!.endurance);
     return Promise.resolve(enduranceTaken);
   }
 
   async combat(enemy: ActiveEnemy, status: CombatStatus): Promise<string> {
-    this.busy = true;
-    postMessage({enemy: enemy, weapon: this.weapon});
-    
+    postMessage({enemy: enemy, weapon: this.weapon, busy: this.busy});
+    const activeEnemy = this.activeEnemy!;
+    const ammoCapacity = this.currentAmmoCapacity!;
     switch(status) {
       case "start": 
         this.calculateDamageInterval = setInterval(async () => {
-          let damage = await this.calculateDamage();
-          let enduranceTaken = await this.calculateEnduranceTaken(damage);
-          if(enduranceTaken <= this.activeEnemy!.enemyType.armor) {
-            postMessage({logFeedback: true, message: `${enemy.elementID} takes no damage.`});
+          if(ammoCapacity! <= 0) {
+            await this.combat(activeEnemy, "stop");
+            postMessage({outOfAmmo: true, weapon: this.weapon, busy: this.busy});
           }
           else {
-            postMessage({activeEnemy: enemy, enduranceTaken: enduranceTaken});
-          } 
+            await this.decrementWeaponAmmo();
+            postMessage({weapon: this.weapon, ammoCapacity: ammoCapacity, busy: this.busy});
+            const damage = await this.calculateDamage();
+            const enduranceTaken = await this.calculateEnduranceTaken(damage);
+            if(enduranceTaken <= activeEnemy.enemyType.armor) {
+              postMessage({logFeedback: true, message: `${enemy.elementID} takes no damage.`, busy: this.busy});
+            }
+            else {
+              postMessage({activeEnemy: enemy, enduranceTaken: enduranceTaken, busy: this.busy});
+              if(activeEnemy.endurance <= 0) {
+                postMessage({message: "dead", busy: false});
+                await weaponWorker1.combat(weaponWorker1.activeEnemy!, "terminate");
+              }
+              else {
+                activeEnemy.endurance -= enduranceTaken; 
+              }
+            }
+          }
         }, 1000);
-        this.calculateDamageInterval;
       break;
 
       case "stop":
@@ -203,19 +219,10 @@ class WeaponWorker {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async decrementWeaponAmmo(amount: number): Promise<string> {
+  async decrementWeaponAmmo(): Promise<void> {
     let currentAmmoCapacity = this.currentAmmoCapacity;
-    currentAmmoCapacity! -= amount;
-    
-    if(currentAmmoCapacity! <= 0) {
-      await this.combat(this.activeEnemy!, "stop");
-      postMessage({outOfAmmo: true, weapon: this.weapon});
-    }
-    else {
-      postMessage({weapon: this.weapon, ammoCapacity: currentAmmoCapacity});
-    }
-    
-    return Promise.resolve(this.resolutionMessage);
+    currentAmmoCapacity! -= this.weapon!.firingRate;
+    return Promise.resolve();
   }
 
   async refillAmmo(): Promise<string> {
@@ -228,7 +235,7 @@ let x: any;
 
 const weaponWorker1 = new WeaponWorker();
 addEventListener('message', async ({ data }) => {
-  // console.log(data, "worker");
+  console.log(data, "worker");
   if(data.weaponName != undefined) {
     data = data as WeaponType;
     // console.log("weaponType", "worker");
@@ -242,15 +249,13 @@ addEventListener('message', async ({ data }) => {
     weaponWorker1.enemy = data;
   }
   else if(data instanceof Array) {
+    weaponWorker1.busy = true;
     data = data as ActiveEnemy[];
     console.log("activeEnemy[]", "worker");
     weaponWorker1.activeEnemyArray = data;
-    await weaponWorker1.checkIfCombatCanBeInitiated();
-  }
-  else if(data === "dead") {
-    console.log("dead", "worker");
-    await weaponWorker1.combat(weaponWorker1.activeEnemy!, "terminate");
-    weaponWorker1.communicateYouAreFree();
+    if(await weaponWorker1.checkIfCombatCanBeInitiated() == false) {
+      await weaponWorker1.communicateYouAreFree();
+    };
   }
   else if(data === "refilled") {
     console.log("refilled", "worker"); 

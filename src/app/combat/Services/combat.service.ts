@@ -41,6 +41,7 @@ export class CombatService {
   activeEnemyArray: ActiveEnemy[] = [];
   firingInterval: null | NodeJS.Timer = null;
   workerArray: {worker: Worker, busy: boolean}[] = [];
+  workerArraySubjects: Subject<{worker: Worker, busy: boolean}>[] = [];
 
   constructor(private warshipTypeService: WarshipTypeService, private warshipPositionService: WarshipPositionService, private weaponService: WeaponService, private enemyPositionService: EnemyStatsService, private enemyCounterService: EnemyCounterService, private torpedoService: TorpedoService, private torpedoTypeService: TorpedoTypeService, private torpedoTrajectoryService: TorpedoTrajectoryService, private torpedoEffectsService: TorpedoEffectsService, private rightUiLogService: RightUiLogService, private enemyStatsService: EnemyStatsService) { 
     this.getWarshipType();
@@ -52,6 +53,7 @@ export class CombatService {
     this.spawnCombatWorker();
     // this.spawnMaintainCombatWorker();
     this.spawnWorkerForEachWeapon();
+    // this.getWeaponWorkerSubject();
   }
 
   async appendRightUiLogFeedback(): Promise<string> {
@@ -108,52 +110,95 @@ export class CombatService {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  // async calculateDistance(activeEnemy: ActiveEnemy): Promise<number> {
-  //   let distance: number = activeEnemy.x - this.warshipX!;
-  //   if(distance < 0) {
-  //     distance *= -1;
-  //   };
-    
-  //   return Promise.resolve(distance);
-  // }
-
-  // async getActiveEnemyArraySubject(): Promise<string> {
-  //   const activeEnemyArraySubject = this.enemyStatsService.activeEnemyArraySubject;
-    
-  //   for(let enemy of activeEnemyArraySubject) {
-  //     enemy.subscribe({
-  //       next: (activeEnemy: ActiveEnemy) => {
-  //         this.activeEnemyArray.push(activeEnemy);
-  //         console.log(this.activeEnemyArray);
-  //       }
-  //     });
-  //   }
-
-  //   return Promise.resolve(this.resolutionMessage);
-  // }
-
   async getActiveEnemyArraySubjectAll(): Promise<string> {
       const activeEnemyArraySubject = this.enemyStatsService.activeEnemyArraySubjectAll;
       
       activeEnemyArraySubject.subscribe({
-        next: (activeEnemyArrayAll: ActiveEnemy[]) => {
+        next: async (activeEnemyArrayAll: ActiveEnemy[]) => {
           this.activeEnemyArray = activeEnemyArrayAll;
-          for(let object of this.workerArray) {
-            if(object.busy != true) {    
-              this.reactToWeaponWorkerMessage(object.worker, false);
-            }  
-          }
+          this.sendActiveEnemyArrayToWeaponWorkers();
         }
       });
   
     return Promise.resolve(this.resolutionMessage);
   }
 
+  async sendActiveEnemyArrayToWeaponWorkers(): Promise<void> {
+    for(let object of this.workerArray) {
+      if(object.busy != true) {    
+        const enemy: null | ActiveEnemy[] = await this.sortActiveEnemyArray();
+        object.busy = true;
+        object.worker.postMessage(enemy as ActiveEnemy[]);
+      }  
+    }
+    return Promise.resolve();
+  }
+
+  async sendActiveEnemyArrayToWeaponWorker(worker: Worker, index: number): Promise<void> {
+    const activeEnemyArray: null | ActiveEnemy[] = await this.sortActiveEnemyArray();
+      if(activeEnemyArray != null && activeEnemyArray.length != 0) {
+        const index = await this.findWorkerInArray(worker);
+        this.workerArray[index].busy = true;
+        worker.postMessage(activeEnemyArray as ActiveEnemy[]);
+      }
+    return Promise.resolve();
+  }
+
+  async reactToWeaponWorkerMessage(worker: Worker, data: any) {
+    // console.log(data, "service");
+    const index = await this.findWorkerInArray(worker);
+    this.workerArray[index].busy = data.busy;
+    let busy = data.busy;
+
+    console.log(data, "service");
+    if(data === false && busy == false) {
+      await this.sendActiveEnemyArrayToWeaponWorker(worker, index);
+      this.workerArray[index].busy = true;
+    }
+
+    else if(data.enemy != undefined) {
+      const quantity = await this.lookForWeaponQuantity(data.weapon);
+      const warshipCombatData: WarshipCombatData = {activeEnemy: data, weapon: data.weapon, weaponQuantity: quantity};
+      const truthiness = this.warshipCombatArray.findIndex(async (warshipCombatData2: WarshipCombatData) => {
+        return warshipCombatData2 === warshipCombatData;
+      });
+      if(truthiness == -1) {
+        await this.appendCombatArrayAuto2(warshipCombatData);
+      }
+    }
+
+    else if(data.logFeedack != undefined) {
+      // console.log("{logFeedack:, message:}", "service");
+      this.logFeedback = data.message;
+      this.appendRightUiLogFeedback();
+    }
+
+    else if(data.activeEnemy != undefined) {
+      // console.log("{activeEenemy:, enduranceTaken:", "service");
+      await this.dealDamage(data.activeEnemy, data.enduranceTaken, worker);
+    }
+
+    else if(data.weapon != undefined) {
+      // console.log("weapon:, ammoCapacity:", "service");
+      await this.weaponService.decrementWeaponAmmo(data.weapon, data.ammoCapacity);
+    }
+
+    else if(data.outOfAmmo != undefined) {
+      // console.log("outOfAmmo:, weapon:", "service");
+      await this.weaponService.refillWeaponAmmo(data.weapon);
+      worker.postMessage("refilled");
+    }
+
+    else if(data.message === "dead") {
+      
+    }
+  }
+
   async getSelectedActiveEnemySubject(): Promise<string> {
     if(this.enemyStatsService.selectedActiveEnemySubject != null) {
       this.enemyStatsService.selectedActiveEnemySubject.subscribe({
         next: (activeEnemy: ActiveEnemy) => {
-          this.selectedActiveEnemy = activeEnemy;
+          this.selectedActiveEnemy = activeEnemy; 
         },
         error: (error: Error) => {
           console.error(`getSelectedActiveEnemySubject on combar.service encountered an error: ${error}.`);
@@ -163,14 +208,6 @@ export class CombatService {
 
     return Promise.resolve(this.resolutionMessage);
   }
-
-  // async decrementAmmo(weapon: WeaponType): Promise<string> {
-  //   const ammoInterval = setInterval(() => {
-  //     this.weaponService.decrementWeaponAmmo(weapon, weapon.firingRate);
-  //   }, 1000);
-    
-  //   return Promise.resolve(this.resolutionMessage);
-  // }
 
   async resetSelection(): Promise<string> {
     this.enemyStatsService.resetSelection();
@@ -190,105 +227,6 @@ export class CombatService {
     }
     return Promise.resolve(this.resolutionMessage);
   }
-
-  // async appendCombatArrayAuto(activeEnemy: ActiveEnemy, weapon: WeaponType): Promise<string> {
-  //   const combatItem: WarshipCombatData = {activeEnemy: activeEnemy, weapon: weapon, weaponQuantity: await this.getWeaponQuantityAuto(weapon)};
-  //   this.warshipCombatArray!.push(combatItem);
-  //   this.warshipCombatArraySubject.push(new Subject<WarshipCombatData>());
-  //   if(this.warshipCombatArraySubject.length > 0) {
-  //     this.warshipCombatArraySubject[this.warshipCombatArraySubject.length - 1].next(combatItem);
-  //   }
-  //   else {
-  //     this.warshipCombatArraySubject[0].next(combatItem);
-  //   }
-  //   return Promise.resolve(this.resolutionMessage);
-  // }
-
-  async appendCombatArrayAuto2(warshipCombatData: WarshipCombatData): Promise<string> {
-    this.warshipCombatArray!.push(warshipCombatData);
-    this.warshipCombatArraySubject.push(new Subject<WarshipCombatData>());
-    if(this.warshipCombatArraySubject.length > 0) {
-      this.warshipCombatArraySubject[this.warshipCombatArraySubject.length - 1].next(warshipCombatData);
-    }
-    else {
-      this.warshipCombatArraySubject[0].next(warshipCombatData);
-    }
-    return Promise.resolve(this.resolutionMessage);
-  }
-
-  // async startCombatBySelection(): Promise<string> {
-  //   if(this.selectedWeapon != null) {
-  //     await this.doWeaponHasVector();
-  //   }
-  //   else {
-  //     this.logFeedback = "Weapon not selected";
-  //     await this.appendRightUiLogFeedback();
-  //   }
-
-  //   return Promise.resolve(this.resolutionMessage);
-  // }
-
-  selectEnemyAuto(): Promise<ActiveEnemy[]> | null{
-    if(this.activeEnemyArray != null || this.activeEnemyArray != 0) {
-      const activeEnemyArraySorted = this.activeEnemyArray.sort((a: ActiveEnemy, b: ActiveEnemy) => {
-        return a.distance - b.distance;
-      });
-      
-      return Promise.resolve(activeEnemyArraySorted);
-    }
-    return Promise.resolve(this.activeEnemyArray)
-  }
-
-  // wip
-  // async startAutomaticCombat(): Promise<string> {
-  //   let weapons: {weapon: WeaponType, quantity: number}[];
-
-  //   // if there are enemies sort them by distance
-  //   if(this.activeEnemyArray != null || this.activeEnemyArray != 0) {
-  //     const activeEnemyArraySorted = this.activeEnemyArray.sort((a: ActiveEnemy, b: ActiveEnemy) => {
-  //       return a.distance - b.distance;
-  //     });
-
-  //     if(this.warshipCombatArray.length == 0) {
-  //       // weapons = this.warshipType!.availableWeapons!;
-  //     } 
-  //     else {
-  //       let counter = 0;
-  //       weapons = await this.selectFreeWeaponAuto2(); 
-  //       if(weapons.length != 0) {
-  //         for(let weaponObj of weapons) {
-  //           let activeEnemy: ActiveEnemy = activeEnemyArraySorted[counter];
-  //           const hasVector: boolean = await this.doWeaponHasVectorAuto2(activeEnemy, weaponObj.weapon);
-  //           if(hasVector == true) {
-  //             let warshipCombatData: WarshipCombatData = {activeEnemy: activeEnemy, weapon: weaponObj.weapon, weaponQuantity: weaponObj.quantity};
-  //             const isInRange = this.isEnemyInRangeAuto2(activeEnemy, weaponObj.weapon);
-  //             await this.appendCombatArrayAuto2(warshipCombatData);
-  //             // await this.maintainCombat(warshipCombatData);
-  //           }
-  //         }
-  //       }
-  //     } 
-  //   }
-
-  //   return Promise.resolve(this.resolutionMessage);
-  // }
-
-
-  // async spawnMaintainCombatWorker(): Promise<string> {
-  //   if (typeof Worker !== 'undefined') {
-  //     // Create a new
-  //     var maintainCombatWorker = new Worker(new URL('src/app/combat/Workers/mantain-combat.worker.ts', import.meta.url));
-  //     maintainCombatWorker.onmessage = async () => {
-        
-  //     };
-  //     maintainCombatWorker.postMessage('');
-      
-  //   } else {
-  //     throw new Error("Game won't work because your browser or environment doesn't allow to use web workers.");
-  //   }
-
-  //   return Promise.resolve(this.resolutionMessage);
-  // }
 
   async spawnCombatWorker(): Promise<string> {
     if (typeof Worker !== 'undefined') {
@@ -326,6 +264,8 @@ export class CombatService {
         case 1:
           const weaponWorker1 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
           this.workerArray.push({worker: weaponWorker1, busy: false});
+          this.workerArraySubjects.push(new Subject<{worker: Worker, busy: boolean}>());
+          this.workerArraySubjects[this.workerArraySubjects.length -1].next({worker: weaponWorker1, busy: false});
           weaponWorker1.onmessage = async ({data}) => {
             await this.reactToWeaponWorkerMessage(weaponWorker1, data);
           };
@@ -335,6 +275,8 @@ export class CombatService {
         case 2:
           const weaponWorker2 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
           this.workerArray.push({worker: weaponWorker2, busy: false});
+          this.workerArraySubjects.push(new Subject<{worker: Worker, busy: boolean}>());
+          this.workerArraySubjects[this.workerArraySubjects.length -1].next({worker: weaponWorker2, busy: false});
           weaponWorker2.onmessage = async ({data}) => {
             await this.reactToWeaponWorkerMessage(weaponWorker2, data);
           };
@@ -345,6 +287,8 @@ export class CombatService {
         case 3:
           const weaponWorker3 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
           this.workerArray.push({worker: weaponWorker3, busy: false});
+          this.workerArraySubjects.push(new Subject<{worker: Worker, busy: boolean}>());
+          this.workerArraySubjects[this.workerArraySubjects.length -1].next({worker: weaponWorker3, busy: false});
           weaponWorker3.onmessage = async ({data}) => {
             await this.reactToWeaponWorkerMessage(weaponWorker3, data);
           };
@@ -355,6 +299,8 @@ export class CombatService {
         case 4:
           const weaponWorker4 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
           this.workerArray.push({worker: weaponWorker4, busy: false});
+          this.workerArraySubjects.push(new Subject<{worker: Worker, busy: boolean}>());
+          this.workerArraySubjects[this.workerArraySubjects.length -1].next({worker: weaponWorker4, busy: false});
           weaponWorker4.onmessage = async ({data}) => {
             await this.reactToWeaponWorkerMessage(weaponWorker4, data);
           };
@@ -365,6 +311,8 @@ export class CombatService {
         case 5:
           const weaponWorker5 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
           this.workerArray.push({worker: weaponWorker5, busy: false});
+          this.workerArraySubjects.push(new Subject<{worker: Worker, busy: boolean}>());
+          this.workerArraySubjects[this.workerArraySubjects.length -1].next({worker: weaponWorker5, busy: false});
           weaponWorker5.onmessage = async ({data}) => {
             await this.reactToWeaponWorkerMessage(weaponWorker5, data);
           };
@@ -375,6 +323,8 @@ export class CombatService {
         case 6:
           const weaponWorker6 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
           this.workerArray.push({worker: weaponWorker6, busy: false});
+          this.workerArraySubjects.push(new Subject<{worker: Worker, busy: boolean}>());
+          this.workerArraySubjects[this.workerArraySubjects.length -1].next({worker: weaponWorker6, busy: false});
           weaponWorker6.onmessage = async ({data}) => {
             await this.reactToWeaponWorkerMessage(weaponWorker6, data);
           };
@@ -385,6 +335,8 @@ export class CombatService {
         case 7:
           const weaponWorker7 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
           this.workerArray.push({worker: weaponWorker7, busy: false});
+          this.workerArraySubjects.push(new Subject<{worker: Worker, busy: boolean}>());
+          this.workerArraySubjects[this.workerArraySubjects.length -1].next({worker: weaponWorker7, busy: false});
           weaponWorker7.onmessage = async ({data}) => {
             await this.reactToWeaponWorkerMessage(weaponWorker7, data);
           };
@@ -395,6 +347,8 @@ export class CombatService {
         case 8:
           const weaponWorker8 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
           this.workerArray.push({worker: weaponWorker8, busy: false});
+          this.workerArraySubjects.push(new Subject<{worker: Worker, busy: boolean}>());
+          this.workerArraySubjects[this.workerArraySubjects.length -1].next({worker: weaponWorker8, busy: false});
           weaponWorker8.onmessage = async ({data}) => {
             await this.reactToWeaponWorkerMessage(weaponWorker8, data);
           };
@@ -405,6 +359,8 @@ export class CombatService {
         case 9:
           const weaponWorker9 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
           this.workerArray.push({worker: weaponWorker9, busy: false});
+          this.workerArraySubjects.push(new Subject<{worker: Worker, busy: boolean}>());
+          this.workerArraySubjects[this.workerArraySubjects.length -1].next({worker: weaponWorker9, busy: false});
           weaponWorker9.onmessage = async ({data}) => {
             await this.reactToWeaponWorkerMessage(weaponWorker9, data);
           };
@@ -415,6 +371,8 @@ export class CombatService {
         case 10:
           const weaponWorker10 = new Worker(new URL(`/home/trebuszeq/Documents/Ng14/naval-defense-2d/src/app/combat/Workers/weapon-worker-1.worker.ts`, import.meta.url), {type: "module"});
           this.workerArray.push({worker: weaponWorker10, busy: false});
+          this.workerArraySubjects.push(new Subject<{worker: Worker, busy: boolean}>());
+          this.workerArraySubjects[this.workerArraySubjects.length -1].next({worker: weaponWorker10, busy: false});
           weaponWorker10.onmessage = async ({data}) => {
             await this.reactToWeaponWorkerMessage(weaponWorker10, data);
           };
@@ -427,53 +385,16 @@ export class CombatService {
       }
   }
 
-  async reactToWeaponWorkerMessage(worker: Worker, data: any) {
-    // console.log(data, "service");
-    switch(data) {
-      
-      case false:
-        // console.log("false", "service");
-        const enemy: null | ActiveEnemy[] = await this.selectEnemyAuto();
-        if(enemy != null && enemy.length != 0) {
-          const index = await this.findWorkerInArray(worker);
-          this.workerArray[index].busy = true;
-          worker.postMessage(enemy as ActiveEnemy[]);
-        }
-      break;
+  // async getWeaponWorkerSubjects() {
+  //   for(let worker of this.workerArraySubjects) {
+  //     worker.subscribe({
+  //       next: async () => {
+          
+  //       }
+  //     })
+  //   }
 
-      case (data as {enemy: ActiveEnemy, weapon: WeaponType}):
-        // console.log("{enemy:, weapon:}", "service");
-        const index = await this.findWorkerInArray(worker);
-        this.workerArray[index].busy = true;
-        const quantity = await this.lookForWeaponQuantity(data.weapon);
-        const warshipCombatData: WarshipCombatData = {activeEnemy: data, weapon: data.weapon, weaponQuantity: quantity};
-        await this.appendCombatArrayAuto2(warshipCombatData);
-      break;
-
-      case (data as {logFeedback: true, message: string}):
-        // console.log("{logFeedack:, message:}", "service");
-        this.logFeedback = data.message;
-        this.appendRightUiLogFeedback();
-      break;
-
-      case (data as {activeEnemy: ActiveEnemy, enduranceTaken: Number}):
-        // console.log("{activeEenemy:, enduranceTaken:", "service");
-        await this.dealDamage(data.activeEnemy, data.enduranceTaken, worker);
-      break;
-
-      case (data as {weapon: WeaponType, ammoCapacity: number}):
-        // console.log("weapon:, ammoCapacity:", "service");
-        await this.weaponService.decrementWeaponAmmo(data.weapon, data.ammoCapacity);
-      break;
-
-      case (data as {outOfAmmo: true, weapon: WeaponType}):
-        // console.log("outOfAmmo:, weapon:", "service");
-        await this.weaponService.refillWeaponAmmo(data.weapon);
-        worker.postMessage("refilled");
-      break;
-    }
-
-  }
+  // }
 
   async findWorkerInArray(worker: Worker): Promise<number> {
     const index: number = this.workerArray.findIndex((item: {worker: Worker, busy: boolean}) => {
@@ -490,6 +411,69 @@ export class CombatService {
     });
     quantity = warshipWeapon.quantity[index];
     return Promise.resolve(quantity)
+  }
+  
+  async getWeaponIndexInWarshipWeaponsAuto(weapon: WeaponType): Promise<number> {
+    const index = this.warshipType!.availableWeapons!.weapon.findIndex((weaponType: WeaponType) => {
+      return weaponType == weapon;
+    });
+    
+    return Promise.resolve(index);
+  }
+
+  async getWeaponQuantityAuto(weapon: WeaponType): Promise<number> {
+    const index = await this.getWeaponIndexInWarshipWeaponsAuto(weapon);
+    const quantity = this.warshipType!.availableWeapons!.quantity[index];
+
+    return Promise.resolve(quantity);
+  }
+  
+  async getWeaponIndexInWarshipWeapons(): Promise<number> {
+    const index = this.warshipType!.availableWeapons!.weapon.findIndex((weaponType: WeaponType) => {
+      return weaponType == this.selectedWeapon!;
+    });
+    
+    return Promise.resolve(index);
+  }
+
+  async getWeaponQuantity(): Promise<number> {
+    const index = await this.getWeaponIndexInWarshipWeapons();
+    const quantity = this.warshipType!.availableWeapons!.quantity[index];
+
+    return Promise.resolve(quantity);
+  }
+
+  async dealDamage(activeEnemy: ActiveEnemy, enduranceTaken: number, worker: Worker): Promise<string> {
+    let enemyStatus: "dead" | "alive" = "alive";
+      const endurance = await this.enemyStatsService.decreaseEnemyEndurance(worker, activeEnemy, enduranceTaken);
+      if(endurance <= 0) {
+        enemyStatus = "dead";
+      }
+
+    return Promise.resolve(enemyStatus);
+  }
+
+  async appendCombatArrayAuto2(warshipCombatData: WarshipCombatData): Promise<string> {
+    this.warshipCombatArray!.push(warshipCombatData);
+    this.warshipCombatArraySubject.push(new Subject<WarshipCombatData>());
+    if(this.warshipCombatArraySubject.length > 0) {
+      this.warshipCombatArraySubject[this.warshipCombatArraySubject.length - 1].next(warshipCombatData);
+    }
+    else {
+      this.warshipCombatArraySubject[0].next(warshipCombatData);
+    }
+    return Promise.resolve(this.resolutionMessage);
+  }
+
+  sortActiveEnemyArray(): Promise<ActiveEnemy[]> | null{
+    if(this.activeEnemyArray != null || this.activeEnemyArray != 0) {
+      const activeEnemyArraySorted = this.activeEnemyArray.sort((a: ActiveEnemy, b: ActiveEnemy) => {
+        return a.distance - b.distance;
+      });
+      
+      return Promise.resolve(activeEnemyArraySorted);
+    }
+    return Promise.resolve(this.activeEnemyArray)
   }
 
   // async isEnemyInRangeAuto(activeEnemy: ActiveEnemy, weapon: WeaponType): Promise<boolean> {
@@ -597,36 +581,6 @@ export class CombatService {
   //   } 
   //   return Promise.resolve(weapons);
   // }
-  
-  async getWeaponIndexInWarshipWeaponsAuto(weapon: WeaponType): Promise<number> {
-    const index = this.warshipType!.availableWeapons!.weapon.findIndex((weaponType: WeaponType) => {
-      return weaponType == weapon;
-    });
-    
-    return Promise.resolve(index);
-  }
-
-  async getWeaponQuantityAuto(weapon: WeaponType): Promise<number> {
-    const index = await this.getWeaponIndexInWarshipWeaponsAuto(weapon);
-    const quantity = this.warshipType!.availableWeapons!.quantity[index];
-
-    return Promise.resolve(quantity);
-  }
-  
-  async getWeaponIndexInWarshipWeapons(): Promise<number> {
-    const index = this.warshipType!.availableWeapons!.weapon.findIndex((weaponType: WeaponType) => {
-      return weaponType == this.selectedWeapon!;
-    });
-    
-    return Promise.resolve(index);
-  }
-
-  async getWeaponQuantity(): Promise<number> {
-    const index = await this.getWeaponIndexInWarshipWeapons();
-    const quantity = this.warshipType!.availableWeapons!.quantity[index];
-
-    return Promise.resolve(quantity);
-  }
 
   // async calculateDamage(activeEnemy: ActiveEnemy, weapon: WeaponType): Promise<number> {
   //   const random: number = Math.floor(Math.random());
@@ -651,21 +605,6 @@ export class CombatService {
     
   //   return Promise.resolve(damage)
   // }
-
-  // wip
-  async dealDamage(activeEnemy: ActiveEnemy, enduranceTaken: number, worker: Worker): Promise<string> {
-    let enemyStatus: "dead" | "alive" = "alive"
-      const endurance = await this.enemyStatsService.decreaseEnemyEndurance(activeEnemy, enduranceTaken);
-      console.log(endurance);
-      if(endurance <= 0) {
-        const index = await this.enemyStatsService.findEnemyIndexByElementId(activeEnemy.elementID);
-        await this.enemyStatsService.removeDeadEnemy(index);
-        worker.postMessage("dead");
-        enemyStatus = "dead";
-      }
-
-    return Promise.resolve(enemyStatus);
-  }
 
   // async stopDealingDamage(): Promise<string> {
   //   if(this.firingInterval != null) {
@@ -769,5 +708,116 @@ export class CombatService {
 
   //   return Promise.resolve(checker)
   // }
-  
+ 
+    // async appendCombatArrayAuto(activeEnemy: ActiveEnemy, weapon: WeaponType): Promise<string> {
+  //   const combatItem: WarshipCombatData = {activeEnemy: activeEnemy, weapon: weapon, weaponQuantity: await this.getWeaponQuantityAuto(weapon)};
+  //   this.warshipCombatArray!.push(combatItem);
+  //   this.warshipCombatArraySubject.push(new Subject<WarshipCombatData>());
+  //   if(this.warshipCombatArraySubject.length > 0) {
+  //     this.warshipCombatArraySubject[this.warshipCombatArraySubject.length - 1].next(combatItem);
+  //   }
+  //   else {
+  //     this.warshipCombatArraySubject[0].next(combatItem);
+  //   }
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
+
+  // async startCombatBySelection(): Promise<string> {
+  //   if(this.selectedWeapon != null) {
+  //     await this.doWeaponHasVector();
+  //   }
+  //   else {
+  //     this.logFeedback = "Weapon not selected";
+  //     await this.appendRightUiLogFeedback();
+  //   }
+
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
+
+
+
+  // wip
+  // async startAutomaticCombat(): Promise<string> {
+  //   let weapons: {weapon: WeaponType, quantity: number}[];
+
+  //   // if there are enemies sort them by distance
+  //   if(this.activeEnemyArray != null || this.activeEnemyArray != 0) {
+  //     const activeEnemyArraySorted = this.activeEnemyArray.sort((a: ActiveEnemy, b: ActiveEnemy) => {
+  //       return a.distance - b.distance;
+  //     });
+
+  //     if(this.warshipCombatArray.length == 0) {
+  //       // weapons = this.warshipType!.availableWeapons!;
+  //     } 
+  //     else {
+  //       let counter = 0;
+  //       weapons = await this.selectFreeWeaponAuto2(); 
+  //       if(weapons.length != 0) {
+  //         for(let weaponObj of weapons) {
+  //           let activeEnemy: ActiveEnemy = activeEnemyArraySorted[counter];
+  //           const hasVector: boolean = await this.doWeaponHasVectorAuto2(activeEnemy, weaponObj.weapon);
+  //           if(hasVector == true) {
+  //             let warshipCombatData: WarshipCombatData = {activeEnemy: activeEnemy, weapon: weaponObj.weapon, weaponQuantity: weaponObj.quantity};
+  //             const isInRange = this.isEnemyInRangeAuto2(activeEnemy, weaponObj.weapon);
+  //             await this.appendCombatArrayAuto2(warshipCombatData);
+  //             // await this.maintainCombat(warshipCombatData);
+  //           }
+  //         }
+  //       }
+  //     } 
+  //   }
+
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
+
+
+  // async spawnMaintainCombatWorker(): Promise<string> {
+  //   if (typeof Worker !== 'undefined') {
+  //     // Create a new
+  //     var maintainCombatWorker = new Worker(new URL('src/app/combat/Workers/mantain-combat.worker.ts', import.meta.url));
+  //     maintainCombatWorker.onmessage = async () => {
+        
+  //     };
+  //     maintainCombatWorker.postMessage('');
+      
+  //   } else {
+  //     throw new Error("Game won't work because your browser or environment doesn't allow to use web workers.");
+  //   }
+
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
+
+
+  // async calculateDistance(activeEnemy: ActiveEnemy): Promise<number> {
+  //   let distance: number = activeEnemy.x - this.warshipX!;
+  //   if(distance < 0) {
+  //     distance *= -1;
+  //   };
+    
+  //   return Promise.resolve(distance);
+  // }
+
+  // async getActiveEnemyArraySubject(): Promise<string> {
+  //   const activeEnemyArraySubject = this.enemyStatsService.activeEnemyArraySubject;
+    
+  //   for(let enemy of activeEnemyArraySubject) {
+  //     enemy.subscribe({
+  //       next: (activeEnemy: ActiveEnemy) => {
+  //         this.activeEnemyArray.push(activeEnemy);
+  //         console.log(this.activeEnemyArray);
+  //       }
+  //     });
+  //   }
+
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
+
+  // async decrementAmmo(weapon: WeaponType): Promise<string> {
+  //   const ammoInterval = setInterval(() => {
+  //     this.weaponService.decrementWeaponAmmo(weapon, weapon.firingRate);
+  //   }, 1000);
+    
+  //   return Promise.resolve(this.resolutionMessage);
+  // }
+
 }

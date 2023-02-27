@@ -24,9 +24,9 @@ export class EnemyStatsService {
   selectedActiveEnemy: ActiveEnemy | null = null;
   selectedActiveEnemySubject: Subject<ActiveEnemy> | null = new Subject<ActiveEnemy>();
   activeEnemyArray: ActiveEnemy[] = activeEnemyArray;
-  activeEnemyArraySubject: Subject<ActiveEnemy>[] = activeEnemyArraySubject;
   activeEnemyArraySubjectAll: Subject<ActiveEnemy[]> = activeEnemyArraySubjectAll;
-  enemyToDestroy: Subject<ActiveEnemy> = new Subject();
+  enemyDestroyed: ActiveEnemy[] = [];
+  enemyToDestroy: Subject<ActiveEnemy> = new Subject<ActiveEnemy>();
   logFeedback: string = "";
   warshipX: number | null = null;
   constructor(private enemyCounterService: EnemyCounterService, private rightUiLogService: RightUiLogService, private warshipPositionService: WarshipPositionService, ) {
@@ -67,13 +67,7 @@ export class EnemyStatsService {
 
   async appendActiveEnemyArray(activeEnemy: ActiveEnemy): Promise<string> {
     this.activeEnemyArray.push(activeEnemy);
-    this.activeEnemyArraySubject.push(new Subject());
-    this.activeEnemyArraySubject[this.activeEnemyArray.length - 1].next(activeEnemy);
-    this.activeEnemyArraySubjectAll.next(this.activeEnemyArray);
-    // console.log(this.activeEnemyArraySubject, "enemy-stats");
-    // console.log(this.activeEnemyArraySubjectAll);
-    await this.watchEnemy(activeEnemy.elementID);
-
+    await this.updateActiveEnemyArraySubjectAll();
     return Promise.resolve(this.resolutionMessage);
   }
 
@@ -93,51 +87,40 @@ export class EnemyStatsService {
   //   return Promise.resolve(this.resolutionMessage);
   // }
 
-  async setEnemyStatsByItem(activeEnemy: ActiveEnemy): Promise<string> {
-    const index = await this.findEnemyIndexByElementId(activeEnemy.elementID);
-    this.activeEnemyArray[index] = activeEnemy;
-    this.activeEnemyArraySubject[index].next(activeEnemy);
-
-    return Promise.resolve(this.resolutionMessage);
-  }
-
   async removeDeadEnemy(index: number): Promise<string> {
-    this.enemyToDestroy.next(this.activeEnemyArray[index]);
-    this.activeEnemyArray = this.activeEnemyArray.splice(index, 1);
-    this.activeEnemyArraySubject[index].unsubscribe();
-    this.activeEnemyArraySubject.splice(index, 1);
-    
-    const index2 = await this.enemyCounterService.findEnemyIndexByName(this.activeEnemyArray[index].elementID);
-    await this.enemyCounterService.decrementAllEnemyCounter();
-    await this.enemyCounterService.decrementEnemySubjectsArray(index2);
-
-
+    let activeEnemyArray: ActiveEnemy[] = this.activeEnemyArray;
+    this.enemyToDestroy.next(activeEnemyArray[index]);
+    this.enemyDestroyed.push(activeEnemyArray[index]);
+    activeEnemyArray = this.activeEnemyArray.splice(index, 1);
+    this.activeEnemyArray = activeEnemyArray;
+    console.warn(activeEnemyArray, this.enemyToDestroy, this.enemyDestroyed);
+    await this.updateActiveEnemyArraySubjectAll();
+    await this.removeEnemyCounters(index);
     return Promise.resolve(this.resolutionMessage);
   }
+
+async removeEnemyCounters(index: number): Promise<void> {
+  const index2 = await this.enemyCounterService.findEnemyIndexByName(activeEnemyArray[index].elementID);
+  await this.enemyCounterService.decrementAllEnemyCounter();
+  await this.enemyCounterService.decrementEnemySubjectsArray(index2);
+
+  return Promise.resolve();
+}
 
   async decreaseEnemyEndurance(activeEnemy: ActiveEnemy, amount: number): Promise<number> {
     const index = await this.findEnemyIndexByElementId(activeEnemy.elementID);
+    const activeEnemyArray = this.activeEnemyArray;
+    const enemyTakingDamage = activeEnemyArray[index];   
+    if(enemyTakingDamage.endurance <= 0) {
 
-      const enemyTakingDamage = this.activeEnemyArray[index];
-
+      await this.removeDeadEnemy(index);
+    }
+    else if(enemyTakingDamage.endurance > 0) {
       enemyTakingDamage.endurance -= amount;
-      this.activeEnemyArraySubject[index].next(enemyTakingDamage);
-
+      activeEnemyArray[index] = enemyTakingDamage;
+    }
+    await this.updateActiveEnemyArraySubjectAll();
     return Promise.resolve(enemyTakingDamage.endurance);
-  }
-
-  async watchEnemy(elementID: string): Promise<string> {
-    const index = await this.findEnemyIndexByElementId(elementID);
-
-    this.activeEnemyArraySubject[index].subscribe({
-      next: async (activeEnemySubject: ActiveEnemy) => {
-        if(activeEnemySubject.endurance <= 0) {
-          await this.removeDeadEnemy(index);
-        };        
-      }
-    })
-
-    return Promise.resolve(this.resolutionMessage);
   }
 
   async getStartingWarshipPosition(): Promise<string> {
@@ -159,15 +142,8 @@ export class EnemyStatsService {
     this.warshipPositionService.warshipXSubject.subscribe({
       next: async (warshipX: number) => {
         this.warshipX = warshipX;
-        let counter: number = 0;
         if(this.activeEnemyArray != null && this.activeEnemyArray.length != 0) {
-          for(let enemy of this.activeEnemyArray) {
-            const distance = await this.calculateDistanceX(enemy);
-            this.activeEnemyArray[counter].distance = distance;
-            const forSubject: ActiveEnemy = this.activeEnemyArray[counter];
-            this.activeEnemyArraySubject[counter].next(forSubject);
-            counter++;
-          }
+          await this.updateActiveEnemyArrays();
         }
       },
       error: async (error: Error) => {
@@ -177,9 +153,24 @@ export class EnemyStatsService {
 
     return Promise.resolve(this.resolutionMessage);
   }
+
+  async updateActiveEnemyArrays(): Promise<void>  {
+    for(let enemy of this.activeEnemyArray) {
+      const distance = await this.calculateDistanceX(enemy);
+      enemy.distance = distance;
+      await this.updateActiveEnemyArraySubjectAll();
+    }
+
+    return Promise.resolve();
+  }
+
+  async updateActiveEnemyArraySubjectAll(): Promise<void> {
+    this.activeEnemyArraySubjectAll.next(this.activeEnemyArray);
+    return Promise.resolve();
+  }
   
   async calculateDistanceX(activeEnemy: ActiveEnemy): Promise<number> {
-    const distance: number = activeEnemy.x - this.warshipX!;
-    return Promise.resolve(distance);
+    const distance: number = Math.abs(activeEnemy.x) - Math.abs(this.warshipX!);
+    return Promise.resolve(Math.abs(distance));
   }
 }

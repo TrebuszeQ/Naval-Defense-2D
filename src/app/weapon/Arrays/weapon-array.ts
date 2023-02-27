@@ -6,11 +6,11 @@ export const weaponArray: WeaponType[] = [
     {
         weaponName: "DS30M Mark 2 30mm ASCG",
         caliber: "30mm",
-        firingRate: 10.8,
+        firingRate: 3.3,
         reloadingRate: 3600,
         muzzleVelo: 1080,
         ammoCapacity: 400,
-        range: {ground: 3000, air: 2750, submarine: 0},
+        range: {ground: 4000, air: 2000, submarine: 0},
         barrelLife: 5000,
         attackVector: ["ground", "air"],
         damage: [1, 2],

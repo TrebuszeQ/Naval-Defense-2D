@@ -28,7 +28,6 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
   // enemyArray: Enemy[] = [];
   waterLevel: number = 0;
   selectedActiveEnemy: ActiveEnemy | null = null;
-  enemyToDestroy: ActiveEnemy | null = null;
   allEnemyCounter: number = 0;
   logFeedback: string = '';
 
@@ -223,8 +222,8 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
 
   async getEnemyToDestroySubject(): Promise<string> {
     this.enemyStatsService.enemyToDestroy.subscribe({
-      next: (enemyToDestroy: ActiveEnemy) => {
-        this.enemyToDestroy = enemyToDestroy;
+      next: async (enemyToDestroy: ActiveEnemy) => {
+        await this.destroyEnemy(enemyToDestroy);
       },
       error: (error: Error) => {
         console.error(`getEnemyToDestroySubject() encountered an error: ${error}.`);
@@ -234,10 +233,10 @@ export class EnemyWrapperComponent implements OnInit, OnDestroy {
     return Promise.resolve(this.resolutionMessage);
   }
 
-  async destroyEnemy(): Promise<string> {
-    const element = document.getElementById(this.enemyToDestroy!.elementID);
-    document.removeChild(element!);
-
+  async destroyEnemy(enemyToDestroy: ActiveEnemy): Promise<string> {
+    const element = document.getElementById(enemyToDestroy.elementID);
+    element!.remove();
+    console.log("removed");
     return Promise.resolve(this.resolutionMessage);
   }
 
