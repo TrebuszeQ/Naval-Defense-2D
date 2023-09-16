@@ -1,6 +1,8 @@
 # NavalDefense2d
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.0.2.
+Indeed Angular is not suited for such purpose. 
+Also project had to be halted because that time I had to change my job to one where amount of tasks was too much to practice programming. Also I had to reconsider my career development plan.
 
 ## Development server
 
